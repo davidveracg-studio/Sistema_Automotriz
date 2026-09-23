@@ -56,18 +56,12 @@ function Login() {
         <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 160px 40px rgba(0,0,0,0.6)' }} />
 
         <div className="relative z-10 max-w-md text-center lg:text-left">
-          <div className="inline-block rounded-2xl bg-white px-7 py-6 shadow-2xl">
-            <img src="/logo-vpai.png" alt="VPAI" className="h-16 w-auto lg:h-20" />
+          <div className="inline-block rounded-2xl bg-white px-8 py-7 shadow-2xl">
+            <img src="/logo-vpai.png" alt="VPAI" className="h-24 w-auto lg:h-32" />
           </div>
           <h1 className="mt-8 text-3xl font-bold leading-tight text-white lg:text-4xl">
             Gestión <span className="text-brand-accentSoft">de taller</span>
           </h1>
-          <p className="mt-3 text-base text-slate-300 lg:text-lg">CRM de recepción, ventas y postventa.</p>
-          <div className="mt-6 flex items-center justify-center gap-2 lg:justify-start">
-            <span className="h-1 w-10 rounded-full bg-brand-accent" />
-            <span className="h-1 w-6 rounded-full bg-brand-accentSoft" />
-            <span className="h-1 w-3 rounded-full bg-white/40" />
-          </div>
         </div>
       </div>
 
@@ -75,7 +69,7 @@ function Login() {
       <div className="flex items-center justify-center bg-white px-6 py-12 lg:w-2/5">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex justify-center lg:hidden">
-            <img src="/logo-vpai.png" alt="VPAI" className="h-12 w-auto" />
+            <img src="/logo-vpai.png" alt="VPAI" className="h-16 w-auto" />
           </div>
 
           <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-accent">
