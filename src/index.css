@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Paleta neutra de VPAI (versión demo/portafolio, sin colores de marca de
+   ningún cliente). Variables CSS en vez de colores fijos de Tailwind para
+   poder usar la sintaxis de opacidad `bg-deep/40` -ver tailwind.config.js-. */
+:root {
+  --c-ink: 10 11 12;
+  --c-deep: 30 58 138;
+  --c-steel: 37 99 235;
+  --c-sky: 147 197 253;
+  --c-mist: 232 238 241;
+  --c-paper: 246 248 249;
+  --c-accent: 37 99 235;
+  --c-accent-soft: 96 165 250;
+  --c-dark: 14 15 18;
+  --c-carbon: 21 23 28;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+           text-sm font-medium transition-colors disabled:opacity-50
+           disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-deep text-white hover:bg-steel;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-deep hover:bg-mist;
+  }
+  .card {
+    @apply rounded-xl border border-slate-200/70 bg-white shadow-sm;
+  }
+  .input {
+    @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none
+           focus:border-deep focus:ring-1 focus:ring-deep;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-slate-500;
+  }
+}
+
+/* Fondo con textura sutil (rejilla diagonal + resplandor) para el panel de
+   marca del login y la barra lateral. Sobrio a propósito -sin curvas ni
+   artwork de marca de ningún cliente, solo textura neutra-. */
+.carbon {
+  background-color: #0c0d0f;
+  background-image: radial-gradient(120% 80% at 50% -8%, rgba(255, 255, 255, 0.045), transparent 60%),
+    radial-gradient(90% 90% at 0% 0%, rgba(37, 99, 235, 0.08), transparent 55%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.1) 0 2px, transparent 2px 4px);
+}
+.carbon-sidebar {
+  background-color: #101113;
+  background-image: radial-gradient(110% 34% at 0% 0%, rgba(37, 99, 235, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 16%),
+    linear-gradient(27deg, rgba(255, 255, 255, 0.035) 5px, transparent 5px) 0 5px,
+    linear-gradient(207deg, rgba(255, 255, 255, 0.035) 5px, transparent 5px) 10px 0,
+    linear-gradient(27deg, rgba(0, 0, 0, 0.55) 5px, transparent 5px) 0 10px,
+    linear-gradient(207deg, rgba(0, 0, 0, 0.55) 5px, transparent 5px) 10px 5px;
+  background-size: auto, auto, 20px 20px, 20px 20px, 20px 20px, 20px 20px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 8px 0 28px rgba(0, 0, 0, 0.55);
+}
+
+/* Chrome no imprime fondos/colores (background-color, box-shadow) a menos
+   que la persona tenga activado "Gráficos de fondo" al exportar a PDF -eso
+   dejaba invisibles, por ejemplo, el círculo rojo de una marca en el
+   diagrama de daños o el círculo azul/verde de tipo de cliente en la Orden
+   de Egreso-. Se fuerza acá, una sola vez para todo el sitio, en vez de
+   repetir la propiedad en cada componente que use un color de fondo dentro
+   de un documento impreso. */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

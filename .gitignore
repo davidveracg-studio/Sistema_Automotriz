@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.local
+.DS_Store
+*.log
+.vscode/*
+!.vscode/extensions.json
+
+# Caché local de la CLI de Supabase (project ref, versiones, pooler URL)
+supabase/.temp
+supabase/.branches

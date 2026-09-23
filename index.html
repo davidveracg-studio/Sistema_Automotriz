@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1D4ED8" />
+    <link rel="icon" type="image/png" href="/icono-vpai.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>VPAI CRM</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Red de seguridad: si el navegador no logra cargar el módulo principal
+         (típicamente porque una pestaña vieja quedó apuntando a un archivo con
+         hash que ya no existe tras un despliegue en Vercel), se limpia la
+         caché y se recarga una sola vez en vez de dejar la pantalla en blanco.
+         El centinela en sessionStorage evita un bucle si el fallo es por otra
+         causa. Tomado de un prototipo anterior del mismo proyecto. -->
+    <script>
+      window.addEventListener(
+        'error',
+        function (e) {
+          var esModulo = e.target && e.target.tagName === 'SCRIPT'
+          if (!esModulo) return
+          if (sessionStorage.getItem('recuperando')) return
+          sessionStorage.setItem('recuperando', '1')
+          if (window.caches && caches.keys) {
+            caches
+              .keys()
+              .then(function (nombres) {
+                return Promise.all(nombres.map(function (n) { return caches.delete(n) }))
+              })
+              .then(function () { location.reload() })
+          } else {
+            location.reload()
+          }
+        },
+        true
+      )
+
+      window.addEventListener('load', function () {
+        setTimeout(function () { sessionStorage.removeItem('recuperando') }, 4000)
+      })
+    </script>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

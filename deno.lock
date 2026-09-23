@@ -1,0 +1,33 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@supabase/supabase-js@2": "2.116.0"
+  },
+  "jsr": {
+    "@supabase/supabase-js@2.116.0": {
+      "integrity": "3005b560a70ba75504f9c11ec48cb05cec71d86d715a3c15be574394963270e0"
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@eslint/js@^9.11.1",
+        "npm:@supabase/supabase-js@^2.45.4",
+        "npm:@vitejs/plugin-react@^4.3.1",
+        "npm:autoprefixer@^10.4.20",
+        "npm:eslint-plugin-react-hooks@5",
+        "npm:eslint-plugin-react-refresh@~0.4.12",
+        "npm:eslint-plugin-react@^7.36.1",
+        "npm:eslint@^9.11.1",
+        "npm:globals@^15.9.0",
+        "npm:postcss@^8.4.47",
+        "npm:react-dom@^18.3.1",
+        "npm:react-router-dom@^6.26.2",
+        "npm:react@^18.3.1",
+        "npm:tailwindcss@^3.4.13",
+        "npm:vite-plugin-pwa@~0.20.5",
+        "npm:vite@^5.4.8"
+      ]
+    }
+  }
+}
