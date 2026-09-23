@@ -82,7 +82,7 @@ begin
   insert into public.empresas (id, nombre, direccion, telefono, correo, logo_url, siguiente_numero_ot, siguiente_numero_presupuesto, corte_mediodia_inicio, corte_mediodia_fin)
   values (
     v_empresa_id, 'VPAI Demo — Taller Multimarca', 'Av. Providencia 1234, Santiago', '+56 2 2345 6789', 'contacto@vpai.dev',
-    'https://ywdozovkhnnvlpckstsd.supabase.co/storage/v1/object/public/logos-empresa/b0000000-0000-4000-8000-000000000001/logo-vpai.png',
+    'https://bshgazaczzfcdfuguvsh.supabase.co/storage/v1/object/public/logos-empresa/b0000000-0000-4000-8000-000000000001/logo-vpai.png',
     5000, 1, '13:00', '15:00'
   )
   on conflict (id) do update set

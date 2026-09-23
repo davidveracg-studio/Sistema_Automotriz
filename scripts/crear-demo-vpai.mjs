@@ -13,7 +13,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { readFile } from 'node:fs/promises'
 
-const SUPABASE_URL = 'https://ywdozovkhnnvlpckstsd.supabase.co'
+const SUPABASE_URL = 'https://bshgazaczzfcdfuguvsh.supabase.co'
 const EMPRESA_ID = 'b0000000-0000-4000-8000-000000000001'
 const CONTRASENA_DEMO = 'VpaiDemo2026!'
 
@@ -38,6 +38,27 @@ const USUARIOS_DEMO = [
   { id: 'a0000000-0000-4000-8000-000000000008', correo: 'demo-recepcionista@vpai.dev', rol: 'recepcionista' },
 ]
 
+// El trigger on_auth_user_created (0001_esquema_roles.sql) crea sola la fila
+// de `usuarios` al dar de alta cada cuenta de Auth, resolviendo empresa_id
+// desde raw_user_meta_data si viene, o si no cayendo a "la primera empresa
+// activa" -que en un proyecto recién creado todavía no existe-. Sin esta
+// fila previa, la inserción de `usuarios` viola su FK a `empresas` y
+// GoTrue reporta el fallo genérico "Database error creating new user".
+// La migración 0036 hace su propio upsert después con los datos completos
+// (dirección, logo, numeración) -este insert acá es solo para desbloquear
+// la creación de las cuentas, sin pisar nada de lo que 0036 vaya a fijar-.
+async function crearEmpresa() {
+  const { error } = await supabase.from('empresas').upsert(
+    { id: EMPRESA_ID, nombre: 'VPAI Demo — Taller Multimarca' },
+    { onConflict: 'id' }
+  )
+  if (error) {
+    console.error('Error creando la empresa base:', error.message)
+    process.exit(1)
+  }
+  console.log('Empresa base lista.')
+}
+
 async function crearUsuarios() {
   for (const usuario of USUARIOS_DEMO) {
     const { data, error } = await supabase.auth.admin.createUser({
@@ -45,6 +66,7 @@ async function crearUsuarios() {
       email: usuario.correo,
       password: CONTRASENA_DEMO,
       email_confirm: true,
+      user_metadata: { empresa_id: EMPRESA_ID },
     })
 
     if (error) {
@@ -75,6 +97,7 @@ async function subirLogo() {
   console.log(`Logo subido: ${SUPABASE_URL}/storage/v1/object/public/logos-empresa/${ruta}`)
 }
 
+await crearEmpresa()
 await crearUsuarios()
 await subirLogo()
 console.log('Listo. Ahora corre la migración 0036_tenant_demo_vpai.sql en el SQL Editor.')
