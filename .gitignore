@@ -12,3 +12,5 @@ dist-ssr
 # Caché local de la CLI de Supabase (project ref, versiones, pooler URL)
 supabase/.temp
 supabase/.branches
+
+.vercel

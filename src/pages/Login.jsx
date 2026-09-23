@@ -12,12 +12,10 @@ const CONTRASENA_DEMO = 'VpaiDemo2026!'
 
 const ROLES_DEMO = [
   { valor: 'admin', etiqueta: 'Administrador', correo: 'demo-admin@vpai.dev' },
-  { valor: 'socia', etiqueta: 'Socia', correo: 'demo-socia@vpai.dev' },
   { valor: 'asesor', etiqueta: 'Asesor', correo: 'demo-asesor@vpai.dev' },
   { valor: 'jefe_taller', etiqueta: 'Jefe de taller', correo: 'demo-jefe-taller@vpai.dev' },
-  { valor: 'encargado_presupuestos', etiqueta: 'Encargado de presupuestos', correo: 'demo-presupuestos@vpai.dev' },
+  { valor: 'encargado_presupuestos', etiqueta: 'Encargado de bodega', correo: 'demo-presupuestos@vpai.dev' },
   { valor: 'tecnico', etiqueta: 'Técnico', correo: 'demo-tecnico@vpai.dev' },
-  { valor: 'detailer', etiqueta: 'Detailer', correo: 'demo-detailer@vpai.dev' },
   { valor: 'recepcionista', etiqueta: 'Recepcionista', correo: 'demo-recepcionista@vpai.dev' },
 ]
 
