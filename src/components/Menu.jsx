@@ -170,15 +170,9 @@ function Menu() {
   return (
     <nav className="carbon-sidebar flex w-64 shrink-0 flex-col text-white print:hidden">
       <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
-        {usuario?.empresas?.logo_url ? (
-          <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white">
-            <img src={usuario.empresas.logo_url} alt={usuario.empresas.nombre} className="h-full w-full object-contain" />
-          </div>
-        ) : (
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand-accent font-bold text-white">
-            {(usuario?.empresas?.nombre || 'D').slice(0, 1).toUpperCase()}
-          </div>
-        )}
+        <div className="grid h-9 w-9 shrink-0 place-items-center">
+          <img src="/icono-vpai-transparente.png" alt="VPAI" className="h-full w-full object-contain" />
+        </div>
         <div className="min-w-0">
           <div className="truncate text-base font-bold leading-none tracking-tight">{usuario?.empresas?.nombre || 'CRM'}</div>
           <div className="mt-1 text-[11px] text-sky/60">Gestión del taller</div>
