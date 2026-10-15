@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 
+import { formatearPatente } from '../lib/patente'
 const ETIQUETA_URGENCIA = { baja: 'Baja', media: 'Media', alta: 'Alta' }
 const COLOR_URGENCIA = { baja: 'bg-slate-100 text-slate-600', media: 'bg-amber-100 text-amber-800', alta: 'bg-red-100 text-red-800' }
 const ETIQUETA_AREA = {
@@ -277,7 +278,7 @@ function RadarSesion() {
         </div>
 
         <h1 className="mb-1 text-2xl font-semibold text-slate-900">
-          {trabajo.vehiculos?.patente} — {trabajo.vehiculos?.marca} {trabajo.vehiculos?.modelo}
+          {formatearPatente(trabajo.vehiculos?.patente)} — {trabajo.vehiculos?.marca} {trabajo.vehiculos?.modelo}
         </h1>
         <p className="mb-6 text-lg text-slate-500">{nombreCliente(trabajo.clientes)} · OT {trabajo.numero_ot}</p>
 
@@ -325,7 +326,7 @@ function RadarSesion() {
       </Link>
 
       <h1 className="mb-1 text-xl font-semibold text-slate-900">
-        {etiquetaSesion} — {trabajo.vehiculos?.patente}
+        {etiquetaSesion} — {formatearPatente(trabajo.vehiculos?.patente)}
       </h1>
       <p className="mb-4 text-sm text-slate-500">
         {trabajo.vehiculos?.marca} {trabajo.vehiculos?.modelo} · {nombreCliente(trabajo.clientes)} · OT {trabajo.numero_ot}

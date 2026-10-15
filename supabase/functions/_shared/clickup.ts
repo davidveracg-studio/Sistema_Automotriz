@@ -124,6 +124,17 @@ export function obtenerTarea(tareaId: string) {
   return clickupFetch(`/task/${tareaId}`)
 }
 
+// La tarjeta con sus subtareas en una sola llamada (el kanban refresca prioridad,
+// fecha y estado de cada subtarea sin pedir una llamada por subtarea).
+export function obtenerTareaConSubtareas(tareaId: string) {
+  return clickupFetch(`/task/${tareaId}?include_subtasks=true`)
+}
+
+// La lista con sus estados (nombre exacto, tipo -open/custom/done/closed-, color y orden).
+export function obtenerLista(listaId: string) {
+  return clickupFetch(`/list/${listaId}`)
+}
+
 export function fijarCampoPersonalizado(tareaId: string, campoId: string, valor: unknown) {
   return clickupFetch(`/task/${tareaId}/field/${campoId}`, {
     method: 'POST',
@@ -156,4 +167,66 @@ export function actualizarItemChecklist(
     method: 'PUT',
     body: JSON.stringify(cuerpo),
   })
+}
+
+export function eliminarTarea(tareaId: string) {
+  return clickupFetch(`/task/${tareaId}`, { method: 'DELETE' })
+}
+
+// Campos personalizados de la lista de una empresa. Los de la lista base
+// están fijos arriba; otra lista (por ejemplo la de la demo) puede tener
+// IDs distintos, y se guardan en clickup_config.campos (jsonb). null o campos
+// que falten = los fijos de arriba.
+export interface CamposLista {
+  ids: Record<keyof typeof CAMPOS_PERSONALIZADOS, string>
+  opcionesTipoServicio: Record<string, string>
+}
+
+export function resolverCampos(campos: unknown): CamposLista {
+  const configurados = (campos && typeof campos === 'object' ? campos : {}) as Record<string, unknown>
+  const ids: Record<keyof typeof CAMPOS_PERSONALIZADOS, string> = { ...CAMPOS_PERSONALIZADOS }
+  for (const clave of Object.keys(ids) as (keyof typeof CAMPOS_PERSONALIZADOS)[]) {
+    if (typeof configurados[clave] === 'string' && configurados[clave]) ids[clave] = configurados[clave] as string
+  }
+  const opciones = { ...OPCIONES_TIPO_SERVICIO }
+  const propias = configurados.opcionesTipoServicio
+  if (propias && typeof propias === 'object') {
+    for (const [clave, valor] of Object.entries(propias as Record<string, unknown>)) {
+      if (typeof valor === 'string' && valor) opciones[clave] = valor
+    }
+  }
+  return { ids, opcionesTipoServicio: opciones }
+}
+
+// Diferencia de la zona horaria de Chile (minutos respecto de UTC) en un instante dado.
+function desfaseChileMinutos(instante: Date): number {
+  const partes = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Santiago',
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+      .formatToParts(instante)
+      .map((parte) => [parte.type, parte.value])
+  )
+  const comoUtc = Date.UTC(+partes.year, +partes.month - 1, +partes.day, +partes.hour, +partes.minute, +partes.second)
+  return (comoUtc - instante.getTime()) / 60000
+}
+
+// Milisegundos desde 1970 de una fecha y hora "de pared" de Chile (respeta el
+// cambio de horario de verano). ClickUp espera esa marca de tiempo en las
+// fechas de vencimiento. Sin hora se usa 09:00.
+export function marcaTiempoChile(fecha: string, hora: string | null): number {
+  const [anio, mes, dia] = fecha.split('-').map(Number)
+  const [horas, minutos] = (hora ?? '09:00').split(':').map(Number)
+  const suposicion = Date.UTC(anio, mes - 1, dia, horas, minutos)
+  const primerDesfase = desfaseChileMinutos(new Date(suposicion))
+  const candidato = suposicion - primerDesfase * 60000
+  const segundoDesfase = desfaseChileMinutos(new Date(candidato))
+  return suposicion - segundoDesfase * 60000
 }

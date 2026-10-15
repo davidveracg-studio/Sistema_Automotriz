@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../supabaseClient'
 
+import { formatearPatente } from '../lib/patente'
 const ETIQUETA_TIPO = {
   presupuesto_pendiente: 'Presupuesto',
   encuesta_negativa: 'Encuesta negativa',
@@ -12,6 +13,10 @@ const ETIQUETA_TIPO = {
   factura_vencida: 'Factura vencida',
   whatsapp_desconectado: 'WhatsApp desconectado',
   repuesto_pendiente_presupuesto: 'Repuesto sin presupuesto',
+  descuento_pendiente: 'Descuento por autorizar',
+  descuento_resuelto: 'Descuento',
+  tarea_asignada: 'Tarea asignada',
+  repuesto_asignado: 'Repuesto para preparar',
 }
 
 const COLOR_TIPO = {
@@ -23,6 +28,10 @@ const COLOR_TIPO = {
   factura_vencida: 'border-l-red-500',
   whatsapp_desconectado: 'border-l-red-500',
   repuesto_pendiente_presupuesto: 'border-l-amber-400',
+  descuento_pendiente: 'border-l-amber-400',
+  descuento_resuelto: 'border-l-emerald-500',
+  tarea_asignada: 'border-l-violet-400',
+  repuesto_asignado: 'border-l-orange-400',
 }
 
 // Mismo grupo de acceso que /cuentas-por-cobrar (App.jsx): admin/socia ya
@@ -119,7 +128,7 @@ function Inicio() {
       leida: leidas.has(notificacion.id),
       trabajoId: notificacion.trabajo_id,
       numeroOt: notificacion.trabajos_taller?.numero_ot,
-      patente: notificacion.trabajos_taller?.vehiculos?.patente,
+      patente: formatearPatente(notificacion.trabajos_taller?.vehiculos?.patente),
       marcable: true,
     })),
     ...facturasVencidas.map((factura) => ({
@@ -131,7 +140,7 @@ function Inicio() {
       leida: false,
       trabajoId: factura.id,
       numeroOt: factura.numero_ot,
-      patente: factura.vehiculos?.patente,
+      patente: formatearPatente(factura.vehiculos?.patente),
       marcable: false,
     })),
   ].sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn))

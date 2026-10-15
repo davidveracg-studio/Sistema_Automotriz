@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import { invocarFuncion } from '../lib/invocarFuncion'
 import { PREGUNTAS, ETIQUETA_COMO_CONOCIO } from '../lib/encuestas'
 
+import { formatearPatente } from '../lib/patente'
 const CARAS = ['😞', '🙁', '😐', '🙂', '😄']
 
 const MENSAJE_POR_CLASIFICACION = {
@@ -106,7 +107,16 @@ function EncuestaPublica() {
       if (clasificacion === 'negativo') {
         // Best-effort: si el aviso interno falla, el cliente igual ve su
         // agradecimiento -esto no le pertenece a su experiencia-.
-        invocarFuncion('notificar-encuesta-negativa', { body: { token } }).catch(() => {})
+        // En la demo, el enlace del correo trae el correo del asesor de prueba
+        // (da) y su firma (ds): la función los valida, no confía en ellos.
+        const parametros = new URLSearchParams(window.location.search)
+        invocarFuncion('notificar-encuesta-negativa', {
+          body: {
+            token,
+            correo_asesor_demo: parametros.get('da') || undefined,
+            firma_demo: parametros.get('ds') || undefined,
+          },
+        }).catch(() => {})
       }
     } catch {
       setError('No se pudo conectar con el servidor. Revisa la conexión e intenta de nuevo.')
@@ -158,7 +168,7 @@ function EncuestaPublica() {
           <form onSubmit={enviarRespuesta}>
             <h1 className="mb-1 text-lg font-semibold text-slate-900">¿Cómo fue tu experiencia?</h1>
             <p className="mb-4 text-sm text-slate-500">
-              {datos?.marca} {datos?.modelo} · patente {datos?.patente} · OT {datos?.numero_ot}
+              {datos?.marca} {datos?.modelo} · patente {formatearPatente(datos?.patente)} · OT {datos?.numero_ot}
             </p>
 
             {PREGUNTAS.map((pregunta) => (

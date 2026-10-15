@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 
+import { formatearPatente, formatearPatenteEntrada } from '../lib/patente'
 function normalizarPatenteLocal(patente) {
   return (patente || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
 }
@@ -220,7 +221,7 @@ function ClienteDetalle() {
             <tbody>
               {vehiculos.map(({ vehiculos: vehiculo }) => (
                 <tr key={vehiculo.id} className="border-t border-slate-100">
-                  <td className="px-3 py-2 font-medium text-slate-800">{vehiculo.patente}</td>
+                  <td className="px-3 py-2 font-medium text-slate-800">{formatearPatente(vehiculo.patente)}</td>
                   <td className="px-3 py-2 text-slate-600">
                     {vehiculo.marca} {vehiculo.modelo}
                   </td>
@@ -297,7 +298,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
         .from('vehiculos')
         .insert({
           empresa_id: empresaId,
-          patente,
+          patente: normalizarPatenteLocal(patente),
           marca,
           modelo,
           anio: anio ? Number(anio) : null,
@@ -351,7 +352,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
           <input
             required
             value={patente}
-            onChange={(evento) => setPatente(evento.target.value)}
+            onChange={(evento) => setPatente(formatearPatenteEntrada(evento.target.value))}
             placeholder="GH TY 34"
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm uppercase"
           />
@@ -408,7 +409,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
                 onClick={() => vincularVehiculoExistente(vehiculoExistente.id)}
                 className="mt-2 rounded bg-amber-700 px-3 py-1 text-white hover:bg-amber-800"
               >
-                Vincular {vehiculoExistente.patente} ({vehiculoExistente.marca} {vehiculoExistente.modelo}) a este
+                Vincular {formatearPatente(vehiculoExistente.patente)} ({vehiculoExistente.marca} {vehiculoExistente.modelo}) a este
                 cliente
               </button>
             )}

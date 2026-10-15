@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 
+import { formatearPatente } from '../lib/patente'
+import { calcularDescuentoManoObra } from '../lib/descuento'
 function nombreCliente(cliente) {
   if (!cliente) return '—'
   return cliente.razon_social || [cliente.nombre, cliente.apellido].filter(Boolean).join(' ')
@@ -32,7 +34,7 @@ function CuentasPorCobrar() {
       const { data: facturasData, error: errorFacturas } = await supabase
         .from('trabajos_taller')
         .select(
-          'id, numero_ot, numero_documento_facturacion, estado_pago, fecha_vencimiento_pago, fecha_pago, fecha_entrega, clientes(nombre, apellido, razon_social), vehiculos(patente, marca, modelo)'
+          'id, numero_ot, descuento_mano_obra_pct, numero_documento_facturacion, estado_pago, fecha_vencimiento_pago, fecha_pago, fecha_entrega, clientes(nombre, apellido, razon_social), vehiculos(patente, marca, modelo)'
         )
         .eq('tipo_documento', 'factura')
         .order('fecha_vencimiento_pago', { ascending: true, nullsFirst: false })
@@ -47,7 +49,7 @@ function CuentasPorCobrar() {
       if (ids.length > 0) {
         const { data: itemsData, error: errorItems } = await supabase
           .from('ot_detalle_con_permiso')
-          .select('trabajo_id, total_linea')
+          .select('trabajo_id, area, total_linea')
           .eq('decision', 'aceptado')
           .in('trabajo_id', ids)
 
@@ -55,10 +57,15 @@ function CuentasPorCobrar() {
           setError(errorItems.message)
           return
         }
-        totalesPorTrabajo = (itemsData || []).reduce((acumulado, item) => {
-          acumulado[item.trabajo_id] = (acumulado[item.trabajo_id] || 0) + (item.total_linea || 0)
+        const itemsPorTrabajo = (itemsData || []).reduce((acumulado, item) => {
+          if (!acumulado[item.trabajo_id]) acumulado[item.trabajo_id] = []
+          acumulado[item.trabajo_id].push(item)
           return acumulado
         }, {})
+        // Total con el descuento de mano de obra ya aplicado, igual que la orden de egreso.
+        for (const factura of facturasData || []) {
+          totalesPorTrabajo[factura.id] = calcularDescuentoManoObra(itemsPorTrabajo[factura.id] || [], factura.descuento_mano_obra_pct).total
+        }
       }
 
       setFacturas(facturasData || [])
@@ -152,7 +159,7 @@ function CuentasPorCobrar() {
                     </td>
                     <td className="px-3 py-2">{nombreCliente(f.clientes)}</td>
                     <td className="px-3 py-2">
-                      {f.vehiculos?.patente} {f.vehiculos?.marca} {f.vehiculos?.modelo}
+                      {formatearPatente(f.vehiculos?.patente)} {f.vehiculos?.marca} {f.vehiculos?.modelo}
                     </td>
                     <td className="px-3 py-2">{f.numero_documento_facturacion}</td>
                     <td className={`px-3 py-2 ${vencida ? 'font-medium text-red-600' : ''}`}>

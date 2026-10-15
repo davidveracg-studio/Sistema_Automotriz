@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { PREGUNTAS, ETIQUETA_COMO_CONOCIO, ETIQUETA_CLASIFICACION, COLOR_CLASIFICACION } from '../lib/encuestas'
 
+import { formatearPatente } from '../lib/patente'
 const FILTROS = [
   { valor: 'todas', etiqueta: 'Todas' },
   { valor: 'negativo', etiqueta: 'Negativas' },
@@ -125,7 +126,7 @@ function Encuestas() {
                 </div>
 
                 <p className="mb-2 text-sm text-slate-800">
-                  {nombreCliente(trabajo?.clientes)} · {trabajo?.vehiculos?.patente} — {trabajo?.vehiculos?.marca}{' '}
+                  {nombreCliente(trabajo?.clientes)} · {formatearPatente(trabajo?.vehiculos?.patente)} — {trabajo?.vehiculos?.marca}{' '}
                   {trabajo?.vehiculos?.modelo}
                 </p>
 

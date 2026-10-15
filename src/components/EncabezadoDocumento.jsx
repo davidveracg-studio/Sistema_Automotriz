@@ -2,7 +2,7 @@
 // (Orden de Ingreso, Presupuesto, Orden de Egreso). Centralizado a
 // propósito: el proyecto es multi-tenant, así que el nombre/dirección/
 // teléfono/correo/logo salen siempre de `empresa` (la fila de `empresas`
-// del tenant actual) -nunca texto fijo de Didial en el componente-. Una
+// del tenant actual) -nunca texto fijo de un taller en el componente-. Una
 // empresa nueva que se sume a la plataforma solo necesita completar sus
 // propios datos y logo; ningún documento hay que tocarlo.
 function EncabezadoDocumento({ empresa, lineas, fecha, pagina = 1 }) {

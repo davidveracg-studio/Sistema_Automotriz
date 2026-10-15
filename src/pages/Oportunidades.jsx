@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { invocarFuncion } from '../lib/invocarFuncion'
+import { leerCorreosDemo, pedirCorreosDemo } from '../lib/correosDemo'
+import { formatearPatente } from '../lib/patente'
 
 const ETIQUETA_ESTADO = {
   pendiente: 'Pendiente',
@@ -19,7 +21,7 @@ function nombreCliente(cliente) {
 }
 
 function Oportunidades() {
-  const { usuario } = useAuth()
+  const { sesion, usuario } = useAuth()
   const [oportunidades, setOportunidades] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -65,11 +67,24 @@ function Oportunidades() {
   }
 
   async function enviarEncuestasPendientes() {
-    setEnviandoEncuestas(true)
     setResultadoEnvio(null)
     setError(null)
+
+    // En la demo los correos de prueba viajan con la llamada (no están en la base).
+    let opciones = {}
+    if (usuario?.empresas?.es_demo) {
+      const correos = leerCorreosDemo(sesion)
+      if (!correos) {
+        setError('Ingresa tus correos de prueba para poder enviar la encuesta.')
+        pedirCorreosDemo()
+        return
+      }
+      opciones = { body: { correo_cliente_demo: correos.cliente, correo_asesor_demo: correos.asesor } }
+    }
+
+    setEnviandoEncuestas(true)
     try {
-      const resultado = await invocarFuncion('enviar-encuestas-pendientes', {})
+      const resultado = await invocarFuncion('enviar-encuestas-pendientes', opciones)
       setResultadoEnvio(resultado)
     } catch (excepcion) {
       setError(excepcion.message)
@@ -142,7 +157,7 @@ function Oportunidades() {
                       <p className="text-xs text-slate-400">{trabajo?.clientes?.telefono}</p>
                     </td>
                     <td className="px-3 py-2 text-slate-600">
-                      {trabajo?.vehiculos?.patente} — {trabajo?.vehiculos?.marca} {trabajo?.vehiculos?.modelo}
+                      {formatearPatente(trabajo?.vehiculos?.patente)} — {trabajo?.vehiculos?.marca} {trabajo?.vehiculos?.modelo}
                     </td>
                     <td className="px-3 py-2 text-slate-600">{oportunidad.descripcion}</td>
                     <td className="px-3 py-2">

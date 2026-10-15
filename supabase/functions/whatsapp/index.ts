@@ -1,7 +1,7 @@
 // whatsapp
 //
 // Webhook + endpoint de envío para la integración de WhatsApp Cloud API en
-// modo Coexistencia (dos números reales de Didial: Toyota y Multimarca, ver
+// modo Coexistencia (uno o más números por empresa, ver
 // 0032_whatsapp_recepcion.sql). Un solo Deno.serve maneja dos cosas
 // distintas, cada una con su propia forma de autenticación -Verify JWT
 // queda OFF en el dashboard de Supabase a propósito, porque Meta llama al
@@ -34,6 +34,7 @@
 // `payload_original` se guarda siempre crudo en cada tabla para poder
 // reprocesar si algún nombre de campo resulta distinto en producción real.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { sincronizarCitasPendientes } from '../_shared/clickupCitas.ts'
 
 const GRAPH_BASE = 'https://graph.facebook.com/v23.0'
 
@@ -688,7 +689,7 @@ async function obtenerServiciosBot(
 // deno-lint-ignore no-explicit-any
 async function mostrarMenuPrincipalBot(supabase: any, contacto: any) {
   const texto =
-    'Hola, soy el asistente de Servicio Automotriz Didial.\n¿En qué te podemos ayudar?\n\n1) Agendar una hora\n2) Hablar con un asesor\n\nResponde con el número de la opción.'
+    'Hola, soy el asistente virtual del taller.\n¿En qué te podemos ayudar?\n\n1) Agendar una hora\n2) Hablar con un asesor\n\nResponde con el número de la opción.'
   await enviarBot(supabase, contacto, texto)
   await actualizarBotEstado(supabase, contacto, 'saludo', {})
 }
@@ -892,6 +893,15 @@ async function confirmarReservaBot(
     `¡Listo! Tu hora quedó agendada para el ${formatoFechaCortaBot(fecha)} a las ${hora.slice(0, 5)} — ${servicioEtiqueta}.\nCualquier cambio, escríbenos por acá.`
   )
   await actualizarBotEstado(supabase, contacto, null, null, { estado: 'agendado' })
+
+  // La cita agendada por el bot también va a ClickUp, en el estado "agenda".
+  // Se hace después de confirmarle al cliente, para no demorarlo; si falla, la
+  // cita ya existe y queda pendiente: se reintenta al abrir la Agenda.
+  try {
+    await sincronizarCitasPendientes(supabase, contacto.empresa_id)
+  } catch (error) {
+    console.error('whatsapp: no se pudo enviar la cita a ClickUp', error)
+  }
 }
 
 // deno-lint-ignore no-explicit-any

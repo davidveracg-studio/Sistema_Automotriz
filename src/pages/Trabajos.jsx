@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 
+import { formatearPatente } from '../lib/patente'
 function Trabajos() {
   const navegar = useNavigate()
   const [busqueda, setBusqueda] = useState('')
@@ -96,7 +97,7 @@ function Trabajos() {
               >
                 <td className="px-3 py-2 font-medium text-slate-800">{trabajo.numero_ot}</td>
                 <td className="px-3 py-2 text-slate-600">
-                  {trabajo.vehiculos?.patente} — {trabajo.vehiculos?.marca} {trabajo.vehiculos?.modelo}
+                  {formatearPatente(trabajo.vehiculos?.patente)} — {trabajo.vehiculos?.marca} {trabajo.vehiculos?.modelo}
                 </td>
                 <td className="px-3 py-2 text-slate-600">{nombreCliente(trabajo.clientes)}</td>
                 <td className="px-3 py-2 text-slate-600">

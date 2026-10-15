@@ -1,4 +1,4 @@
-// Script de un solo uso: crea las 8 cuentas de autenticación del tenant
+// Script de un solo uso: crea las 12 cuentas de autenticación del tenant
 // "VPAI Demo" (una por rol, ver 0036_tenant_demo_vpai.sql) y sube el logo
 // al bucket público logos-empresa, en la ruta que esa migración espera
 // -determinística a propósito, para no tener que capturar la salida del
@@ -7,6 +7,10 @@
 // Requiere SUPABASE_SERVICE_ROLE_KEY (Dashboard → Settings → API): un
 // secreto real, nunca se guarda en este repo. Se lee de una variable de
 // entorno pasada al momento de correr el script, no de un archivo.
+//
+// Se puede volver a correr: las cuentas que ya existen se saltan, así que
+// sirve también para agregar las 4 cuentas técnicas nuevas a una demo ya
+// creada.
 //
 // Uso: SUPABASE_SERVICE_ROLE_KEY=... node scripts/crear-demo-vpai.mjs
 
@@ -36,6 +40,11 @@ const USUARIOS_DEMO = [
   { id: 'a0000000-0000-4000-8000-000000000006', correo: 'demo-tecnico@vpai.dev', rol: 'tecnico' },
   { id: 'a0000000-0000-4000-8000-000000000007', correo: 'demo-detailer@vpai.dev', rol: 'detailer' },
   { id: 'a0000000-0000-4000-8000-000000000008', correo: 'demo-recepcionista@vpai.dev', rol: 'recepcionista' },
+  // Resto del equipo técnico (ver 0050_demo_equipo_tecnico.sql).
+  { id: 'a0000000-0000-4000-8000-000000000009', correo: 'demo-mecanico2@vpai.dev', rol: 'tecnico' },
+  { id: 'a0000000-0000-4000-8000-00000000000a', correo: 'demo-mecanico3@vpai.dev', rol: 'tecnico' },
+  { id: 'a0000000-0000-4000-8000-00000000000b', correo: 'demo-lavador@vpai.dev', rol: 'tecnico' },
+  { id: 'a0000000-0000-4000-8000-00000000000c', correo: 'demo-alineador@vpai.dev', rol: 'tecnico' },
 ]
 
 // El trigger on_auth_user_created (0001_esquema_roles.sql) crea sola la fila

@@ -16,6 +16,13 @@ export default {
           dark: 'rgb(var(--c-dark) / <alpha-value>)',
           carbon: 'rgb(var(--c-carbon) / <alpha-value>)',
         },
+        vpai: {
+          navy: 'rgb(var(--c-vpai-navy) / <alpha-value>)',
+          black: 'rgb(var(--c-vpai-black) / <alpha-value>)',
+          silver: 'rgb(var(--c-vpai-silver) / <alpha-value>)',
+          skyblue: 'rgb(var(--c-vpai-skyblue) / <alpha-value>)',
+          blue: 'rgb(var(--c-vpai-blue) / <alpha-value>)',
+        },
       },
       fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
     },
