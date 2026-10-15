@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { invocarFuncion } from '../../lib/invocarFuncion'
+import { useClickUpConectado } from '../../lib/clickup'
 import { formatearPatente } from '../../lib/patente'
 import { nombreCliente } from '../../lib/plano'
 import DetalleOt from './DetalleOt'
@@ -26,6 +27,9 @@ function uno(valor) {
 // fuente, mismo refresco cada minuto-, así que plano y kanban nunca se
 // desincronizan entre sí: si acá se cambia el puesto de un vehículo, el
 // plano lo refleja apenas vuelva a cargar, y viceversa.
+//
+// Sin ClickUp (modo local) las columnas son los estados del taller cargados
+// en la base (0067) y arrastrar una tarjeta cambia el estado ahí mismo.
 function Kanban({ usuario, puedeEditar, trabajos, tareas, elementos, ocupacion, tecnicos, estadosClickup, onUbicar, onRecargar }) {
   const [arrastrando, setArrastrando] = useState(null)
   const [ocupado, setOcupado] = useState(false)
@@ -34,6 +38,8 @@ function Kanban({ usuario, puedeEditar, trabajos, tareas, elementos, ocupacion, 
   const [reubicar, setReubicar] = useState(null) // { trabajoId, regla, elemento } tras un cambio de estado
   const [sobreEstadoOptimista, setSobreEstadoOptimista] = useState({}) // trabajoId -> estado (mientras ClickUp/webhook se ponen al día)
   const [detalleAbierto, setDetalleAbierto] = useState(null) // trabajo_id de la tarjeta abierta, o null
+  const clickupConectado = useClickUpConectado()
+  const local = clickupConectado === false
 
   const nombreTecnico = (id) => tecnicos.find((t) => t.id === id)?.nombre_completo || null
   const elementoDe = useMemo(() => new Map(ocupacion.map((o) => [o.trabajo_id, o.elemento_id])), [ocupacion])
@@ -106,7 +112,7 @@ function Kanban({ usuario, puedeEditar, trabajos, tareas, elementos, ocupacion, 
     const actual = sobreEstadoOptimista[ot.id] || ot.clickup_estado_actual || ot.estado
     if (claveEstado(actual) === claveEstado(nuevoEstado)) return
     if (['entregado', 'anulado'].includes(ot.estado)) return
-    if (!ot.clickup_task_id) {
+    if (!local && !ot.clickup_task_id) {
       setError(`OT ${ot.numero_ot} todavía no tiene tarjeta en ClickUp; sincronízala primero desde Trabajos.`)
       return
     }
@@ -146,19 +152,23 @@ function Kanban({ usuario, puedeEditar, trabajos, tareas, elementos, ocupacion, 
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <p className="text-sm text-slate-500">
           {estadosClickup.length === 0
-            ? 'Sin estados de ClickUp cargados todavía.'
-            : `${tarjetas.length} OT activa${tarjetas.length === 1 ? '' : 's'} · ${estadosClickup.length} estados de ClickUp.`}
+            ? local
+              ? 'Sin estados del taller cargados todavía.'
+              : 'Sin estados de ClickUp cargados todavía.'
+            : `${tarjetas.length} OT activa${tarjetas.length === 1 ? '' : 's'} · ${estadosClickup.length} estados${local ? '' : ' de ClickUp'}.`}
         </p>
-        <div className="ml-auto flex gap-2">
-          {puedeEditar && (
-            <button type="button" disabled={ocupado} onClick={sincronizarEstados} className="btn-ghost text-xs">
-              {estadosClickup.length === 0 ? 'Sincronizar estados de ClickUp' : 'Releer estados de ClickUp'}
+        {clickupConectado && (
+          <div className="ml-auto flex gap-2">
+            {puedeEditar && (
+              <button type="button" disabled={ocupado} onClick={sincronizarEstados} className="btn-ghost text-xs">
+                {estadosClickup.length === 0 ? 'Sincronizar estados de ClickUp' : 'Releer estados de ClickUp'}
+              </button>
+            )}
+            <button type="button" disabled={ocupado} onClick={refrescarDetalle} className="btn-ghost text-xs">
+              Actualizar detalle (prioridad, fecha, subtareas)
             </button>
-          )}
-          <button type="button" disabled={ocupado} onClick={refrescarDetalle} className="btn-ghost text-xs">
-            Actualizar detalle (prioridad, fecha, subtareas)
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
       {error && <p className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -186,7 +196,7 @@ function Kanban({ usuario, puedeEditar, trabajos, tareas, elementos, ocupacion, 
 
       {estadosClickup.length === 0 && tarjetas.length === 0 ? (
         <p className="rounded border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
-          Todavía no hay estados de ClickUp ni OT activas para mostrar.
+          Todavía no hay estados{local ? ' del taller' : ' de ClickUp'} ni OT activas para mostrar.
         </p>
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-2">
@@ -239,7 +249,7 @@ function Kanban({ usuario, puedeEditar, trabajos, tareas, elementos, ocupacion, 
         </div>
       )}
       {puedeEditar && (
-        <p className="mt-2 text-xs text-slate-400">Toca una tarjeta para ver su detalle, o arrástrala a otra columna para cambiar el estado en ClickUp.</p>
+        <p className="mt-2 text-xs text-slate-400">Toca una tarjeta para ver su detalle, o arrástrala a otra columna para cambiar su estado{local ? '' : ' en ClickUp'}.</p>
       )}
     </div>
   )

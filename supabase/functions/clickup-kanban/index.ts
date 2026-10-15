@@ -25,6 +25,12 @@
 //                     personalizado "Observaciones"). Se empuja a ClickUp y se
 //                     guarda en caché en trabajos_taller.clickup_descripcion.
 //
+// MODO LOCAL (empresa sin lista de ClickUp activa, ver _shared/taller.ts): las
+// columnas son los estados ya cargados en clickup_estados (0067), cambiar_estado
+// guarda el estado directo en la base y dispara los mismos avisos que el
+// webhook, detalle/descripcion leen y escriben solo la base, y refrescar no
+// tiene nada que traer.
+//
 // Quién llama se identifica con su sesión (no con un secreto): solo admin, socia y
 // jefe de taller, y todo se acota a SU empresa. Las escrituras usan service role
 // porque clickup_estados solo la escribe admin por RLS y esto lo necesita el jefe
@@ -32,6 +38,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { respuestaJson, respuestaPreflight } from '../_shared/cors.ts'
 import { ErrorClickUp, actualizarTarea, obtenerLista, obtenerTarea, obtenerTareaConSubtareas } from '../_shared/clickup.ts'
+import { SELECCION_TRABAJO_ESTADO, type TrabajoEstado, aplicarCambioEstado, listaClickUp } from '../_shared/taller.ts'
 
 const ROLES_PERMITIDOS = ['admin', 'socia', 'jefe_taller']
 const MAX_OT_POR_LLAMADA = 12
@@ -126,11 +133,8 @@ Deno.serve(async (req) => {
 
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
-    const { data: config } = await admin.from('clickup_config').select('lista_trabajos_id').eq('empresa_id', empresaId).maybeSingle()
-    if (!config?.lista_trabajos_id) {
-      return respuestaJson({ error: { mensaje: 'Esta empresa no tiene configurada una lista de ClickUp.' } }, 422)
-    }
-    const listaId = config.lista_trabajos_id as string
+    // null = modo local (sin ClickUp): todo se resuelve contra la base.
+    const listaId = await listaClickUp(admin, empresaId)
 
     async function registrarError(trabajoId: string | null, operacion: string, error: unknown) {
       await admin.from('integraciones_clickup_errores').insert({
@@ -143,7 +147,7 @@ Deno.serve(async (req) => {
     }
 
     // Trae los estados de la lista y deja clickup_estados igual a ClickUp.
-    async function sincronizarEstados() {
+    async function sincronizarEstados(listaId: string) {
       const lista = (await obtenerLista(listaId)) as { statuses?: EstadoLista[] }
       const estados = lista.statuses ?? []
       if (estados.length === 0) throw new Error('ClickUp no devolvió estados para la lista de esta empresa.')
@@ -171,7 +175,11 @@ Deno.serve(async (req) => {
     }
 
     if (cuerpo.accion === 'estados') {
-      const filas = await sincronizarEstados()
+      if (!listaId) {
+        const { data: filas } = await admin.from('clickup_estados').select('nombre, orden, tipo, color').eq('empresa_id', empresaId).order('orden')
+        return respuestaJson({ data: { estados: filas ?? [], local: true } })
+      }
+      const filas = await sincronizarEstados(listaId)
       return respuestaJson({ data: { estados: filas } })
     }
 
@@ -182,12 +190,12 @@ Deno.serve(async (req) => {
 
       const { data: trabajo } = await admin
         .from('trabajos_taller')
-        .select('id, clickup_task_id, estado')
+        .select(`${SELECCION_TRABAJO_ESTADO}, clickup_task_id, estado`)
         .eq('id', cuerpo.trabajo_id)
         .eq('empresa_id', empresaId)
         .maybeSingle()
       if (!trabajo) return respuestaJson({ error: { mensaje: 'OT no encontrada.' } }, 404)
-      if (!trabajo.clickup_task_id) {
+      if (listaId && !trabajo.clickup_task_id) {
         return respuestaJson({ error: { mensaje: 'Esta OT todavía no tiene tarjeta en ClickUp; sincronízala primero.' } }, 422)
       }
       if (['entregado', 'anulado'].includes(trabajo.estado)) {
@@ -198,13 +206,22 @@ Deno.serve(async (req) => {
       // exacto de ClickUp, no lo que llegó): un nombre mal escrito da un error
       // claro acá en vez de un 400 críptico de la API.
       let { data: estados } = await admin.from('clickup_estados').select('nombre').eq('empresa_id', empresaId)
-      if (!estados || estados.length === 0) {
-        estados = (await sincronizarEstados()).map((e) => ({ nombre: e.nombre }))
+      if ((!estados || estados.length === 0) && listaId) {
+        estados = (await sincronizarEstados(listaId)).map((e) => ({ nombre: e.nombre }))
       }
       const objetivo = cuerpo.estado.trim().toLowerCase()
-      const estadoExacto = estados.find((e) => e.nombre.trim().toLowerCase() === objetivo)?.nombre
+      const estadoExacto = (estados ?? []).find((e) => e.nombre.trim().toLowerCase() === objetivo)?.nombre
       if (!estadoExacto) {
-        return respuestaJson({ error: { mensaje: `"${cuerpo.estado}" no es un estado de la lista de ClickUp.` } }, 422)
+        return respuestaJson({ error: { mensaje: `"${cuerpo.estado}" no es un estado del taller.` } }, 422)
+      }
+
+      // Modo local: el estado se guarda acá mismo, con los mismos avisos que
+      // dispararía el webhook de ClickUp (listo para entrega, compra reptos, retroceso).
+      if (!listaId) {
+        await aplicarCambioEstado(admin, trabajo as unknown as TrabajoEstado, estadoExacto.trim().toLowerCase(), async (_e, trabajoId, operacion, error) => {
+          await registrarError(trabajoId, operacion, error)
+        })
+        return respuestaJson({ data: { estado: estadoExacto, local: true } })
       }
 
       try {
@@ -219,7 +236,7 @@ Deno.serve(async (req) => {
 
     if (cuerpo.accion === 'refrescar') {
       const ids = (cuerpo.trabajo_ids ?? []).slice(0, MAX_OT_POR_LLAMADA)
-      if (ids.length === 0) return respuestaJson({ data: { actualizados: 0, errores: [] } })
+      if (ids.length === 0 || !listaId) return respuestaJson({ data: { actualizados: 0, errores: [], local: !listaId } })
 
       const { data: trabajos } = await admin
         .from('trabajos_taller')
@@ -281,13 +298,22 @@ Deno.serve(async (req) => {
 
       const { data: trabajo } = await admin
         .from('trabajos_taller')
-        .select('id, clickup_task_id')
+        .select('id, clickup_task_id, clickup_descripcion, clickup_fecha_inicio')
         .eq('id', cuerpo.trabajo_id)
         .eq('empresa_id', empresaId)
         .maybeSingle()
       if (!trabajo) return respuestaJson({ error: { mensaje: 'OT no encontrada.' } }, 404)
-      if (!trabajo.clickup_task_id) {
-        return respuestaJson({ data: { descripcion: null, fecha_inicio: null, observaciones: null, segmento: null, sugerencias: null } })
+      if (!listaId || !trabajo.clickup_task_id) {
+        return respuestaJson({
+          data: {
+            descripcion: trabajo.clickup_descripcion ?? null,
+            fecha_inicio: trabajo.clickup_fecha_inicio ?? null,
+            observaciones: null,
+            segmento: null,
+            sugerencias: null,
+            local: !listaId,
+          },
+        })
       }
 
       let remota: TareaRemota
@@ -334,7 +360,7 @@ Deno.serve(async (req) => {
 
       const texto = (cuerpo.descripcion ?? '').trim() || null
 
-      if (trabajo.clickup_task_id) {
+      if (listaId && trabajo.clickup_task_id) {
         try {
           await actualizarTarea(trabajo.clickup_task_id as string, { description: texto ?? '' })
         } catch (error) {

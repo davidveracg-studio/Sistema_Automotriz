@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabaseClient'
 import { invocarFuncion } from '../../lib/invocarFuncion'
+import { useClickUpConectado } from '../../lib/clickup'
 import { formatearPatente } from '../../lib/patente'
 import { nombreCliente } from '../../lib/plano'
 import { NOMBRE_CHECKLIST_POR_AREA, PRIORIDADES, iniciales } from '../../lib/tallerReglas'
@@ -34,7 +35,10 @@ function fechaHora(iso) {
 // (acción "detalle" de clickup-kanban), porque nadie las copia a la base en
 // ningún otro momento. Asignar técnico, marcar ejecutada y guardar la
 // observación empujan el cambio a ClickUp también (función clickup-tarea).
+// Sin ClickUp (modo local) todo eso se guarda solo en la base y los campos que
+// solo existen en ClickUp (segmento, sugerencias, observaciones) no se muestran.
 function DetalleOt({ trabajoId, usuario, tecnicos, nombreTecnico, onCerrar }) {
+  const local = useClickUpConectado() === false
   const [trabajo, setTrabajo] = useState(null)
   const [subtareas, setSubtareas] = useState([])
   const [items, setItems] = useState([])
@@ -269,24 +273,28 @@ function DetalleOt({ trabajoId, usuario, tecnicos, nombreTecnico, onCerrar }) {
                   {hechas}/{total} subtareas · {progreso}%
                 </p>
               </div>
-              <div>
-                <p className="label">Segmento</p>
-                <p className="text-sm text-slate-700">{clickup?.segmento || '—'}</p>
-              </div>
-              <div>
-                <p className="label">Sugerencias</p>
-                <p className="text-sm text-slate-700">{clickup?.sugerencias || '—'}</p>
-              </div>
-              <div className="sm:col-span-2 lg:col-span-4">
-                <p className="label">Observaciones (campo de ClickUp)</p>
-                <p className="text-sm text-slate-700">{clickup?.observaciones || '—'}</p>
-              </div>
+              {!local && (
+                <>
+                  <div>
+                    <p className="label">Segmento</p>
+                    <p className="text-sm text-slate-700">{clickup?.segmento || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="label">Sugerencias</p>
+                    <p className="text-sm text-slate-700">{clickup?.sugerencias || '—'}</p>
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-4">
+                    <p className="label">Observaciones (campo de ClickUp)</p>
+                    <p className="text-sm text-slate-700">{clickup?.observaciones || '—'}</p>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="mt-4 rounded-lg border border-slate-200 p-4">
               <p className="label mb-1">Descripción</p>
               {clickup?.error ? (
-                <p className="text-sm text-amber-700">No se pudo traer la descripción de ClickUp: {clickup.error}</p>
+                <p className="text-sm text-amber-700">No se pudo traer la descripción: {clickup.error}</p>
               ) : (
                 <DescripcionOt puedeEditar={puedeAsignar} descripcion={clickup?.descripcion || ''} onGuardar={guardarDescripcion} />
               )}
@@ -530,7 +538,7 @@ function DescripcionOt({ puedeEditar, descripcion, onGuardar }) {
 
   return (
     <div>
-      {descripcion ? <p className="whitespace-pre-line text-sm text-slate-700">{descripcion}</p> : <p className="text-sm text-slate-400">Sin descripción en ClickUp.</p>}
+      {descripcion ? <p className="whitespace-pre-line text-sm text-slate-700">{descripcion}</p> : <p className="text-sm text-slate-400">Sin descripción.</p>}
       {puedeEditar && (
         <button type="button" onClick={() => setEditando(true)} className="mt-1 text-xs text-slate-500 underline hover:text-slate-800">
           {descripcion ? 'Editar' : 'Agregar descripción'}

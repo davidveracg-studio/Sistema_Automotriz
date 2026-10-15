@@ -5,7 +5,8 @@
 // tarjeta en el Kanban. Tres acciones:
 //   - agregar: crea el ítem. Si el área es Repuestos o Lubricantes e insumos,
 //              se asigna solo al coordinador de repuestos de la empresa
-//              (clickup_config.responsable_repuestos_id, ver 0062) -Servicios
+//              (clickup_config.responsable_repuestos_id, ver 0062; sin ClickUp,
+//              el encargado de presupuestos) -Servicios
 //              externos no lleva asignación automática, son terceros-.
 //   - editar:  cambia el nombre y/o la cantidad del ítem.
 //   - marcar:  marca/desmarca el ítem como verificado.
@@ -25,6 +26,7 @@ import {
   obtenerMiembrosEquipo,
   obtenerTarea,
 } from '../_shared/clickup.ts'
+import { coordinadorRepuestos } from '../_shared/taller.ts'
 
 const ROLES_PERMITIDOS = ['admin', 'socia', 'jefe_taller']
 const AREAS_VALIDAS = ['repuestos', 'lubricantes_insumos', 'servicios_externos']
@@ -103,8 +105,7 @@ Deno.serve(async (req) => {
 
       let responsableId: string | null = null
       if (AREAS_CON_ASIGNACION_AUTOMATICA.includes(cuerpo.area)) {
-        const { data: config } = await admin.from('clickup_config').select('responsable_repuestos_id').eq('empresa_id', empresaId).maybeSingle()
-        responsableId = config?.responsable_repuestos_id ?? null
+        responsableId = await coordinadorRepuestos(admin, empresaId)
       }
 
       const detalle = cuerpo.detalle.trim()

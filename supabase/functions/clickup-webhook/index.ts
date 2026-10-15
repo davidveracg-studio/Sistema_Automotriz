@@ -26,15 +26,13 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { respuestaJson, respuestaPreflight } from '../_shared/cors.ts'
 import { NOMBRE_CHECKLIST_POR_AREA, obtenerTarea, resolverCampos } from '../_shared/clickup.ts'
-import { enviarCorreo } from '../_shared/brevo.ts'
+import { SELECCION_TRABAJO_ESTADO, aplicarCambioEstado, avisarObservacionTecnico, coordinadorRepuestos } from '../_shared/taller.ts'
 
-// Nombres de estado que el cliente confirmó el 2026-09-15 (ver CHANGELOG).
-// Comparados siempre en minúsculas: la API de ClickUp normaliza el status
-// a minúsculas al devolverlo, aunque se haya creado con otra capitalización
-// (así se creó "POR DESIGNAR" en clickup-sincronizar, por ejemplo).
-const ESTADO_RETROCESO = 'retroceso'
-const ESTADO_LISTO_PARA_ENTREGA = 'listo para entrega'
-const ESTADO_COMPRA_REPTOS = 'compra reptos'
+// Los estados se comparan siempre en minúsculas: la API de ClickUp normaliza
+// el status a minúsculas al devolverlo, aunque se haya creado con otra
+// capitalización (así se creó "POR DESIGNAR" en clickup-sincronizar). Las
+// reacciones a cada estado viven en _shared/taller.ts (las comparte el
+// Kanban en modo local, sin ClickUp).
 
 // Estados terminales de ClickUp (tipo "done"/"closed"): alimentan el % de ejecución del kanban.
 const TIPOS_ESTADO_TERMINAL = new Set(['done', 'closed'])
@@ -207,68 +205,16 @@ Deno.serve(async (req) => {
     // reaccionar a los estados que el cliente detalló el 2026-09-15.
     const { data: trabajo } = await supabase
       .from('trabajos_taller')
-      .select(
-        'id, empresa_id, numero_ot, vehiculo_id, trabajo_original_id, asesor_id, clickup_estado_actual, clientes(nombre, apellido, razon_social), vehiculos(patente, marca, modelo)'
-      )
+      .select(SELECCION_TRABAJO_ESTADO)
       .eq('clickup_task_id', taskId)
       .maybeSingle()
 
     if (trabajo) {
       await reconciliarChecklists(supabase, trabajo.id, trabajo.empresa_id, tareaRemota.checklists ?? [])
 
+      // Retroceso, "listo para entrega" y "compra reptos" (ver _shared/taller.ts).
       const estadoClickUp = (tareaRemota.status?.status ?? '').toLowerCase()
-
-      // RETROCESO = "retrabajo" (confirmado por el cliente 2026-09-15):
-      // vincular a la OT original del mismo vehículo -la más reciente ya
-      // entregada- si todavía no tiene una. Si no hay ninguna OT entregada
-      // anterior para ese vehículo, queda registrado como aviso en vez de
-      // fallar: puede que el retroceso sea de una OT que el CRM no
-      // administra, o que haga falta vincularlo a mano.
-      if (estadoClickUp === ESTADO_RETROCESO && !trabajo.trabajo_original_id && trabajo.vehiculo_id) {
-        const { data: original } = await supabase
-          .from('trabajos_taller')
-          .select('id')
-          .eq('vehiculo_id', trabajo.vehiculo_id)
-          .eq('estado', 'entregado')
-          .neq('id', trabajo.id)
-          .order('fecha_entrega', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-
-        if (original) {
-          await supabase.from('trabajos_taller').update({ trabajo_original_id: original.id }).eq('id', trabajo.id)
-        } else {
-          await registrarError(
-            trabajo.empresa_id,
-            trabajo.id,
-            'retroceso_sin_ot_original',
-            new Error(
-              'ClickUp marcó esta tarjeta como RETROCESO pero no se encontró una OT entregada anterior para el mismo vehículo. Revisar y vincular a mano si corresponde.'
-            )
-          )
-        }
-      }
-
-      // "Listo para entrega": aviso activo al asesor por correo, solo en la
-      // TRANSICIÓN -se compara contra el último estado guardado para no
-      // reenviar en cada evento mientras la tarjeta sigue en este estado-.
-      if (estadoClickUp === ESTADO_LISTO_PARA_ENTREGA && trabajo.clickup_estado_actual !== ESTADO_LISTO_PARA_ENTREGA) {
-        await avisarListoParaEntrega(supabase, trabajo, registrarError)
-        await crearNotificacionListoParaEntrega(supabase, trabajo, registrarError)
-      }
-
-      // "Compra reptos": mismo criterio de transición que "listo para
-      // entrega", pero para jefe_taller/encargado_presupuestos (bodega). Se
-      // resuelve sola si la tarjeta avanza a cualquier otro estado.
-      if (estadoClickUp === ESTADO_COMPRA_REPTOS && trabajo.clickup_estado_actual !== ESTADO_COMPRA_REPTOS) {
-        await crearNotificacionCompraReptos(supabase, trabajo, registrarError)
-      } else if (estadoClickUp !== ESTADO_COMPRA_REPTOS && trabajo.clickup_estado_actual === ESTADO_COMPRA_REPTOS) {
-        await supabase.from('notificaciones').delete().eq('trabajo_id', trabajo.id).eq('tipo', 'compra_reptos_pendiente')
-      }
-
-      if (estadoClickUp && estadoClickUp !== trabajo.clickup_estado_actual) {
-        await supabase.from('trabajos_taller').update({ clickup_estado_actual: estadoClickUp }).eq('id', trabajo.id)
-      }
+      await aplicarCambioEstado(supabase, trabajo, estadoClickUp, registrarError)
 
       // Prioridad y fecha de vencimiento para el kanban. Los eventos de ClickUp que
       // cambian SOLO la prioridad o la fecha (taskPriorityUpdated / taskDueDateUpdated)
@@ -351,145 +297,6 @@ Deno.serve(async (req) => {
   }
 })
 
-// Aviso por correo al asesor cuando la tarjeta llega a "listo para
-// entrega": sin esto, nada le avisa de forma activa que puede cobrar -el
-// spec original pide justo eso: "informar en el sistema para que el
-// asesor pueda tomar el trabajo realizado y realizar el cobro"-.
-async function avisarListoParaEntrega(
-  // deno-lint-ignore no-explicit-any
-  supabase: any,
-  trabajo: {
-    id: string
-    empresa_id: string
-    numero_ot: number
-    asesor_id: string | null
-    clientes: { nombre: string; apellido: string | null; razon_social: string | null } | { nombre: string; apellido: string | null; razon_social: string | null }[] | null
-    vehiculos: { patente: string; marca: string; modelo: string } | { patente: string; marca: string; modelo: string }[] | null
-  },
-  registrarError: (empresaId: string | null, trabajoId: string | null, operacion: string, error: unknown) => Promise<void>
-) {
-  if (!trabajo.asesor_id) {
-    await registrarError(
-      trabajo.empresa_id,
-      trabajo.id,
-      'aviso_listo_entrega',
-      new Error('La OT no tiene asesor asignado; no se pudo avisar por correo.')
-    )
-    return
-  }
-
-  const { data: asesor } = await supabase
-    .from('usuarios')
-    .select('correo, nombre_completo')
-    .eq('id', trabajo.asesor_id)
-    .maybeSingle()
-
-  if (!asesor?.correo) {
-    await registrarError(trabajo.empresa_id, trabajo.id, 'aviso_listo_entrega', new Error('No se encontró el correo del asesor asignado.'))
-    return
-  }
-
-  const cliente = Array.isArray(trabajo.clientes) ? trabajo.clientes[0] : trabajo.clientes
-  const vehiculo = Array.isArray(trabajo.vehiculos) ? trabajo.vehiculos[0] : trabajo.vehiculos
-  const nombreCliente = cliente?.razon_social || [cliente?.nombre, cliente?.apellido].filter(Boolean).join(' ')
-
-  try {
-    await enviarCorreo({
-      destinatarioEmail: asesor.correo,
-      destinatarioNombre: asesor.nombre_completo,
-      asunto: `Listo para entrega: OT ${trabajo.numero_ot}`,
-      html: `<p>La OT <strong>${trabajo.numero_ot}</strong> (${vehiculo?.patente ?? ''} — ${vehiculo?.marca ?? ''} ${vehiculo?.modelo ?? ''}, cliente ${nombreCliente}) quedó marcada como <strong>LISTO PARA ENTREGA</strong> en ClickUp. Contacta al cliente y registra el cobro en el CRM.</p>`,
-    })
-  } catch (error) {
-    await registrarError(trabajo.empresa_id, trabajo.id, 'aviso_listo_entrega', error)
-  }
-}
-
-// Notificación en la app (además del correo) para el asesor ya asignado a
-// la OT -mismo destinatario, mismo criterio de "solo en la transición".
-async function crearNotificacionListoParaEntrega(
-  // deno-lint-ignore no-explicit-any
-  supabase: any,
-  trabajo: {
-    id: string
-    empresa_id: string
-    numero_ot: number
-    asesor_id: string | null
-    vehiculos: { patente: string } | { patente: string }[] | null
-  },
-  registrarError: (empresaId: string | null, trabajoId: string | null, operacion: string, error: unknown) => Promise<void>
-) {
-  if (!trabajo.asesor_id) return // ya quedó registrado el error en avisarListoParaEntrega
-
-  const vehiculo = Array.isArray(trabajo.vehiculos) ? trabajo.vehiculos[0] : trabajo.vehiculos
-
-  const { error } = await supabase.from('notificaciones').insert({
-    empresa_id: trabajo.empresa_id,
-    tipo: 'listo_para_entrega',
-    trabajo_id: trabajo.id,
-    usuario_destino_id: trabajo.asesor_id,
-    titulo: 'Vehículo listo para entrega',
-    mensaje: `${vehiculo?.patente ?? 'Vehículo'} · OT ${trabajo.numero_ot} quedó listo para entrega. Contacta al cliente y registra el cobro.`,
-  })
-  if (error) await registrarError(trabajo.empresa_id, trabajo.id, 'notificacion_listo_entrega', error)
-}
-
-// Aviso para jefe_taller/encargado_presupuestos cuando ClickUp marca que
-// faltan repuestos por comprar -mismo grupo de acceso de /bodega-.
-async function crearNotificacionCompraReptos(
-  // deno-lint-ignore no-explicit-any
-  supabase: any,
-  trabajo: {
-    id: string
-    empresa_id: string
-    numero_ot: number
-    vehiculos: { patente: string } | { patente: string }[] | null
-  },
-  registrarError: (empresaId: string | null, trabajoId: string | null, operacion: string, error: unknown) => Promise<void>
-) {
-  const vehiculo = Array.isArray(trabajo.vehiculos) ? trabajo.vehiculos[0] : trabajo.vehiculos
-
-  const { error } = await supabase.from('notificaciones').insert({
-    empresa_id: trabajo.empresa_id,
-    tipo: 'compra_reptos_pendiente',
-    trabajo_id: trabajo.id,
-    roles_destino: ['jefe_taller', 'encargado_presupuestos'],
-    titulo: 'Repuestos pendientes de compra',
-    mensaje: `${vehiculo?.patente ?? 'Vehículo'} · OT ${trabajo.numero_ot} quedó en "Compra reptos": faltan repuestos por comprar.`,
-  })
-  if (error) await registrarError(trabajo.empresa_id, trabajo.id, 'notificacion_compra_reptos', error)
-}
-
-// Avisa al asesor de la OT que un técnico dejó una observación en una
-// subtarea -puede señalar una venta cruzada (ej. "neumáticos gastados",
-// "batería con signos de falla") que conviene ofrecer al cliente.
-async function avisarObservacionTecnico(
-  // deno-lint-ignore no-explicit-any
-  supabase: any,
-  datos: {
-    empresaId: string
-    trabajoId: string
-    numeroOt?: number
-    asesorId: string | null
-    patente?: string
-    observacion: string
-    registrarError: (empresaId: string | null, trabajoId: string | null, operacion: string, error: unknown) => Promise<void>
-  }
-) {
-  if (!datos.asesorId) return
-
-  const resumen = datos.observacion.length > 200 ? `${datos.observacion.slice(0, 200)}…` : datos.observacion
-  const { error } = await supabase.from('notificaciones').insert({
-    empresa_id: datos.empresaId,
-    tipo: 'observacion_tecnico',
-    trabajo_id: datos.trabajoId,
-    usuario_destino_id: datos.asesorId,
-    titulo: 'Observación del técnico',
-    mensaje: `${datos.patente ?? 'Vehículo'} · OT ${datos.numeroOt ?? ''}: ${resumen}`,
-  })
-  if (error) await datos.registrarError(datos.empresaId, datos.trabajoId, 'notificacion_observacion_tecnico', error)
-}
-
 // Compara los checklists que trae ClickUp contra ot_detalle: marca
 // verificado/nombre en los ítems que ya conocemos, e importa los que se
 // hayan agregado directamente en ClickUp.
@@ -537,14 +344,7 @@ async function reconciliarChecklists(
       } else {
         let responsableId: string | null = null
         if (area === 'repuestos' || area === 'lubricantes_insumos') {
-          if (coordinadorRepuestosId === null) {
-            const { data: config } = await supabase
-              .from('clickup_config')
-              .select('responsable_repuestos_id')
-              .eq('empresa_id', empresaId)
-              .maybeSingle()
-            coordinadorRepuestosId = config?.responsable_repuestos_id ?? null
-          }
+          if (coordinadorRepuestosId === null) coordinadorRepuestosId = await coordinadorRepuestos(supabase, empresaId)
           responsableId = coordinadorRepuestosId
         }
 
