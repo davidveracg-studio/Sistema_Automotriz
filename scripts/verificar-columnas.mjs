@@ -73,6 +73,11 @@ function buscarLlamadasInsertUpdate(codigo) {
     const matchOperacion = /\.(insert|update|upsert)\(/.exec(ventana)
     if (!matchOperacion) continue
     const posicionAbs = fin + matchOperacion.index + matchOperacion[0].length
+    // Si el argumento no es un objeto/arreglo literal (ej. `.update(cabecera)`),
+    // no hay nada que verificar acá: sin este corte, el script seguía de largo
+    // y le atribuía a la llamada el próximo `{...}` del archivo, que era de otra.
+    const primerCaracter = codigo.slice(posicionAbs).match(/\S/)?.[0]
+    if (primerCaracter !== '{' && primerCaracter !== '[') continue
     const cuerpoObjeto = extraerPrimerObjetoBalanceado(codigo, posicionAbs)
     if (cuerpoObjeto === null) continue
     llamadas.push({ tabla, operacion: matchOperacion[1], claves: extraerClavesDeObjeto(cuerpoObjeto) })

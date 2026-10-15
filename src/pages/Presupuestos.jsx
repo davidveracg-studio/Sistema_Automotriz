@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 
+import { formatearPatente } from '../lib/patente'
+import { calcularDescuentoManoObra } from '../lib/descuento'
 const ETIQUETA_ESTADO = {
   borrador: 'Borrador',
   enviado: 'Enviado · esperando respuesta',
@@ -44,7 +46,7 @@ function Presupuestos() {
       const { data: presupuestosData, error: errorPresupuestos } = await supabase
         .from('presupuestos_taller')
         .select(
-          'id, correlativo, estado, creado_en, fecha_envio, fecha_respuesta, trabajos_taller(numero_ot, clientes(nombre, apellido, razon_social), vehiculos(patente, marca, modelo))'
+          'id, correlativo, estado, creado_en, fecha_envio, fecha_respuesta, trabajos_taller(numero_ot, descuento_mano_obra_pct, clientes(nombre, apellido, razon_social), vehiculos(patente, marca, modelo))'
         )
         .order('creado_en', { ascending: false })
 
@@ -58,18 +60,23 @@ function Presupuestos() {
       if (ids.length > 0) {
         const { data: itemsData, error: errorItems } = await supabase
           .from('ot_detalle_con_permiso')
-          .select('presupuesto_id, total_linea')
+          .select('presupuesto_id, area, total_linea')
           .in('presupuesto_id', ids)
 
         if (errorItems) {
           setError(errorItems.message)
           return
         }
-        totalesPorPresupuesto = (itemsData || []).reduce((acumulado, item) => {
-          const clave = item.presupuesto_id
-          acumulado[clave] = (acumulado[clave] || 0) + (item.total_linea || 0)
+        const itemsPorPresupuesto = (itemsData || []).reduce((acumulado, item) => {
+          if (!acumulado[item.presupuesto_id]) acumulado[item.presupuesto_id] = []
+          acumulado[item.presupuesto_id].push(item)
           return acumulado
         }, {})
+        // Con el descuento de mano de obra de la OT ya aplicado, igual que en el documento.
+        for (const presupuesto of presupuestosData || []) {
+          const ot = Array.isArray(presupuesto.trabajos_taller) ? presupuesto.trabajos_taller[0] : presupuesto.trabajos_taller
+          totalesPorPresupuesto[presupuesto.id] = calcularDescuentoManoObra(itemsPorPresupuesto[presupuesto.id] || [], ot?.descuento_mano_obra_pct).total
+        }
       }
 
       setPresupuestos(presupuestosData || [])
@@ -152,7 +159,7 @@ function Presupuestos() {
                     <td className="px-3 py-2">OT {trabajo?.numero_ot}</td>
                     <td className="px-3 py-2">{nombreCliente(trabajo?.clientes)}</td>
                     <td className="px-3 py-2">
-                      {trabajo?.vehiculos?.patente} {trabajo?.vehiculos?.marca} {trabajo?.vehiculos?.modelo}
+                      {formatearPatente(trabajo?.vehiculos?.patente)} {trabajo?.vehiculos?.marca} {trabajo?.vehiculos?.modelo}
                     </td>
                     <td className="px-3 py-2">
                       <span className={`rounded px-2 py-0.5 text-xs ${COLOR_ESTADO[p.estado] || 'bg-slate-100'}`}>

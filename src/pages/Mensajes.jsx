@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 
+import { formatearPatente } from '../lib/patente'
 const ETIQUETA_ESTADO = {
   nuevo: 'Nuevo',
   en_conversacion: 'En conversación',
@@ -318,7 +319,7 @@ function Mensajes() {
                     </span>
                   </div>
                   <p className="truncate text-xs text-slate-500">
-                    {cuenta?.etiqueta || '—'} · {contacto.vehiculos?.patente || 'sin vehículo vinculado'}
+                    {cuenta?.etiqueta || '—'} · {formatearPatente(contacto.vehiculos?.patente) || 'sin vehículo vinculado'}
                   </p>
                   {ultimo && <p className="mt-1 truncate text-xs text-slate-400">{resumenMensaje(ultimo)}</p>}
                 </button>
@@ -381,7 +382,7 @@ function Mensajes() {
                         <option value="">Sin vehículo</option>
                         {vehiculosCliente.map((vehiculo) => (
                           <option key={vehiculo.id} value={vehiculo.id}>
-                            {vehiculo.patente} — {vehiculo.marca} {vehiculo.modelo}
+                            {formatearPatente(vehiculo.patente)} — {vehiculo.marca} {vehiculo.modelo}
                           </option>
                         ))}
                       </select>

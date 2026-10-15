@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { registrarError } from '../lib/uso'
 
 // Envuelve cada página. Si algo dentro revienta, esta pantalla reemplaza solo
 // ese contenido (el menú, que vive fuera del boundary, sigue funcionando) y
@@ -16,6 +17,7 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, info) {
     this.setState({ info })
     console.error('Error atrapado por ErrorBoundary:', error, info)
+    registrarError(`${error?.name}: ${error?.message}`)
   }
 
   copiarTraza = () => {

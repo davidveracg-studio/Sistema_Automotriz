@@ -6,6 +6,8 @@ import EncabezadoDocumento from '../components/EncabezadoDocumento'
 import CampoDato from '../components/CampoDato'
 import BloqueTotales from '../components/BloqueTotales'
 
+import { formatearPatente } from '../lib/patente'
+import { calcularDescuentoManoObra, textoPorcentaje } from '../lib/descuento'
 const ETIQUETA_ESTADO = {
   borrador: 'Borrador',
   enviado: 'Enviado · esperando respuesta',
@@ -23,6 +25,13 @@ const ETIQUETA_AREA = {
 }
 
 const AREAS_ORDEN = ['repuestos', 'lubricantes_insumos', 'servicios_externos', 'mano_obra']
+
+// Casos de políticas que se imprimen al pie (texto en politicas_presupuesto).
+const OPCIONES_CONDICIONES = [
+  { valor: 'sin_encargo', etiqueta: 'Sin encargo de repuestos' },
+  { valor: 'encargo', etiqueta: 'Repuestos por encargo (2 a 3 días hábiles)' },
+  { valor: 'importacion', etiqueta: 'Repuestos por importación (30 a 40 días hábiles)' },
+]
 
 function nombreCliente(cliente) {
   if (!cliente) return ''
@@ -48,6 +57,7 @@ function PresupuestoDetalle() {
   const [trabajo, setTrabajo] = useState(null)
   const [clienteSolicita, setClienteSolicita] = useState('')
   const [items, setItems] = useState([])
+  const [politicas, setPoliticas] = useState({})
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [actualizando, setActualizando] = useState(false)
@@ -58,7 +68,7 @@ function PresupuestoDetalle() {
     try {
       const { data: presupuestoData, error: errorPresupuesto } = await supabase
         .from('presupuestos_taller')
-        .select('id, correlativo, estado, creado_en, fecha_envio, fecha_respuesta, notas, trabajo_id')
+        .select('id, correlativo, estado, creado_en, fecha_envio, fecha_respuesta, notas, trabajo_id, condiciones')
         .eq('id', id)
         .maybeSingle()
 
@@ -72,12 +82,17 @@ function PresupuestoDetalle() {
       }
       setPresupuesto(presupuestoData)
 
-      const [{ data: trabajoData, error: errorTrabajo }, { data: inspeccionData }, { data: itemsData, error: errorItems }] =
+      const [
+        { data: trabajoData, error: errorTrabajo },
+        { data: inspeccionData },
+        { data: itemsData, error: errorItems },
+        { data: politicasData },
+      ] =
         await Promise.all([
           supabase
             .from('trabajos_taller')
             .select(
-              'numero_ot, clientes(nombre, apellido, razon_social, rut, telefono_norm), vehiculos(patente, marca, modelo, anio, color)'
+              'numero_ot, descuento_mano_obra_pct, clientes(nombre, apellido, razon_social, rut, telefono_norm), vehiculos(patente, marca, modelo, anio, color)'
             )
             .eq('id', presupuestoData.trabajo_id)
             .maybeSingle(),
@@ -87,6 +102,7 @@ function PresupuestoDetalle() {
             .select('id, area, codigo, detalle, cantidad, precio_unitario, total_linea')
             .eq('presupuesto_id', id)
             .order('creado_en'),
+          supabase.from('politicas_presupuesto').select('condicion, texto'),
         ])
 
       if (errorTrabajo) {
@@ -101,6 +117,7 @@ function PresupuestoDetalle() {
       setTrabajo(trabajoData)
       setClienteSolicita(inspeccionData?.cliente_solicita || '')
       setItems(itemsData || [])
+      setPoliticas(Object.fromEntries((politicasData || []).map((fila) => [fila.condicion, fila.texto])))
     } catch {
       setError('No se pudo conectar con el servidor. Revisa la conexión e intenta de nuevo.')
     } finally {
@@ -133,6 +150,22 @@ function PresupuestoDetalle() {
     }
   }
 
+  async function cambiarCondiciones(nuevas) {
+    const anteriores = presupuesto.condiciones
+    setPresupuesto((previo) => ({ ...previo, condiciones: nuevas }))
+    setError(null)
+    try {
+      const { error: errorUpdate } = await supabase.from('presupuestos_taller').update({ condiciones: nuevas }).eq('id', id)
+      if (errorUpdate) {
+        setError(errorUpdate.message)
+        setPresupuesto((previo) => ({ ...previo, condiciones: anteriores }))
+      }
+    } catch {
+      setError('No se pudo conectar con el servidor. Revisa la conexión e intenta de nuevo.')
+      setPresupuesto((previo) => ({ ...previo, condiciones: anteriores }))
+    }
+  }
+
   if (cargando) return <div className="p-6 text-slate-500">Cargando…</div>
   if (error && !presupuesto) return <div className="p-6 text-red-600">{error}</div>
   if (!presupuesto) return null
@@ -143,19 +176,22 @@ function PresupuestoDetalle() {
     acumulado[item.area].push(item)
     return acumulado
   }, {})
-  const total = items.reduce((acumulado, item) => acumulado + (item.total_linea || 0), 0)
+  const { descuento, total, totalBruto, porcentaje } = calcularDescuentoManoObra(items, trabajo?.descuento_mano_obra_pct)
   const neto = Math.round(total / 1.19)
   const iva = total - neto
+  const textoPoliticas = politicas[presupuesto.condiciones] || null
+  const tieneRepuestos = Boolean(itemsPorArea.repuestos?.length)
 
   const telefonoCliente = trabajo?.clientes?.telefono_norm
   const linkWhatsapp = telefonoCliente
     ? `https://wa.me/${telefonoCliente.replace('+', '')}?text=${encodeURIComponent(
         [
-          `Hola ${nombreCliente(trabajo?.clientes)}, te compartimos el presupuesto ${presupuesto.correlativo} para tu ${trabajo?.vehiculos?.marca} ${trabajo?.vehiculos?.modelo} (${trabajo?.vehiculos?.patente}):`,
+          `Hola ${nombreCliente(trabajo?.clientes)}, te compartimos el presupuesto ${presupuesto.correlativo} para tu ${trabajo?.vehiculos?.marca} ${trabajo?.vehiculos?.modelo} (${formatearPatente(trabajo?.vehiculos?.patente)}):`,
           '',
           ...items.map((item) => `- ${item.detalle}: $${formatoNumero(item.total_linea)}`),
           '',
-          `Total: $${formatoNumero(total)}`,
+          ...(descuento > 0 ? [`Descuento en mano de obra (${textoPorcentaje(porcentaje)}%): -${formatoNumero(descuento)}`] : []),
+          `Total: ${formatoNumero(total)}`,
           '',
           'Quedamos atentos a tus consultas.',
         ].join('\n')
@@ -248,6 +284,30 @@ function PresupuestoDetalle() {
         )}
       </div>
 
+      {presupuesto.estado !== 'anulado' && (
+        <div className="mb-3 max-w-3xl print:hidden">
+          <label className="block text-sm">
+            <span className="font-medium text-slate-700">Políticas del presupuesto</span>
+            <select
+              value={presupuesto.condiciones}
+              onChange={(evento) => cambiarCondiciones(evento.target.value)}
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 sm:w-96"
+            >
+              {OPCIONES_CONDICIONES.map((opcion) => (
+                <option key={opcion.valor} value={opcion.valor}>
+                  {opcion.etiqueta}
+                </option>
+              ))}
+            </select>
+          </label>
+          {tieneRepuestos && presupuesto.condiciones === 'sin_encargo' && (
+            <p className="mt-1 text-xs text-amber-700">
+              Este presupuesto incluye repuestos: si hay que encargarlos, cambia las políticas para que salga el plazo y el abono.
+            </p>
+          )}
+        </div>
+      )}
+
       {error && <p className="mb-4 text-sm text-red-600 print:hidden">{error}</p>}
 
       {(presupuesto.fecha_envio || presupuesto.fecha_respuesta) && (
@@ -265,7 +325,7 @@ function PresupuestoDetalle() {
         />
 
         <div className="mb-3 grid grid-cols-4 gap-x-4 gap-y-2 border-b border-slate-300 pb-3">
-          <CampoDato etiqueta="Patente" valor={trabajo?.vehiculos?.patente} />
+          <CampoDato etiqueta="Patente" valor={formatearPatente(trabajo?.vehiculos?.patente)} />
           <CampoDato etiqueta="R.U.T." valor={trabajo?.clientes?.rut} />
           <CampoDato etiqueta="Color" valor={trabajo?.vehiculos?.color} />
           <CampoDato etiqueta="Año" valor={trabajo?.vehiculos?.anio} />
@@ -318,16 +378,28 @@ function PresupuestoDetalle() {
         {items.length === 0 && <p className="mb-3 text-slate-400">Sin ítems vinculados a este presupuesto.</p>}
 
         <div className="mt-2 print:mt-auto">
-          <p className="mb-2 text-xs italic text-slate-600">
-            Este presupuesto tiene una vigencia de 30 días a partir de la fecha de emisión.
-          </p>
           <BloqueTotales
             filas={[
+              ...(descuento > 0
+                ? [
+                    { etiqueta: 'SUBTOTAL', valor: formatoNumero(totalBruto) },
+                    { etiqueta: `Desc. M.O. (${textoPorcentaje(porcentaje)}%)`, valor: `-${formatoNumero(descuento)}` },
+                  ]
+                : []),
               { etiqueta: 'NETO', valor: formatoNumero(neto) },
               { etiqueta: 'I.V.A.', valor: formatoNumero(iva) },
               { etiqueta: 'TOTAL', valor: formatoNumero(total), destacado: true },
             ]}
           />
+          {textoPoliticas && (
+            <div className="mt-3 border-t border-slate-300 pt-2 text-[10px] leading-snug text-slate-700">
+              {textoPoliticas.split('\n').map((linea, indice) => (
+                <p key={indice} className={indice === 0 ? 'font-bold' : ''}>
+                  {linea}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
