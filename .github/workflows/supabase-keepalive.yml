@@ -1,0 +1,32 @@
+# Mantiene activo el proyecto Supabase de la demo.
+# El plan gratuito pausa el proyecto tras ~7 días sin actividad en la base de
+# datos; esta consulta liviana cada 3 días cuenta como actividad. Con RLS la
+# respuesta llega vacía ([]), pero la consulta igual pasa por Postgres.
+# Secrets requeridos: SUPABASE_URL y SUPABASE_ANON_KEY (la misma anon key
+# pública que usa el frontend).
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar la base de datos
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          codigo=$(curl -s -o respuesta.txt -w '%{http_code}' --max-time 30 \
+            "$SUPABASE_URL/rest/v1/empresas?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "HTTP $codigo"
+          cat respuesta.txt
+          if [ "$codigo" != "200" ]; then
+            echo "::error::Supabase no respondió 200 (¿proyecto pausado?)"
+            exit 1
+          fi
