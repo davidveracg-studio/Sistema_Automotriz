@@ -1,0 +1,43 @@
+# Publica el frontend en Vercel (proyecto vpai-servicio-automotriz, equipo VPAI)
+# en cada push a main.
+# El proyecto de Vercel no usa la integración nativa con GitHub: el repo vive en
+# otra cuenta de GitHub que la que tiene conectada el usuario de Vercel. Por eso
+# la publicación pasa por la CLI, autenticada con un token.
+# Secret requerido: VERCEL_TOKEN (Vercel → Account Settings → Tokens, scope VPAI).
+# Las variables VITE_SUPABASE_* se toman del propio proyecto de Vercel (vercel pull).
+name: Deploy a Vercel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vercel-produccion
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: team_aV3xg5A8qWYdsRmGABTqLHiJ
+  VERCEL_PROJECT_ID: prj_r0KjqA4cM31zEiGOyjyJstJA7YLk
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Instalar la CLI de Vercel
+        run: npm install --global vercel@latest
+
+      - name: Traer la configuración y variables de producción
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Compilar
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Publicar en producción
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
