@@ -82,8 +82,11 @@ Deno.serve(async (req) => {
       .eq('empresa_id', trabajo.empresa_id)
       .maybeSingle()
 
-    if (errorConfig || !config) {
-      return respuestaJson({ error: { mensaje: 'Esta empresa no tiene configurada una lista de ClickUp.' } }, 422)
+    if (errorConfig) return respuestaJson({ error: { mensaje: errorConfig.message } }, 500)
+    if (!config) {
+      // Modo local (sin ClickUp): no hay tarjeta que crear. El estado inicial
+      // de la OT lo pone el trigger de 0067.
+      return respuestaJson({ data: { sinConfiguracion: true } })
     }
 
     const errores: { operacion: string; mensaje: string }[] = []

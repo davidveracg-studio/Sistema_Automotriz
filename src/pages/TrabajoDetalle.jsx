@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { invocarFuncion } from '../lib/invocarFuncion'
+import { useClickUpConectado } from '../lib/clickup'
 import FirmaCanvas from '../components/FirmaCanvas'
 
 import DescuentoManoObra from '../components/DescuentoManoObra'
@@ -324,6 +325,8 @@ function TrabajoDetalle() {
   const [cerrando, setCerrando] = useState(false)
 
   const [sincronizando, setSincronizando] = useState(false)
+  // Sin lista de ClickUp (modo local) no hay tarjeta que sincronizar.
+  const clickupConectado = useClickUpConectado()
   const [resultadoSync, setResultadoSync] = useState(null)
   const [errorSync, setErrorSync] = useState(null)
 
@@ -900,19 +903,21 @@ function TrabajoDetalle() {
           >
             {trabajo.tipo_ingreso === 'diagnostico' ? 'RADAR' : 'Revisión del asesor'}
           </Link>
-          <div>
-            <button
-              type="button"
-              onClick={sincronizarConClickUp}
-              disabled={sincronizando}
-              className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-            >
-              {sincronizando ? 'Sincronizando…' : 'Sincronizar con ClickUp'}
-            </button>
-            {trabajo.clickup_task_id && (
-              <p className="mt-1 text-xs text-slate-400">Tarjeta ya creada en ClickUp</p>
-            )}
-          </div>
+          {clickupConectado && (
+            <div>
+              <button
+                type="button"
+                onClick={sincronizarConClickUp}
+                disabled={sincronizando}
+                className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              >
+                {sincronizando ? 'Sincronizando…' : 'Sincronizar con ClickUp'}
+              </button>
+              {trabajo.clickup_task_id && (
+                <p className="mt-1 text-xs text-slate-400">Tarjeta ya creada en ClickUp</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

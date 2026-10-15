@@ -840,8 +840,8 @@ function NuevoIngreso() {
                 ))}
               </select>
               <p className="mt-1 text-xs text-slate-400">
-                Marca esto si el cliente había reservado hora en Agenda. Define el estado con el que nace la tarjeta
-                en ClickUp.
+                Marca esto si el cliente había reservado hora en Agenda. Define el estado con el que nace la OT en el
+                taller.
               </p>
             </div>
           )}

@@ -18,10 +18,16 @@
 //                  -el mismo campo que ya se lee en sentido ClickUp -> CRM,
 //                  ver clickup-webhook-.
 //
+// Sin ClickUp (tarea sin tarjeta, o empresa en modo local) todo queda solo en
+// la base: completar usa el estado "hecho" del taller (clickup_estados) y la
+// observación avisa al asesor acá mismo -con ClickUp ese aviso lo da el
+// webhook al recibir el cambio-.
+//
 // Quién llama se identifica con su sesión; todo se acota a su empresa.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { respuestaJson, respuestaPreflight } from '../_shared/cors.ts'
 import { ErrorClickUp, actualizarTarea, encontrarPorCorreo, fijarCampoPersonalizado, obtenerMiembrosEquipo, obtenerTarea, resolverCampos } from '../_shared/clickup.ts'
+import { avisarObservacionTecnico } from '../_shared/taller.ts'
 
 const ROLES_QUE_ASIGNAN = ['admin', 'socia', 'jefe_taller']
 const ROLES_QUE_EJECUTAN_CUALQUIERA = ['admin', 'socia', 'jefe_taller']
@@ -60,7 +66,7 @@ Deno.serve(async (req) => {
 
     const { data: tarea } = await admin
       .from('tareas_taller')
-      .select('id, descripcion, tecnico_id, clickup_task_id, trabajo_id, observaciones_tecnico, trabajos_taller!inner(id, empresa_id, numero_ot, estado, vehiculos(patente))')
+      .select('id, descripcion, tecnico_id, clickup_task_id, trabajo_id, observaciones_tecnico, trabajos_taller!inner(id, empresa_id, numero_ot, estado, asesor_id, vehiculos(patente))')
       .eq('id', cuerpo.tarea_taller_id)
       .eq('trabajos_taller.empresa_id', empresaId)
       .maybeSingle()
@@ -153,15 +159,15 @@ Deno.serve(async (req) => {
         return respuestaJson({ error: { mensaje: 'Escribe una observación antes de marcar la tarea como ejecutada.' } }, 422)
       }
 
-      let nombreEstado: string | null = null
+      // Estado "hecho" del taller: el de ClickUp, o el local (0067) sin ClickUp.
+      const { data: estadosTerminales } = await admin
+        .from('clickup_estados')
+        .select('nombre, tipo, orden')
+        .eq('empresa_id', empresaId)
+        .in('tipo', TIPOS_TERMINALES)
+        .order('orden')
+      const nombreEstado: string | null = estadosTerminales?.[0]?.nombre ?? null
       if (tarea.clickup_task_id) {
-        const { data: estados } = await admin
-          .from('clickup_estados')
-          .select('nombre, tipo, orden')
-          .eq('empresa_id', empresaId)
-          .in('tipo', TIPOS_TERMINALES)
-          .order('orden')
-        nombreEstado = estados?.[0]?.nombre ?? null
         if (!nombreEstado) {
           return respuestaJson({ error: { mensaje: 'No hay un estado de tipo "hecho" en la lista de ClickUp de esta empresa. Sincroniza los estados desde el Kanban primero.' } }, 422)
         }
@@ -200,6 +206,17 @@ Deno.serve(async (req) => {
           await registrarError('guardar_observacion_clickup', error)
           // El CRM ya quedó guardado; ClickUp se reintenta a mano si hace falta.
         }
+      } else if (texto && texto !== tarea.observaciones_tecnico) {
+        // Sin tarjeta no hay webhook que avise: el asesor se entera acá.
+        await avisarObservacionTecnico(admin, {
+          empresaId,
+          trabajoId: trabajo.id,
+          numeroOt: trabajo.numero_ot,
+          asesorId: trabajo.asesor_id ?? null,
+          patente: vehiculo?.patente,
+          observacion: texto,
+          registrarError: async (_e, _t, operacion, error) => registrarError(operacion, error),
+        })
       }
 
       return respuestaJson({ data: { observacion: texto } })
