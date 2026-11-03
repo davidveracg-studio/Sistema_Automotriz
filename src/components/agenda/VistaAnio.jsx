@@ -48,7 +48,7 @@ function VistaAnio({ fecha, citas, tiposIsla, horarios, corteMediodia, personal,
     <div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {meses.map((mes) => (
-          <section key={mes.clave} aria-label={mes.nombre} className="rounded-lg border border-slate-200 bg-white p-2.5">
+          <section key={mes.clave} aria-label={mes.nombre} className="rounded-2xl bg-white p-2.5 shadow-mm print:shadow-none">
             <button
               type="button"
               onClick={(evento) => onElegirMes(mes.clave, evento)}

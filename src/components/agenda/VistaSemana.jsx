@@ -119,7 +119,7 @@ function VistaSemana({ fecha, citas, tiposIsla, horarios, corteMediodia, persona
           <p className="mb-2 text-xs text-slate-500">
             Puestos libres sobre el total de todas las islas en cada bloque de 30 minutos. Pincha un horario para ver ese día en detalle.
           </p>
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr>

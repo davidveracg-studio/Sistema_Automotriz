@@ -272,10 +272,10 @@ function Mensajes() {
 
   return (
     <div className="flex h-screen flex-col p-6">
-      <h1 className="mb-4 text-xl font-semibold text-slate-900">Mensajes de WhatsApp</h1>
+      <h1 className="mb-4 text-2xl font-bold text-mm-link dark:text-white">Mensajes de WhatsApp</h1>
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <div className="flex flex-1 overflow-hidden rounded border border-slate-200 bg-white">
+      <div className="flex flex-1 overflow-hidden rounded-2xl bg-white shadow-mm print:shadow-none">
         <div className="flex w-80 shrink-0 flex-col border-r border-slate-200">
           <div className="flex flex-wrap gap-1 border-b border-slate-200 p-2">
             {FILTROS_ESTADO.map((filtro) => (
@@ -314,7 +314,7 @@ function Mensajes() {
                     <p className="truncate text-sm font-medium text-slate-900">
                       {nombreCliente(contacto.clientes) || contacto.nombre_whatsapp || contacto.wa_id}
                     </p>
-                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${COLOR_ESTADO[contacto.estado] || ''}`}>
+                    <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${COLOR_ESTADO[contacto.estado] || ''}`}>
                       {ETIQUETA_ESTADO[contacto.estado] || contacto.estado}
                     </span>
                   </div>
@@ -351,14 +351,14 @@ function Mensajes() {
                   <button
                     type="button"
                     onClick={() => cambiarBotPausado(!seleccionado.bot_pausado)}
-                    className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                    className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
                   >
                     {seleccionado.bot_pausado ? 'Reactivar bot' : 'Tomar la conversación'}
                   </button>
                   <select
                     value={seleccionado.estado}
                     onChange={(evento) => cambiarEstado(evento.target.value)}
-                    className="rounded border border-slate-300 px-2 py-1 text-xs"
+                    className="rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                   >
                     {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
                       <option key={valor} value={valor}>
@@ -377,7 +377,7 @@ function Mensajes() {
                       <select
                         value={seleccionado.vehiculo_id || ''}
                         onChange={(evento) => vincularVehiculo(evento.target.value)}
-                        className="rounded border border-slate-300 px-2 py-1 text-xs"
+                        className="rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                       >
                         <option value="">Sin vehículo</option>
                         {vehiculosCliente.map((vehiculo) => (
@@ -395,12 +395,12 @@ function Mensajes() {
                       value={terminoCliente}
                       onChange={(evento) => setTerminoCliente(evento.target.value)}
                       placeholder="Buscar cliente por nombre o teléfono para vincular…"
-                      className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs"
+                      className="flex-1 rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                     <button
                       type="submit"
                       disabled={buscandoCliente}
-                      className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100"
+                      className="rounded-lg border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100"
                     >
                       Buscar
                     </button>
@@ -411,7 +411,7 @@ function Mensajes() {
                             key={cliente.id}
                             type="button"
                             onClick={() => vincularCliente(cliente)}
-                            className="block w-full rounded border border-slate-200 px-2 py-1 text-left text-xs hover:bg-slate-100"
+                            className="block w-full rounded-xl border border-slate-200 px-2 py-1 text-left text-xs hover:bg-slate-100"
                           >
                             {nombreCliente(cliente)} {cliente.telefono ? `· ${cliente.telefono}` : ''}
                           </button>
@@ -448,12 +448,12 @@ function Mensajes() {
                   value={texto}
                   onChange={(evento) => setTexto(evento.target.value)}
                   placeholder="Escribe una respuesta…"
-                  className="flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <button
                   type="submit"
                   disabled={enviando || !texto.trim()}
-                  className="rounded bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-50"
+                  className="rounded-lg bg-brand-accent px-4 py-2 text-sm text-white disabled:opacity-50"
                 >
                   Enviar
                 </button>

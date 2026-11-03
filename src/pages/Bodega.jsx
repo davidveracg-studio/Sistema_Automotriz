@@ -61,19 +61,19 @@ function Bodega() {
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Bodega</h1>
+        <h1 className="text-2xl font-bold text-mm-link dark:text-white">Bodega</h1>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setMostrarProveedores(true)}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Proveedores
           </button>
           <button
             type="button"
             onClick={() => setMostrarNuevoProducto(true)}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep"
           >
             Nuevo producto
           </button>
@@ -82,9 +82,9 @@ function Bodega() {
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-500">
+          <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
             <tr>
               <th className="px-3 py-2">Código</th>
               <th className="px-3 py-2">Nombre</th>
@@ -246,7 +246,7 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
             <input
               value={codigo}
               onChange={(evento) => setCodigo(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -254,7 +254,7 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
             <input
               value={categoria}
               onChange={(evento) => setCategoria(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -265,7 +265,7 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
             required
             value={nombre}
             onChange={(evento) => setNombre(evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -275,7 +275,7 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
             <input
               value={unidadMedida}
               onChange={(evento) => setUnidadMedida(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -285,7 +285,7 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
               min="0"
               value={costoInicial}
               onChange={(evento) => setCostoInicial(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -298,7 +298,7 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
               min="0"
               value={stockInicial}
               onChange={(evento) => setStockInicial(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -308,7 +308,7 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
               min="0"
               value={stockMinimo}
               onChange={(evento) => setStockMinimo(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -319,14 +319,14 @@ function FormularioProducto({ empresaId, onCancelar, onCreado }) {
           <button
             type="button"
             onClick={onCancelar}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={guardando}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {guardando ? 'Guardando…' : 'Guardar'}
           </button>
@@ -404,7 +404,7 @@ function FormularioMovimiento({ empresaId, usuarioId, producto, proveedores, onC
           <select
             value={motivo}
             onChange={(evento) => setMotivo(evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           >
             {Object.entries(ETIQUETA_MOTIVO).map(([valor, etiqueta]) => (
               <option key={valor} value={valor}>
@@ -420,7 +420,7 @@ function FormularioMovimiento({ empresaId, usuarioId, producto, proveedores, onC
             <select
               value={proveedorId}
               onChange={(evento) => setProveedorId(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">Sin especificar</option>
               {proveedores.map((p) => (
@@ -442,7 +442,7 @@ function FormularioMovimiento({ empresaId, usuarioId, producto, proveedores, onC
               step="0.01"
               value={cantidad}
               onChange={(evento) => setCantidad(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -452,7 +452,7 @@ function FormularioMovimiento({ empresaId, usuarioId, producto, proveedores, onC
               min="0"
               value={costoUnitario}
               onChange={(evento) => setCostoUnitario(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -463,7 +463,7 @@ function FormularioMovimiento({ empresaId, usuarioId, producto, proveedores, onC
             value={referencia}
             onChange={(evento) => setReferencia(evento.target.value)}
             placeholder="N° de factura, motivo del ajuste…"
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -473,14 +473,14 @@ function FormularioMovimiento({ empresaId, usuarioId, producto, proveedores, onC
           <button
             type="button"
             onClick={onCancelar}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={guardando}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {guardando ? 'Guardando…' : 'Registrar'}
           </button>
@@ -541,7 +541,7 @@ function PanelProveedores({ empresaId, proveedores, onCerrar, onCambio }) {
           </button>
         </div>
 
-        <ul className="mb-4 divide-y divide-slate-100 rounded border border-slate-200">
+        <ul className="mb-4 divide-y divide-slate-100 rounded-xl border border-slate-200">
           {proveedores.map((p) => (
             <li key={p.id} className="px-3 py-2 text-sm">
               <p className="text-slate-800">{p.nombre}</p>
@@ -567,26 +567,26 @@ function PanelProveedores({ empresaId, proveedores, onCerrar, onCambio }) {
                 placeholder="Nombre"
                 value={nombre}
                 onChange={(evento) => setNombre(evento.target.value)}
-                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
               <input
                 placeholder="Contacto"
                 value={contacto}
                 onChange={(evento) => setContacto(evento.target.value)}
-                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
               <input
                 placeholder="Teléfono"
                 value={telefono}
                 onChange={(evento) => setTelefono(evento.target.value)}
-                className="col-span-2 rounded border border-slate-300 px-3 py-2 text-sm"
+                className="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
             {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
             <button
               type="submit"
               disabled={guardando}
-              className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               {guardando ? 'Guardando…' : 'Crear proveedor'}
             </button>

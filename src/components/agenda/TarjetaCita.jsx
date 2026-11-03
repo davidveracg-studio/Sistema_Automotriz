@@ -125,10 +125,10 @@ function TarjetaCita({ cita, nombreIsla, expandida, onAlternar, onCambiarEstado,
             </Dato>
           )}
           <div className="flex flex-wrap items-center gap-1 pt-0.5">
-            {cita.origen === 'bot_whatsapp' && <span className="rounded bg-white/60 px-1.5 py-0.5 text-[10px] font-medium">por WhatsApp</span>}
-            {cita.clickup_task_id && <span className="rounded bg-white/60 px-1.5 py-0.5 text-[10px] font-medium">en ClickUp</span>}
+            {cita.origen === 'bot_whatsapp' && <span className="rounded-full bg-white/60 px-1.5 py-0.5 text-[10px] font-medium">por WhatsApp</span>}
+            {cita.clickup_task_id && <span className="rounded-full bg-white/60 px-1.5 py-0.5 text-[10px] font-medium">en ClickUp</span>}
             {ordenTrabajo?.numero_ot && cita.trabajo_id && (
-              <Link to={`/trabajos/${cita.trabajo_id}`} className="rounded bg-white/60 px-1.5 py-0.5 text-[10px] font-medium underline">
+              <Link to={`/trabajos/${cita.trabajo_id}`} className="rounded-full bg-white/60 px-1.5 py-0.5 text-[10px] font-medium underline">
                 OT {ordenTrabajo.numero_ot}
               </Link>
             )}
@@ -143,7 +143,7 @@ function TarjetaCita({ cita, nombreIsla, expandida, onAlternar, onCambiarEstado,
             </button>
           )}
           {reagendando && (
-            <form onSubmit={guardarReagendamiento} className="space-y-1.5 rounded border border-slate-200 bg-white p-1.5 text-slate-800">
+            <form onSubmit={guardarReagendamiento} className="space-y-1.5 rounded-2xl bg-white p-1.5 text-slate-800 shadow-mm print:shadow-none">
               <p className="text-[10px] font-semibold uppercase tracking-wide">Nuevo día y hora</p>
               <div className="flex flex-wrap gap-1">
                 <input
@@ -153,7 +153,7 @@ function TarjetaCita({ cita, nombreIsla, expandida, onAlternar, onCambiarEstado,
                   value={nuevaFecha}
                   onChange={(evento) => setNuevaFecha(evento.target.value)}
                   aria-label="Nuevo día"
-                  className="min-w-0 flex-1 rounded border border-slate-300 px-1 py-0.5 text-[11px]"
+                  className="min-w-0 flex-1 rounded-lg border border-slate-300 px-1 py-0.5 text-[11px] focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <input
                   type="time"
@@ -162,7 +162,7 @@ function TarjetaCita({ cita, nombreIsla, expandida, onAlternar, onCambiarEstado,
                   value={nuevaHora}
                   onChange={(evento) => setNuevaHora(evento.target.value)}
                   aria-label="Nueva hora"
-                  className="w-24 rounded border border-slate-300 px-1 py-0.5 text-[11px]"
+                  className="w-24 rounded-lg border border-slate-300 px-1 py-0.5 text-[11px] focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               {motivoRechazo && (
@@ -174,14 +174,14 @@ function TarjetaCita({ cita, nombreIsla, expandida, onAlternar, onCambiarEstado,
                 <button
                   type="submit"
                   disabled={guardando}
-                  className="rounded bg-slate-900 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                  className="rounded-lg bg-brand-accent px-2 py-0.5 text-[11px] font-medium text-white hover:bg-deep disabled:opacity-50"
                 >
                   {guardando ? 'Guardando…' : 'Guardar'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setReagendando(false)}
-                  className="rounded border border-slate-300 px-2 py-0.5 text-[11px] text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-slate-300 px-2 py-0.5 text-[11px] text-slate-700 hover:bg-slate-50"
                 >
                   Cancelar
                 </button>
@@ -194,7 +194,7 @@ function TarjetaCita({ cita, nombreIsla, expandida, onAlternar, onCambiarEstado,
               <select
                 value={cita.estado}
                 onChange={(evento) => onCambiarEstado(cita.id, evento.target.value)}
-                className="mt-0.5 block w-full rounded border border-slate-300 bg-white px-1 py-0.5 text-[11px] text-slate-800"
+                className="mt-0.5 block w-full rounded-lg border border-slate-300 bg-white px-1 py-0.5 text-[11px] text-slate-800 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
                   <option key={valor} value={valor}>

@@ -56,7 +56,7 @@ function Trabajos() {
 
   return (
     <div className="p-6">
-      <h1 className="mb-4 text-xl font-semibold text-slate-900">Trabajos</h1>
+      <h1 className="mb-4 text-2xl font-bold text-mm-link dark:text-white">Trabajos</h1>
 
       <form onSubmit={buscar} className="mb-4 flex max-w-md gap-2">
         <input
@@ -64,12 +64,12 @@ function Trabajos() {
           value={busqueda}
           onChange={(evento) => setBusqueda(evento.target.value)}
           placeholder="N° de OT o patente"
-          className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         />
         <button
           type="submit"
           disabled={buscando}
-          className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
         >
           {buscando ? 'Buscando…' : 'Buscar'}
         </button>
@@ -77,9 +77,9 @@ function Trabajos() {
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-500">
+          <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
             <tr>
               <th className="px-3 py-2">OT</th>
               <th className="px-3 py-2">Vehículo</th>

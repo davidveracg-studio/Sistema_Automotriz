@@ -617,28 +617,28 @@ function NuevoIngreso() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep"
             >
               Imprimir / guardar como PDF
             </button>
             <Link
               to={`/trabajos/${otCreada.id}`}
               state={fotosInspeccion.length > 0 ? { analizar: true } : undefined}
-              className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
             >
               Ver OT
             </Link>
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
             >
               Registrar otro ingreso
             </button>
           </div>
         </div>
 
-        <div className="max-w-3xl rounded border border-slate-200 bg-white p-6 text-sm text-slate-900 print:flex print:min-h-[250mm] print:flex-col print:border-0 print:p-0">
+        <div className="max-w-3xl rounded-2xl bg-white p-6 text-sm text-slate-900 print:flex print:min-h-[250mm] print:flex-col print:border-0 print:p-0 shadow-mm print:shadow-none">
           <EncabezadoDocumento
             empresa={empresa}
             lineas={[`ORDEN DE TRABAJO N° ${otCreada.numero_ot}`]}
@@ -709,7 +709,7 @@ function NuevoIngreso() {
 
   return (
     <div className="p-6">
-      <h1 className="mb-4 text-xl font-semibold text-slate-900">Nuevo ingreso</h1>
+      <h1 className="mb-4 text-2xl font-bold text-mm-link dark:text-white">Nuevo ingreso</h1>
 
       {/* Paso 1: patente */}
       <p className="mb-1 text-sm font-semibold text-slate-700">1 · Vehículo</p>
@@ -723,12 +723,12 @@ function NuevoIngreso() {
           value={patenteBusqueda}
           onChange={(evento) => setPatenteBusqueda(formatearPatenteEntrada(evento.target.value))}
           placeholder="Patente (GH TY 34)"
-          className="w-full rounded border border-slate-300 px-3 py-2 text-sm uppercase"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm uppercase focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         />
         <button
           type="submit"
           disabled={buscando}
-          className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
         >
           {buscando ? 'Buscando…' : 'Buscar'}
         </button>
@@ -737,7 +737,7 @@ function NuevoIngreso() {
       {errorBusqueda && <p className="mb-4 text-sm text-red-600">{errorBusqueda}</p>}
 
       {busquedaHecha && vehiculo && (
-        <div className="mb-6 max-w-md rounded border border-slate-200 bg-white p-4">
+        <div className="mb-6 max-w-md rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <p className="font-medium text-slate-800">
             {formatearPatente(vehiculo.patente)} — {vehiculo.marca} {vehiculo.modelo} {vehiculo.anio || ''}
           </p>
@@ -777,7 +777,7 @@ function NuevoIngreso() {
                 required
                 value={marcaNueva}
                 onChange={(evento) => setMarcaNueva(evento.target.value)}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
             <div>
@@ -786,7 +786,7 @@ function NuevoIngreso() {
                 required
                 value={modeloNuevo}
                 onChange={(evento) => setModeloNuevo(evento.target.value)}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
           </div>
@@ -796,7 +796,7 @@ function NuevoIngreso() {
               type="number"
               value={anioNuevo}
               onChange={(evento) => setAnioNuevo(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -804,7 +804,7 @@ function NuevoIngreso() {
 
       {/* Cliente: solo se pide buscar/crear si el vehículo es nuevo o no tiene cliente vinculado */}
       {busquedaHecha && !clienteId && (creandoVehiculoNuevo || clientesDelVehiculo.length === 0) && (
-        <div className="mb-6 max-w-md rounded border border-slate-200 bg-white p-4">
+        <div className="mb-6 max-w-md rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <p className="mb-2 font-medium text-slate-800">2 · Cliente — ¿quién trae el vehículo?</p>
 
           <form onSubmit={buscarCliente} className="mb-3 flex gap-2">
@@ -813,12 +813,12 @@ function NuevoIngreso() {
               value={terminoCliente}
               onChange={(evento) => setTerminoCliente(evento.target.value)}
               placeholder="Buscar cliente por nombre, RUT o teléfono"
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
             <button
               type="submit"
               disabled={buscandoCliente}
-              className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
             >
               Buscar
             </button>
@@ -871,7 +871,7 @@ function NuevoIngreso() {
                     value={razonSocialNuevo}
                     onChange={(evento) => setRazonSocialNuevo(evento.target.value)}
                     onBlur={revisarDuplicadosClienteNuevo}
-                    className="col-span-2 rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                   />
                 ) : (
                   <>
@@ -880,14 +880,14 @@ function NuevoIngreso() {
                       value={nombreNuevo}
                       onChange={(evento) => setNombreNuevo(evento.target.value)}
                       onBlur={revisarDuplicadosClienteNuevo}
-                      className="rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                     <input
                       placeholder="Apellido"
                       value={apellidoNuevo}
                       onChange={(evento) => setApellidoNuevo(evento.target.value)}
                       onBlur={revisarDuplicadosClienteNuevo}
-                      className="rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                   </>
                 )}
@@ -896,27 +896,27 @@ function NuevoIngreso() {
                   value={telefonoNuevo}
                   onChange={(evento) => setTelefonoNuevo(evento.target.value)}
                   onBlur={revisarDuplicadosClienteNuevo}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <input
                   placeholder="RUT"
                   value={rutNuevo}
                   onChange={(evento) => setRutNuevo(evento.target.value)}
                   onBlur={revisarDuplicadosClienteNuevo}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <input
                   type="email"
                   placeholder="Correo"
                   value={emailNuevo}
                   onChange={(evento) => setEmailNuevo(evento.target.value)}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <input
                   placeholder="Dirección"
                   value={direccionNuevo}
                   onChange={(evento) => setDireccionNuevo(evento.target.value)}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               {avisosDuplicado.length > 0 && (
@@ -929,7 +929,7 @@ function NuevoIngreso() {
               <button
                 type="button"
                 onClick={usarClienteNuevo}
-                className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep"
               >
                 Continuar con este cliente
               </button>
@@ -939,7 +939,7 @@ function NuevoIngreso() {
       )}
 
       {clienteId && (vehiculo || (marcaNueva && modeloNuevo)) && (
-        <form onSubmit={manejarEnvioFinal} className="max-w-2xl rounded border border-slate-200 bg-white p-4">
+        <form onSubmit={manejarEnvioFinal} className="max-w-2xl rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <p className="mb-4 rounded bg-slate-50 px-3 py-2 text-sm text-slate-600">
             Ingresando a <span className="font-medium">{nombreVisible(clienteSeleccionado)}</span>
             {clienteId === CLIENTE_NUEVO && <span className="ml-1 text-xs text-amber-700">(cliente nuevo: se crea al registrar)</span>}
@@ -951,7 +951,7 @@ function NuevoIngreso() {
           </p>
           <p className="mb-3 text-sm font-semibold text-slate-700">3 · Motivo del ingreso, evidencias y firma</p>
 
-          <div className="mb-4 rounded border border-slate-200 p-3">
+          <div className="mb-4 rounded-xl border border-slate-200 p-3">
             <p className="mb-2 text-sm font-medium text-slate-700">
               Datos del vehículo para la Orden de Trabajo {vehiculo && '(completa lo que falte)'}
             </p>
@@ -961,7 +961,7 @@ function NuevoIngreso() {
                 <input
                   value={colorVehiculo}
                   onChange={(evento) => setColorVehiculo(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               <div>
@@ -969,7 +969,7 @@ function NuevoIngreso() {
                 <input
                   value={vinVehiculo}
                   onChange={(evento) => setVinVehiculo(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               <div>
@@ -978,7 +978,7 @@ function NuevoIngreso() {
                   type="number"
                   value={puertasVehiculo}
                   onChange={(evento) => setPuertasVehiculo(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               <div>
@@ -986,7 +986,7 @@ function NuevoIngreso() {
                 <input
                   value={aseguradoraVehiculo}
                   onChange={(evento) => setAseguradoraVehiculo(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               <div>
@@ -994,7 +994,7 @@ function NuevoIngreso() {
                 <select
                   value={tipoCarroceria}
                   onChange={(evento) => setTipoCarroceria(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 >
                   <option value="sedan">Sedán</option>
                   <option value="hatchback">Hatchback</option>
@@ -1008,7 +1008,7 @@ function NuevoIngreso() {
                 <select
                   value={tipoCombustible}
                   onChange={(evento) => setTipoCombustible(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 >
                   <option value="bencina">Bencina</option>
                   <option value="diesel">Diésel</option>
@@ -1017,7 +1017,7 @@ function NuevoIngreso() {
             </div>
           </div>
 
-          <div className="mb-4 rounded border border-slate-200 p-3">
+          <div className="mb-4 rounded-xl border border-slate-200 p-3">
             <p className="mb-2 text-sm font-medium text-slate-700">Diagrama de daños/detalles al ingreso</p>
             <DiagramaVehiculo tipo={tipoCarroceria} marcas={diagramaDanos} onCambio={cambiarDiagrama} fotosPorId={fotosPorId} />
           </div>
@@ -1049,7 +1049,7 @@ function NuevoIngreso() {
               <select
                 value={citaId}
                 onChange={(evento) => setCitaId(evento.target.value)}
-                className="w-full max-w-xs rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 <option value="">Sin cita, ingreso directo</option>
                 {citasAbiertas.map((c) => (
@@ -1074,7 +1074,7 @@ function NuevoIngreso() {
               <select
                 value={trabajoOriginalId}
                 onChange={(evento) => setTrabajoOriginalId(evento.target.value)}
-                className="w-full max-w-xs rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 <option value="">No es un retrabajo</option>
                 {trabajosAnteriores.map((t) => (
@@ -1097,7 +1097,7 @@ function NuevoIngreso() {
                 type="number"
                 value={kilometraje}
                 onChange={(evento) => setKilometraje(evento.target.value)}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
             <div>
@@ -1105,7 +1105,7 @@ function NuevoIngreso() {
               <select
                 value={nivelCombustible}
                 onChange={(evento) => setNivelCombustible(evento.target.value)}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 <option value="vacio">Vacío</option>
                 <option value="1/4">1/4</option>
@@ -1123,7 +1123,7 @@ function NuevoIngreso() {
               onChange={(evento) => setClienteSolicita(evento.target.value)}
               rows={3}
               placeholder="Lo que el cliente pide revisar o reparar, tal como lo dice"
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
 
@@ -1133,7 +1133,7 @@ function NuevoIngreso() {
               value={danosVisibles}
               onChange={(evento) => setDanosVisibles(evento.target.value)}
               rows={2}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
 
@@ -1143,7 +1143,7 @@ function NuevoIngreso() {
               value={accesorios}
               onChange={(evento) => setAccesorios(evento.target.value)}
               rows={2}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
 
@@ -1153,12 +1153,12 @@ function NuevoIngreso() {
               value={observaciones}
               onChange={(evento) => setObservaciones(evento.target.value)}
               rows={2}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
 
           {tipoIngreso === 'diagnostico' && (
-            <div className="mb-4 rounded border border-slate-200 p-3">
+            <div className="mb-4 rounded-xl border border-slate-200 p-3">
               <p className="mb-2 text-sm font-medium text-slate-700">Preguntas de descubrimiento</p>
               {PREGUNTAS_DESCUBRIMIENTO.map((pregunta) => (
                 <div key={pregunta.clave} className="mb-2">
@@ -1168,14 +1168,14 @@ function NuevoIngreso() {
                     onChange={(evento) =>
                       setRespuestasDescubrimiento((actual) => ({ ...actual, [pregunta.clave]: evento.target.value }))
                     }
-                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                   />
                 </div>
               ))}
             </div>
           )}
 
-          <div className="mb-4 rounded border border-slate-200 p-3">
+          <div className="mb-4 rounded-xl border border-slate-200 p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-slate-700">Fotos de inspección (escáner)</p>
@@ -1187,7 +1187,7 @@ function NuevoIngreso() {
               <button
                 type="button"
                 onClick={() => setMostrarEscaner((visible) => !visible)}
-                className="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
               >
                 {mostrarEscaner ? 'Ocultar escáner' : fotosInspeccion.length > 0 ? 'Abrir escáner' : 'Escanear vehículo'}
               </button>
@@ -1206,18 +1206,18 @@ function NuevoIngreso() {
                 placeholder="Nombre de quien firma"
                 value={firmadoPor}
                 onChange={(evento) => setFirmadoPor(evento.target.value)}
-                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
               <input
                 placeholder="N° de celular"
                 value={firmadoCelular}
                 onChange={(evento) => setFirmadoCelular(evento.target.value)}
-                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
               <select
                 value={rolPersonaPresente}
                 onChange={(evento) => setRolPersonaPresente(evento.target.value)}
-                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 <option value="dueno">Es dueño</option>
                 <option value="conductor">Es conductor</option>
@@ -1231,7 +1231,7 @@ function NuevoIngreso() {
           <button
             type="submit"
             disabled={guardando}
-            className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {subiendoFotos ? 'Subiendo fotos…' : guardando ? 'Guardando…' : 'Registrar ingreso'}
           </button>

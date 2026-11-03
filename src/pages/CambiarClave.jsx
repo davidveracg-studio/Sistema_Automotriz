@@ -42,7 +42,7 @@ function CambiarClave() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100">
       <form onSubmit={manejarEnvio} className="w-full max-w-sm rounded-lg bg-white p-8 shadow-sm">
-        <h1 className="mb-1 text-xl font-semibold text-slate-900">Define tu clave</h1>
+        <h1 className="mb-1 text-2xl font-bold text-mm-link dark:text-white">Define tu clave</h1>
         <p className="mb-6 text-sm text-slate-500">
           Estás usando una clave provisoria. Antes de continuar, crea tu propia clave.
         </p>
@@ -57,7 +57,7 @@ function CambiarClave() {
           minLength={8}
           value={clave}
           onChange={(evento) => setClave(evento.target.value)}
-          className="mb-4 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         />
 
         <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="confirmacion">
@@ -70,7 +70,7 @@ function CambiarClave() {
           minLength={8}
           value={confirmacion}
           onChange={(evento) => setConfirmacion(evento.target.value)}
-          className="mb-4 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         />
 
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
@@ -78,7 +78,7 @@ function CambiarClave() {
         <button
           type="submit"
           disabled={enviando}
-          className="w-full rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="w-full rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
         >
           {enviando ? 'Guardando…' : 'Guardar clave'}
         </button>

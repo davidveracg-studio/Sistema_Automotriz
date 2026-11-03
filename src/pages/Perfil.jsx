@@ -79,7 +79,7 @@ function Perfil() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold text-slate-900">Editar perfil</h1>
+      <h1 className="text-2xl font-bold text-mm-link dark:text-white">Editar perfil</h1>
       <p className="mb-6 text-sm text-slate-500">Tus datos en el sistema.</p>
 
       <div className="grid max-w-4xl gap-6 lg:grid-cols-2">

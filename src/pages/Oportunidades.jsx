@@ -98,13 +98,13 @@ function Oportunidades() {
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Oportunidades</h1>
+        <h1 className="text-2xl font-bold text-mm-link dark:text-white">Oportunidades</h1>
         {ROLES_ENVIO_ENCUESTAS.includes(usuario?.rol) && (
           <button
             type="button"
             onClick={enviarEncuestasPendientes}
             disabled={enviandoEncuestas}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"
           >
             {enviandoEncuestas ? 'Enviando…' : 'Enviar encuestas de postventa pendientes'}
           </button>
@@ -130,9 +130,9 @@ function Oportunidades() {
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-500">
+          <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
             <tr>
               <th className="px-3 py-2">Fecha sugerida</th>
               <th className="px-3 py-2">Cliente</th>
@@ -164,7 +164,7 @@ function Oportunidades() {
                       <select
                         value={oportunidad.estado}
                         onChange={(evento) => actualizarEstado(oportunidad.id, evento.target.value)}
-                        className="rounded border border-slate-300 px-2 py-1 text-xs"
+                        className="rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                       >
                         {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
                           <option key={valor} value={valor}>

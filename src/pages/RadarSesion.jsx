@@ -271,7 +271,7 @@ function RadarSesion() {
           <button
             type="button"
             onClick={() => setModoPresentacion(false)}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Editar hallazgos
           </button>
@@ -284,7 +284,7 @@ function RadarSesion() {
 
         <div className="space-y-4">
           {hallazgos.map((h) => (
-            <div key={h.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div key={h.id} className="rounded-2xl bg-white p-5 shadow-mm print:shadow-none">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <span className={`mb-2 inline-block rounded-full px-3 py-1 text-xs font-medium ${COLOR_URGENCIA[h.urgencia]}`}>
@@ -325,7 +325,7 @@ function RadarSesion() {
         ← Volver a la OT
       </Link>
 
-      <h1 className="mb-1 text-xl font-semibold text-slate-900">
+      <h1 className="mb-1 text-2xl font-bold text-mm-link dark:text-white">
         {etiquetaSesion} — {formatearPatente(trabajo.vehiculos?.patente)}
       </h1>
       <p className="mb-4 text-sm text-slate-500">
@@ -338,13 +338,13 @@ function RadarSesion() {
         <button
           type="button"
           onClick={iniciarSesion}
-          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-medium text-white hover:bg-deep"
         >
           Iniciar {etiquetaSesion.toLowerCase()}
         </button>
       ) : (
         <div className="max-w-2xl">
-          <div className="mb-4 flex items-center justify-between rounded border border-slate-200 bg-white p-3">
+          <div className="mb-4 flex items-center justify-between rounded-2xl bg-white p-3 shadow-mm print:shadow-none">
             <p className="text-sm text-slate-600">
               Iniciado {new Date(sesion.iniciado_en).toLocaleTimeString('es-CL')} · tiempo transcurrido{' '}
               <span className={segundosTranscurridos > 600 ? 'font-semibold text-amber-600' : ''}>
@@ -354,14 +354,14 @@ function RadarSesion() {
             <button
               type="button"
               onClick={finalizarSesion}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep"
             >
               Finalizar y presentar
             </button>
           </div>
 
           {checklistItems.length > 0 && (
-            <div className="mb-4 rounded border border-slate-200 bg-white p-3">
+            <div className="mb-4 rounded-2xl bg-white p-3 shadow-mm print:shadow-none">
               <div className="mb-2 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-slate-800">Lista de inspección</h2>
                 <span className="text-xs text-slate-400">
@@ -416,7 +416,7 @@ function RadarSesion() {
                                   value={respuesta.nota}
                                   onChange={(evento) => guardarRespuestaChecklist(item.id, { nota: evento.target.value })}
                                   placeholder="Nota (opcional)"
-                                  className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs"
+                                  className="flex-1 rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                                 />
                                 <button
                                   type="button"
@@ -436,7 +436,7 @@ function RadarSesion() {
             </div>
           )}
 
-          <ul className="mb-4 divide-y divide-slate-100 rounded border border-slate-200 bg-white">
+          <ul className="mb-4 divide-y divide-slate-100 rounded-2xl bg-white shadow-mm print:shadow-none">
             {hallazgos.map((h) => (
               <li key={h.id} className="flex items-center justify-between px-3 py-2 text-sm">
                 <span className="text-slate-800">
@@ -453,19 +453,19 @@ function RadarSesion() {
             {hallazgos.length === 0 && <li className="px-3 py-3 text-sm text-slate-400">Sin hallazgos todavía.</li>}
           </ul>
 
-          <form id="form-hallazgo" onSubmit={agregarHallazgo} className="rounded border border-slate-200 bg-white p-3">
+          <form id="form-hallazgo" onSubmit={agregarHallazgo} className="rounded-2xl bg-white p-3 shadow-mm print:shadow-none">
             <input
               required
               value={detalle}
               onChange={(evento) => setDetalle(evento.target.value)}
               placeholder="Ej. Amortiguador delantero derecho con fuga"
-              className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
             <div className="mb-2 grid grid-cols-3 gap-2">
               <select
                 value={area}
                 onChange={(evento) => setArea(evento.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-2 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 <option value="">Área (opcional)</option>
                 {Object.entries(ETIQUETA_AREA).map(([valor, etiqueta]) => (
@@ -479,12 +479,12 @@ function RadarSesion() {
                 value={precioReferencial}
                 onChange={(evento) => setPrecioReferencial(evento.target.value)}
                 placeholder="Precio referencial"
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-2 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
               <select
                 value={urgencia}
                 onChange={(evento) => setUrgencia(evento.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-2 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 {Object.entries(ETIQUETA_URGENCIA).map(([valor, etiqueta]) => (
                   <option key={valor} value={valor}>
@@ -503,7 +503,7 @@ function RadarSesion() {
             <button
               type="submit"
               disabled={guardandoHallazgo}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               {guardandoHallazgo ? 'Guardando…' : 'Agregar hallazgo'}
             </button>

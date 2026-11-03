@@ -52,9 +52,9 @@ function Facturacion() {
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Facturación electrónica</h1>
+        <h1 className="text-2xl font-bold text-mm-link dark:text-white">Facturación electrónica</h1>
         {puedeEmitir && (
-          <Link to="/facturacion/nuevo" className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
+          <Link to="/facturacion/nuevo" className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep">
             Nuevo documento
           </Link>
         )}
@@ -71,7 +71,7 @@ function Facturacion() {
       )}
 
       <div className="mb-4 flex flex-wrap gap-2">
-        <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} className="rounded border border-slate-300 px-3 py-2 text-sm">
+        <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent">
           <option value="todos">Todos los tipos</option>
           {Object.entries(TIPOS_DTE).map(([valor, etiqueta]) => (
             <option key={valor} value={valor}>
@@ -79,7 +79,7 @@ function Facturacion() {
             </option>
           ))}
         </select>
-        <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} className="rounded border border-slate-300 px-3 py-2 text-sm">
+        <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent">
           <option value="todos">Todos los estados</option>
           {Object.entries(ETIQUETA_ESTADO_DTE).map(([valor, etiqueta]) => (
             <option key={valor} value={valor}>
@@ -91,9 +91,9 @@ function Facturacion() {
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-500">
+          <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
             <tr>
               <th className="px-3 py-2">Fecha</th>
               <th className="px-3 py-2">Documento</th>
@@ -113,7 +113,7 @@ function Facturacion() {
                     <Link to={`/facturacion/${d.id}`} className="text-slate-900 underline hover:text-slate-700">
                       {TIPOS_DTE[d.tipo_dte]}
                     </Link>
-                    {d.simulado && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">SIMULADO</span>}
+                    {d.simulado && <span className="ml-2 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">SIMULADO</span>}
                   </td>
                   <td className="px-3 py-2 text-slate-600">{d.folio ?? '—'}</td>
                   <td className="px-3 py-2 text-slate-800">
@@ -122,7 +122,7 @@ function Facturacion() {
                   </td>
                   <td className="px-3 py-2 text-right text-slate-800">${formatoNumero(d.monto_total)}</td>
                   <td className="px-3 py-2">
-                    <span className={`rounded px-2 py-0.5 text-xs font-medium ${COLOR_ESTADO_DTE[d.estado] || ''}`}>{ETIQUETA_ESTADO_DTE[d.estado] || d.estado}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLOR_ESTADO_DTE[d.estado] || ''}`}>{ETIQUETA_ESTADO_DTE[d.estado] || d.estado}</span>
                   </td>
                   <td className="px-3 py-2">
                     {d.trabajo_id && (

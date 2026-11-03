@@ -116,7 +116,7 @@ function DescuentoManoObra({ incrustado = false, trabajoId, empresaId, porcentaj
         Solo aplica a la mano de obra. El asesor puede llegar hasta {textoPorcentaje(limite)}%; un descuento mayor lo autoriza administración.
       </p>
 
-      <div className="rounded border border-slate-200 bg-white p-3 text-sm">
+      <div className="rounded-2xl bg-white p-3 text-sm shadow-mm print:shadow-none">
         <p className="text-slate-800">
           Vigente: <span className="font-semibold">{textoPorcentaje(porcentajeVigente)}%</span>
           {Number(porcentajeVigente) > 0 && subtotalManoObra > 0 && (
@@ -141,7 +141,7 @@ function DescuentoManoObra({ incrustado = false, trabajoId, empresaId, porcentaj
                   onChange={(evento) => setNotaResolucion(evento.target.value)}
                   placeholder="Comentario (opcional)"
                   maxLength={200}
-                  className="min-w-0 flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-slate-800"
+                  className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-800 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <button type="button" disabled={ocupado} onClick={() => resolver(pendiente.id, true)} className="rounded bg-emerald-600 px-3 py-1 font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
                   Autorizar
@@ -167,7 +167,7 @@ function DescuentoManoObra({ incrustado = false, trabajoId, empresaId, porcentaj
                 required
                 value={porcentaje}
                 onChange={(evento) => setPorcentaje(evento.target.value)}
-                className="mt-0.5 block w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-slate-800"
+                className="mt-0.5 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-800 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </label>
             <label className="block">
@@ -178,10 +178,10 @@ function DescuentoManoObra({ incrustado = false, trabajoId, empresaId, porcentaj
                 maxLength={200}
                 value={motivo}
                 onChange={(evento) => setMotivo(evento.target.value)}
-                className="mt-0.5 block w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-slate-800"
+                className="mt-0.5 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-800 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </label>
-            <button type="submit" disabled={ocupado || numero == null} className="rounded bg-slate-900 px-3 py-1.5 font-medium text-white hover:bg-slate-800 disabled:opacity-50">
+            <button type="submit" disabled={ocupado || numero == null} className="rounded-lg bg-brand-accent px-3 py-1.5 font-medium text-white hover:bg-deep disabled:opacity-50">
               {superaLimite ? 'Pedir autorización' : 'Aplicar'}
             </button>
             {superaLimite && (

@@ -126,17 +126,17 @@ function OrdenEgreso() {
         <button
           type="button"
           onClick={() => window.print()}
-          className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep"
         >
           Imprimir / guardar como PDF
         </button>
-        <Link to={`/trabajos/${id}`} className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+        <Link to={`/trabajos/${id}`} className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
           Ver OT
         </Link>
         {['admin', 'socia', 'encargado_presupuestos', 'asesor'].includes(usuario?.rol) && (
           <Link
             to={`/facturacion/nuevo?trabajo=${id}`}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Emitir documento tributario
           </Link>
@@ -145,7 +145,7 @@ function OrdenEgreso() {
 
       {error && <p className="mb-4 text-sm text-red-600 print:hidden">{error}</p>}
 
-      <div className="max-w-3xl rounded border border-slate-200 bg-white p-6 text-sm text-slate-900 print:flex print:min-h-[250mm] print:flex-col print:border-0 print:p-0">
+      <div className="max-w-3xl rounded-2xl bg-white p-6 text-sm text-slate-900 print:flex print:min-h-[250mm] print:flex-col print:border-0 print:p-0 shadow-mm print:shadow-none">
         <EncabezadoDocumento
           empresa={empresa}
           lineas={['ORDEN DE EGRESO', `OT N° ${trabajo.numero_ot}`]}

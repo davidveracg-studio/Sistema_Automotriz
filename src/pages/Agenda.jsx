@@ -374,7 +374,7 @@ function Agenda() {
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Agenda</h1>
+        <h1 className="text-2xl font-bold text-mm-link dark:text-white">Agenda</h1>
         <div className="flex items-center gap-2">
           <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5 text-sm" role="group" aria-label="Vista de la agenda">
             {VISTAS.map((opcion) => (
@@ -393,7 +393,7 @@ function Agenda() {
             <button
               type="button"
               onClick={() => setMostrarEquipo(true)}
-              className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Equipo
             </button>
@@ -401,7 +401,7 @@ function Agenda() {
           <button
             type="button"
             onClick={() => abrirFormulario(null)}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep"
           >
             Nueva cita
           </button>
@@ -415,7 +415,7 @@ function Agenda() {
         <button
           type="button"
           onClick={() => setFecha(hoyLocalISO())}
-          className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
           Hoy
         </button>
@@ -430,7 +430,7 @@ function Agenda() {
           type="date"
           value={fecha}
           onChange={(evento) => evento.target.value && setFecha(evento.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         />
         <span className="text-sm font-medium capitalize text-slate-600">{etiquetaDeRango(vista, fecha)}</span>
       </div>
@@ -509,7 +509,7 @@ function Agenda() {
               El taller no atiende este día.
             </p>
           ) : (
-            <div className="mb-6 overflow-x-auto rounded border border-slate-200 bg-white">
+            <div className="mb-6 overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr>
@@ -564,7 +564,7 @@ function Agenda() {
                                     <button
                                       type="button"
                                       onClick={() => abrirFormulario({ tipoIslaId: isla.id, hora: bloque })}
-                                      className="mt-0.5 block w-full rounded border border-dashed border-slate-200 py-0.5 text-[10px] text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                                      className="mt-0.5 block w-full rounded-xl border border-dashed border-slate-200 py-0.5 text-[10px] text-slate-400 hover:border-slate-400 hover:text-slate-600"
                                     >
                                       + agendar
                                     </button>
@@ -582,9 +582,9 @@ function Agenda() {
             </div>
           )}
 
-          <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500">
+              <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
                 <tr>
                   <th className="px-3 py-2">Hora</th>
                   <th className="px-3 py-2">Isla</th>
@@ -616,19 +616,19 @@ function Agenda() {
                       <td className="px-3 py-2 text-slate-600">
                         {cita.descripcion || '—'}
                         {cita.origen === 'bot_whatsapp' && (
-                          <span className="ml-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
+                          <span className="ml-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
                             agendada por WhatsApp
                           </span>
                         )}
                         {cita.clickup_task_id && (
-                          <span className="ml-1 rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-medium text-sky-800">en ClickUp</span>
+                          <span className="ml-1 rounded-full bg-sky-50 px-1.5 py-0.5 text-[10px] font-medium text-sky-800">en ClickUp</span>
                         )}
                       </td>
                       <td className="px-3 py-2">
                         <select
                           value={cita.estado}
                           onChange={(evento) => actualizarEstado(cita.id, evento.target.value)}
-                          className="rounded border border-slate-300 px-2 py-1 text-xs"
+                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         >
                           {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
                             <option key={valor} value={valor}>
@@ -948,7 +948,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
       <form onSubmit={manejarEnvio} className="my-8 w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
         <h2 className="mb-4 text-lg font-semibold text-slate-900">Nueva cita</h2>
 
-        <div className="mb-4 rounded border border-slate-200 bg-slate-50 p-3">
+        <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <p className="mb-2 text-sm font-medium text-slate-700">Buscar por servicio (opcional)</p>
           <div className="mb-2 grid grid-cols-2 gap-2">
             <select
@@ -957,7 +957,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
                 setCategoriaCatalogo(evento.target.value)
                 setServicioCatalogoId('')
               }}
-              className="rounded border border-slate-300 px-2 py-2 text-sm"
+              className="rounded-lg border border-slate-300 px-2 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">Categoría…</option>
               {[...categoriasPorSegmento.entries()].map(([segmento, categorias]) => (
@@ -974,7 +974,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
               value={servicioCatalogoId}
               onChange={(evento) => setServicioCatalogoId(evento.target.value)}
               disabled={!categoriaCatalogo}
-              className="rounded border border-slate-300 px-2 py-2 text-sm disabled:bg-slate-100"
+              className="rounded-lg border border-slate-300 px-2 py-2 text-sm disabled:bg-slate-100 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">Servicio…</option>
               {serviciosDeCategoria.map((s) => (
@@ -988,7 +988,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
             type="button"
             onClick={buscarHorariosDisponibles}
             disabled={!servicioCatalogoId || buscandoHorarios}
-            className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"
           >
             {buscandoHorarios ? 'Buscando…' : 'Buscar próximos horarios disponibles'}
           </button>
@@ -1018,7 +1018,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
             required
             value={fecha}
             onChange={(evento) => setFecha(evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -1028,7 +1028,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
             required
             value={tipoIslaId}
             onChange={(evento) => setTipoIslaId(evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           >
             {tiposIsla.map((isla) => (
               <option key={isla.id} value={isla.id}>
@@ -1045,7 +1045,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
               type="time"
               value={hora}
               onChange={(evento) => setHora(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -1055,7 +1055,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
               min="1"
               value={duracionMinutos}
               onChange={(evento) => setDuracionMinutos(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -1080,7 +1080,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
         <div className="mb-3 border-t border-slate-100 pt-3">
           <label className="mb-1 block text-sm font-medium text-slate-700">Cliente</label>
           {clienteSeleccionado ? (
-            <div className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
               <span>{nombreVisible(clienteSeleccionado)}</span>
               <button
                 type="button"
@@ -1102,13 +1102,13 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
                   value={terminoCliente}
                   onChange={(evento) => setTerminoCliente(evento.target.value)}
                   placeholder="Buscar por nombre, RUT o teléfono"
-                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <button
                   type="button"
                   onClick={buscarCliente}
                   disabled={buscandoCliente}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                 >
                   Buscar
                 </button>
@@ -1143,26 +1143,26 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
                       placeholder="Nombre"
                       value={nombreNuevo}
                       onChange={(evento) => setNombreNuevo(evento.target.value)}
-                      className="rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                     <input
                       placeholder="Apellido"
                       value={apellidoNuevo}
                       onChange={(evento) => setApellidoNuevo(evento.target.value)}
-                      className="rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                     <input
                       placeholder="Teléfono"
                       value={telefonoNuevo}
                       onChange={(evento) => setTelefonoNuevo(evento.target.value)}
-                      className="col-span-2 rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={crearClienteNuevo}
                     disabled={!nombreNuevo || guardando}
-                    className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                    className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
                   >
                     Crear y continuar
                   </button>
@@ -1178,7 +1178,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
             <select
               value={vehiculoId}
               onChange={(evento) => setVehiculoId(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">Sin definir todavía</option>
               {vehiculosCliente.map((vehiculo) => (
@@ -1197,7 +1197,7 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
             onChange={(evento) => setDescripcion(evento.target.value)}
             rows={2}
             placeholder="Ej: cambio de aceite, ruido en freno delantero"
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -1207,14 +1207,14 @@ function FormularioNuevaCita({ conPersonal, empresaId, usuarioId, tiposIsla, fec
           <button
             type="button"
             onClick={onCancelar}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={guardando || !clienteSeleccionado || (sinCupo && !forzarSobrecupo)}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {guardando ? 'Guardando…' : 'Agendar'}
           </button>
