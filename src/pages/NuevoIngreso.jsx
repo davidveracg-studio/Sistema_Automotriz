@@ -6,6 +6,7 @@ import { invocarFuncion } from '../lib/invocarFuncion'
 import FirmaCanvas from '../components/FirmaCanvas'
 import EscanerCaptura from '../components/EscanerCaptura'
 import { subirFotos } from '../lib/escaner/subida'
+import { rutValido } from '../lib/rut'
 import { contarPendientes, limpiarMarcas, sincronizarMarcasConFotos } from '../lib/escaner/diagrama'
 import DiagramaVehiculo from '../components/DiagramaVehiculo'
 import EncabezadoDocumento from '../components/EncabezadoDocumento'
@@ -17,6 +18,10 @@ import { formatearPatente, formatearPatenteEntrada } from '../lib/patente'
 function normalizarPatenteLocal(patente) {
   return (patente || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
 }
+
+// Id provisorio del cliente que se está creando en este ingreso: el cliente real
+// se guarda recién al registrar el ingreso, junto con el vehículo y la OT.
+const CLIENTE_NUEVO = '__cliente_nuevo__'
 
 function nombreVisible(cliente) {
   if (!cliente) return ''
@@ -86,6 +91,14 @@ function NuevoIngreso() {
   const [apellidoNuevo, setApellidoNuevo] = useState('')
   const [telefonoNuevo, setTelefonoNuevo] = useState('')
   const [rutNuevo, setRutNuevo] = useState('')
+  const [tipoNuevo, setTipoNuevo] = useState('persona')
+  const [razonSocialNuevo, setRazonSocialNuevo] = useState('')
+  const [emailNuevo, setEmailNuevo] = useState('')
+  const [direccionNuevo, setDireccionNuevo] = useState('')
+  const [errorCliente, setErrorCliente] = useState(null)
+  // Lo ya creado en la base durante un registro que falló a mitad de camino:
+  // al reintentar se reutiliza en vez de duplicarlo ("ya existe esa patente").
+  const creadosRef = useRef({})
   const [avisosDuplicado, setAvisosDuplicado] = useState([])
 
   // --- Formulario de ingreso ------------------------------------------------
@@ -183,6 +196,18 @@ function NuevoIngreso() {
     setTipoCombustible('bencina')
     setDiagramaDanos([])
     setPropietarioVehiculo(null)
+    setCreandoClienteNuevo(false)
+    setTipoNuevo('persona')
+    setNombreNuevo('')
+    setApellidoNuevo('')
+    setRazonSocialNuevo('')
+    setTelefonoNuevo('')
+    setRutNuevo('')
+    setEmailNuevo('')
+    setDireccionNuevo('')
+    setErrorCliente(null)
+    setAvisosDuplicado([])
+    creadosRef.current = {}
 
     try {
       const patenteNorm = normalizarPatenteLocal(patenteBusqueda)
@@ -230,7 +255,9 @@ function NuevoIngreso() {
           .order('fecha_ingreso', { ascending: false })
         setTrabajosAnteriores(anteriores || [])
       } else {
+        // Patente nueva: se crean vehículo y cliente en este mismo ingreso.
         setCreandoVehiculoNuevo(true)
+        setCreandoClienteNuevo(true)
       }
 
       setBusquedaHecha(true)
@@ -300,33 +327,49 @@ function NuevoIngreso() {
     }
   }
 
-  async function crearClienteNuevo() {
-    setError(null)
-    setGuardando(true)
-    try {
-      const { data, error: errorInsercion } = await supabase
-        .from('clientes')
-        .insert({
-          empresa_id: usuario.empresa_id,
-          tipo: 'persona',
-          nombre: nombreNuevo,
-          apellido: apellidoNuevo || null,
-          telefono: telefonoNuevo || null,
-          rut: rutNuevo || null,
-        })
-        .select()
-        .single()
-
-      if (errorInsercion) {
-        setError(errorInsercion.message)
-        return
-      }
-      elegirCliente(data)
-    } catch {
-      setError('No se pudo conectar con el servidor. Revisa la conexión e intenta de nuevo.')
-    } finally {
-      setGuardando(false)
+  // Deja listo al cliente nuevo SIN guardarlo todavía: se crea al registrar el
+  // ingreso (así, si se abandona el formulario no queda un cliente huérfano).
+  function usarClienteNuevo() {
+    setErrorCliente(null)
+    const esEmpresa = tipoNuevo === 'empresa'
+    const nombre = (esEmpresa ? razonSocialNuevo : nombreNuevo).trim()
+    if (!nombre) {
+      setErrorCliente(esEmpresa ? 'Ingresa la razón social.' : 'Ingresa el nombre del cliente.')
+      return
     }
+    if (rutNuevo.trim() && !rutValido(rutNuevo)) {
+      setErrorCliente('El RUT no es válido: revisa el número y el dígito verificador.')
+      return
+    }
+    if (emailNuevo.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailNuevo.trim())) {
+      setErrorCliente('El correo no es válido.')
+      return
+    }
+    const datos = {
+      tipo: tipoNuevo,
+      nombre,
+      apellido: esEmpresa ? null : apellidoNuevo.trim() || null,
+      razon_social: esEmpresa ? nombre : null,
+      rut: rutNuevo.trim() || null,
+      telefono: telefonoNuevo.trim() || null,
+      email: emailNuevo.trim() || null,
+      direccion: direccionNuevo.trim() || null,
+    }
+    setClienteSeleccionado({ ...datos, id: CLIENTE_NUEVO })
+    setClienteId(CLIENTE_NUEVO)
+    setResultadosCliente([])
+    setCreandoClienteNuevo(false)
+    setCitaId('')
+  }
+
+  // Volver a elegir cliente (solo cuando el cliente se está definiendo en este
+  // ingreso: un vehículo con cliente vinculado ya lo trae).
+  function cambiarCliente() {
+    setClienteId(null)
+    setClienteSeleccionado(null)
+    setCitasAbiertas([])
+    setCitaId('')
+    setErrorCliente(null)
   }
 
   function actualizarFotoInspeccion(fotoId, cambios) {
@@ -360,7 +403,37 @@ function NuevoIngreso() {
     setError(null)
 
     try {
-      let vehiculoId = vehiculo?.id
+      // Cliente nuevo: se crea ahora, al registrar el ingreso (no al "continuar").
+      let clienteIdFinal = clienteId
+      if (clienteId === CLIENTE_NUEVO) {
+        if (creadosRef.current.clienteId) {
+          clienteIdFinal = creadosRef.current.clienteId
+        } else {
+          const { data: nuevoCliente, error: errorCreacionCliente } = await supabase
+            .from('clientes')
+            .insert({
+              empresa_id: usuario.empresa_id,
+              tipo: clienteSeleccionado.tipo,
+              nombre: clienteSeleccionado.nombre,
+              apellido: clienteSeleccionado.apellido,
+              razon_social: clienteSeleccionado.razon_social,
+              rut: clienteSeleccionado.rut,
+              telefono: clienteSeleccionado.telefono,
+              email: clienteSeleccionado.email,
+              direccion: clienteSeleccionado.direccion,
+            })
+            .select()
+            .single()
+          if (errorCreacionCliente) {
+            setError(`No se pudo crear el cliente: ${errorCreacionCliente.message}`)
+            return
+          }
+          creadosRef.current.clienteId = nuevoCliente.id
+          clienteIdFinal = nuevoCliente.id
+        }
+      }
+
+      let vehiculoId = vehiculo?.id || creadosRef.current.vehiculoId
 
       // Vehículo nuevo: se crea (y se vincula al cliente) recién ahora, junto
       // con el resto, para no dejar vehículos huérfanos si el asesor
@@ -393,14 +466,20 @@ function NuevoIngreso() {
           return
         }
         vehiculoId = nuevoVehiculo.id
+        creadosRef.current.vehiculoId = vehiculoId
+      }
 
+      // Vínculo cliente–vehículo: vehículo nuevo, o uno existente que aún no
+      // tenía a este cliente (antes quedaba sin vincular).
+      if (!clientesDelVehiculo.some((c) => c.id === clienteIdFinal) && !creadosRef.current.vinculado) {
         const { error: errorVinculo } = await supabase
           .from('clientes_vehiculos')
-          .insert({ cliente_id: clienteId, vehiculo_id: vehiculoId, es_propietario: true })
-        if (errorVinculo) {
+          .insert({ cliente_id: clienteIdFinal, vehiculo_id: vehiculoId, es_propietario: true })
+        if (errorVinculo && errorVinculo.code !== '23505') {
           setError(errorVinculo.message)
           return
         }
+        creadosRef.current.vinculado = true
       }
 
       const kilometrajeNumero = kilometraje ? Number(kilometraje) : null
@@ -409,7 +488,7 @@ function NuevoIngreso() {
         .from('trabajos_taller')
         .insert({
           empresa_id: usuario.empresa_id,
-          cliente_id: clienteId,
+          cliente_id: clienteIdFinal,
           vehiculo_id: vehiculoId,
           tipo_ingreso: tipoIngreso,
           asesor_id: usuario.id,
@@ -494,6 +573,7 @@ function NuevoIngreso() {
         setSubiendoFotos(false)
       }
 
+      creadosRef.current = {}
       setOtCreada(trabajo)
     } catch {
       setError('No se pudo conectar con el servidor. Revisa la conexión e intenta de nuevo.')
@@ -632,6 +712,10 @@ function NuevoIngreso() {
       <h1 className="mb-4 text-xl font-semibold text-slate-900">Nuevo ingreso</h1>
 
       {/* Paso 1: patente */}
+      <p className="mb-1 text-sm font-semibold text-slate-700">1 · Vehículo</p>
+      <p className="mb-2 text-xs text-slate-500">
+        Busca por patente. Si no existe, se crea en este mismo ingreso (y también el cliente, si hace falta).
+      </p>
       <form onSubmit={buscarVehiculo} className="mb-6 flex max-w-md gap-2">
         <input
           type="text"
@@ -684,7 +768,7 @@ function NuevoIngreso() {
       {busquedaHecha && creandoVehiculoNuevo && (
         <div className="mb-6 max-w-md rounded border border-amber-300 bg-amber-50 p-4">
           <p className="mb-3 text-sm font-medium text-amber-900">
-            No hay ningún vehículo con esa patente. Se creará uno nuevo.
+            No hay ningún vehículo con esa patente. Se creará uno nuevo al registrar el ingreso.
           </p>
           <div className="mb-3 grid grid-cols-2 gap-3">
             <div>
@@ -721,7 +805,7 @@ function NuevoIngreso() {
       {/* Cliente: solo se pide buscar/crear si el vehículo es nuevo o no tiene cliente vinculado */}
       {busquedaHecha && !clienteId && (creandoVehiculoNuevo || clientesDelVehiculo.length === 0) && (
         <div className="mb-6 max-w-md rounded border border-slate-200 bg-white p-4">
-          <p className="mb-2 font-medium text-slate-800">¿Quién trae el vehículo?</p>
+          <p className="mb-2 font-medium text-slate-800">2 · Cliente — ¿quién trae el vehículo?</p>
 
           <form onSubmit={buscarCliente} className="mb-3 flex gap-2">
             <input
@@ -766,21 +850,47 @@ function NuevoIngreso() {
             </button>
           ) : (
             <div className="mt-2 border-t border-slate-100 pt-3">
+              <p className="mb-2 text-xs text-slate-500">
+                Cliente nuevo: se guarda al registrar el ingreso, junto con el vehículo y la OT.
+              </p>
+              <div className="mb-2 flex gap-4 text-sm">
+                {[
+                  ['persona', 'Persona'],
+                  ['empresa', 'Empresa'],
+                ].map(([valor, etiqueta]) => (
+                  <label key={valor} className="flex items-center gap-1.5">
+                    <input type="radio" checked={tipoNuevo === valor} onChange={() => setTipoNuevo(valor)} />
+                    {etiqueta}
+                  </label>
+                ))}
+              </div>
               <div className="mb-2 grid grid-cols-2 gap-2">
-                <input
-                  placeholder="Nombre"
-                  value={nombreNuevo}
-                  onChange={(evento) => setNombreNuevo(evento.target.value)}
-                  onBlur={revisarDuplicadosClienteNuevo}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
-                />
-                <input
-                  placeholder="Apellido"
-                  value={apellidoNuevo}
-                  onChange={(evento) => setApellidoNuevo(evento.target.value)}
-                  onBlur={revisarDuplicadosClienteNuevo}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
-                />
+                {tipoNuevo === 'empresa' ? (
+                  <input
+                    placeholder="Razón social"
+                    value={razonSocialNuevo}
+                    onChange={(evento) => setRazonSocialNuevo(evento.target.value)}
+                    onBlur={revisarDuplicadosClienteNuevo}
+                    className="col-span-2 rounded border border-slate-300 px-3 py-2 text-sm"
+                  />
+                ) : (
+                  <>
+                    <input
+                      placeholder="Nombre"
+                      value={nombreNuevo}
+                      onChange={(evento) => setNombreNuevo(evento.target.value)}
+                      onBlur={revisarDuplicadosClienteNuevo}
+                      className="rounded border border-slate-300 px-3 py-2 text-sm"
+                    />
+                    <input
+                      placeholder="Apellido"
+                      value={apellidoNuevo}
+                      onChange={(evento) => setApellidoNuevo(evento.target.value)}
+                      onBlur={revisarDuplicadosClienteNuevo}
+                      className="rounded border border-slate-300 px-3 py-2 text-sm"
+                    />
+                  </>
+                )}
                 <input
                   placeholder="Teléfono"
                   value={telefonoNuevo}
@@ -795,6 +905,19 @@ function NuevoIngreso() {
                   onBlur={revisarDuplicadosClienteNuevo}
                   className="rounded border border-slate-300 px-3 py-2 text-sm"
                 />
+                <input
+                  type="email"
+                  placeholder="Correo"
+                  value={emailNuevo}
+                  onChange={(evento) => setEmailNuevo(evento.target.value)}
+                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                />
+                <input
+                  placeholder="Dirección"
+                  value={direccionNuevo}
+                  onChange={(evento) => setDireccionNuevo(evento.target.value)}
+                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                />
               </div>
               {avisosDuplicado.length > 0 && (
                 <div className="mb-2 rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
@@ -802,13 +925,13 @@ function NuevoIngreso() {
                   antes de crear uno nuevo.
                 </div>
               )}
+              {errorCliente && <p className="mb-2 text-sm text-red-600">{errorCliente}</p>}
               <button
                 type="button"
-                onClick={crearClienteNuevo}
-                disabled={!nombreNuevo}
-                className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                onClick={usarClienteNuevo}
+                className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
               >
-                Crear y continuar
+                Continuar con este cliente
               </button>
             </div>
           )}
@@ -819,7 +942,14 @@ function NuevoIngreso() {
         <form onSubmit={manejarEnvioFinal} className="max-w-2xl rounded border border-slate-200 bg-white p-4">
           <p className="mb-4 rounded bg-slate-50 px-3 py-2 text-sm text-slate-600">
             Ingresando a <span className="font-medium">{nombreVisible(clienteSeleccionado)}</span>
+            {clienteId === CLIENTE_NUEVO && <span className="ml-1 text-xs text-amber-700">(cliente nuevo: se crea al registrar)</span>}
+            {(creandoVehiculoNuevo || clientesDelVehiculo.length === 0) && (
+              <button type="button" onClick={cambiarCliente} className="ml-2 text-xs text-slate-500 underline hover:text-slate-800">
+                cambiar cliente
+              </button>
+            )}
           </p>
+          <p className="mb-3 text-sm font-semibold text-slate-700">3 · Motivo del ingreso, evidencias y firma</p>
 
           <div className="mb-4 rounded border border-slate-200 p-3">
             <p className="mb-2 text-sm font-medium text-slate-700">

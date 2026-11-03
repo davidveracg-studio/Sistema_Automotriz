@@ -218,4 +218,9 @@ assert.equal(sincronizarMarcasConFotos([], [foto('h', 'exterior', 'lateral_der',
 assert.equal(sincronizarMarcasConFotos([], [foto('h', 'exterior', 'lateral_der', { esDano: true })], new Set(), 'sedan')[0].vista, 'lateral_izq')
 assert.ok(ZONAS.sedan.superior)
 
+// --- Validación de RUT en el formulario de ingreso (misma regla que el servidor) ---
+import { rutValido } from '../src/lib/rut.js'
+for (const bueno of ['11.111.111-1', '111111111', '12.345.678-5', '76086428-5', '6-K', '6-k']) assert.equal(rutValido(bueno), true, bueno)
+for (const malo of ['12.345.678-9', '13-0', 'abc', '', null, undefined, '123456789012-3']) assert.equal(rutValido(malo), false, String(malo))
+
 console.log('✓ Escáner: nitidez, cambio de escena, decisión de captura, puente con el diagrama y piezas del vehículo correctos.')
