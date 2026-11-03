@@ -117,6 +117,7 @@ export const GRUPOS = [
       { to: '/informes', label: 'Informes', icono: 'informes', roles: ['admin', 'socia'] },
       { to: '/turnos', label: 'Turnos y asistencia', icono: 'turnos', roles: ['admin', 'socia', 'jefe_taller'] },
       { to: '/derechos-titulares', label: 'Derechos de titulares', icono: 'persona', roles: ['admin', 'socia'] },
+      { to: '/retencion-datos', label: 'Retención de datos', icono: 'bodega', roles: ['admin', 'socia'] },
     ],
   },
 ]

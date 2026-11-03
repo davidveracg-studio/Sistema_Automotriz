@@ -28,6 +28,7 @@ import Informes from './pages/Informes'
 import Bodega from './pages/Bodega'
 import Turnos from './pages/Turnos'
 import SolicitudesTitulares from './pages/SolicitudesTitulares'
+import RetencionDatos from './pages/RetencionDatos'
 import Taller from './pages/Taller'
 import Presupuestos from './pages/Presupuestos'
 import PresupuestoDetalle from './pages/PresupuestoDetalle'
@@ -158,6 +159,7 @@ function App() {
           <Route path="/informes" element={paginaProtegida(<Informes />, ['admin', 'socia'])} />
           <Route path="/turnos" element={paginaProtegida(<Turnos />, ['admin', 'socia', 'jefe_taller'])} />
           <Route path="/derechos-titulares" element={paginaProtegida(<SolicitudesTitulares />, ['admin', 'socia'])} />
+          <Route path="/retencion-datos" element={paginaProtegida(<RetencionDatos />, ['admin', 'socia'])} />
           <Route
             path="/bodega"
             element={paginaProtegida(<Bodega />, ['admin', 'socia', 'encargado_presupuestos', 'jefe_taller'])}

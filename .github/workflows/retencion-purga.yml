@@ -1,0 +1,32 @@
+# Purga de datos vencidos (retención).
+# Una vez por semana ejecuta public.purgar_datos_vencidos() (migración 0074):
+# borra, para cada taller, lo anterior al plazo de las políticas que el propio
+# taller activó en la pantalla "Retención de datos", y aplica los plazos fijos
+# de la plataforma. Todo parte inactivo: sin políticas activas solo se purgan
+# los intentos de ingreso rechazados y los errores de correo sin empresa
+# (90 días). Cada ejecución queda registrada en retencion_ejecuciones.
+# La función no la puede llamar ningún usuario de la app: se ejecuta con la
+# conexión directa a la base (secret SUPABASE_DB_URL, el mismo del despliegue).
+name: Retención de datos
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+
+jobs:
+  purgar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ejecutar la purga
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          case "$SUPABASE_DB_URL" in
+            postgres://*|postgresql://*) ;;
+            *)
+              echo "::error::SUPABASE_DB_URL no es una URI de Postgres (debe empezar con postgresql://)."
+              exit 1
+              ;;
+          esac
+          psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -c "select * from public.purgar_datos_vencidos()"
