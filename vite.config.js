@@ -11,7 +11,7 @@ export default defineConfig({
       // archivos estáticos deben quedar fuera del service worker: si se
       // interceptan, cualquier página que no sea la app queda rota.
       workbox: {
-        navigateFallbackDenylist: [/^\/publico/, /^\/encuesta/, /^\/api/],
+        navigateFallbackDenylist: [/^\/publico/, /^\/encuesta/, /^\/privacidad/, /^\/terminos/, /^\/api/],
       },
       includeAssets: ['icono-vpai.png'],
       manifest: {
