@@ -19,6 +19,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { respuestaJson, respuestaPreflight } from '../_shared/cors.ts'
 import { obtenerProveedor } from '../_shared/dte/index.ts'
+import { errorSeguro } from '../_shared/seguridad.ts'
 import type { ReferenciaDte, SolicitudEmision, TipoDte } from '../_shared/dte/proveedor.ts'
 import { validarDocumento } from '../_shared/dte/validar.ts'
 
@@ -244,7 +245,7 @@ Deno.serve(async (req) => {
       .eq('id', documentoId)
 
     if (errorGuardar) {
-      console.error('facturacion-emitir: el proveedor emitió pero no se pudo guardar el resultado', documentoId, resultado, errorGuardar)
+      console.error('facturacion-emitir: el proveedor emitió pero no se pudo guardar el resultado', documentoId, resultado, errorSeguro(errorGuardar))
       return respuestaJson(
         {
           error: {
