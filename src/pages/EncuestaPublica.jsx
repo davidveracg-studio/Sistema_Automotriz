@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { invocarFuncion } from '../lib/invocarFuncion'
 import { PREGUNTAS, ETIQUETA_COMO_CONOCIO } from '../lib/encuestas'
@@ -219,6 +219,13 @@ function EncuestaPublica() {
             </button>
           </form>
         )}
+        <p className="mt-6 text-center text-xs text-slate-400">
+          Usamos tus respuestas para mejorar el servicio. Más información en nuestra{' '}
+          <Link to="/privacidad" className="underline underline-offset-2 hover:text-slate-600">
+            Política de Privacidad
+          </Link>
+          .
+        </p>
       </div>
     </div>
   )

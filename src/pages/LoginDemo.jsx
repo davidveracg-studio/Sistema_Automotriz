@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { registrarAccesoFallido, registrarLogin } from '../lib/uso'
@@ -147,6 +147,15 @@ function LoginDemo() {
           </form>
 
           <p className="mt-10 text-center text-xs text-slate-400">VPAI · Datos de demostración, sin información real</p>
+          <p className="mt-2 text-center text-xs text-slate-500">
+            <Link to="/privacidad" className="underline underline-offset-2 hover:text-vpai-blue">
+              Política de Privacidad
+            </Link>
+            {' · '}
+            <Link to="/terminos" className="underline underline-offset-2 hover:text-vpai-blue">
+              Términos y Condiciones
+            </Link>
+          </p>
         </div>
       </div>
     </div>

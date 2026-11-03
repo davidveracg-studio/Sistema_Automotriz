@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { ETIQUETAS_ROL } from '../lib/navegacion'
@@ -80,7 +81,13 @@ function Perfil() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-mm-link dark:text-white">Editar perfil</h1>
-      <p className="mb-6 text-sm text-slate-500">Tus datos en el sistema.</p>
+      <p className="mb-6 text-sm text-slate-500">
+        Tus datos en el sistema. Cómo los tratamos está en la{' '}
+        <Link to="/privacidad" className="font-medium text-vpai-blue underline underline-offset-2">
+          Política de Privacidad
+        </Link>
+        .
+      </p>
 
       <div className="grid max-w-4xl gap-6 lg:grid-cols-2">
         <form onSubmit={guardarNombre} className="card space-y-4 p-5">

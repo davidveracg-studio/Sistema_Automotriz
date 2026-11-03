@@ -21,6 +21,8 @@ import EscanerInspeccion from './pages/EscanerInspeccion'
 import Oportunidades from './pages/Oportunidades'
 import Encuestas from './pages/Encuestas'
 import EncuestaPublica from './pages/EncuestaPublica'
+import PoliticaPrivacidad from './pages/PoliticaPrivacidad'
+import Terminos from './pages/Terminos'
 import Agenda from './pages/Agenda'
 import Informes from './pages/Informes'
 import Bodega from './pages/Bodega'
@@ -92,6 +94,8 @@ function App() {
           <Route path="/login" element={<LoginDemo />} />
           <Route path="/demo" element={<Navigate to="/login" replace />} />
           <Route path="/encuesta/:token" element={<EncuestaPublica />} />
+          <Route path="/privacidad" element={<PoliticaPrivacidad />} />
+          <Route path="/terminos" element={<Terminos />} />
           <Route path="/cambiar-clave" element={paginaProtegida(<CambiarClave />)} />
           <Route path="/" element={paginaProtegida(<Inicio />)} />
           <Route path="/perfil" element={paginaProtegida(<Perfil />)} />
