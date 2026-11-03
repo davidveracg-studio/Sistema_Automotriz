@@ -21,7 +21,23 @@ env:
   VERCEL_PROJECT_ID: prj_r0KjqA4cM31zEiGOyjyJstJA7YLk
 
 jobs:
+  # Las migraciones se aplican ANTES de publicar el frontend, para que la
+  # versión nueva nunca llegue a producción sin las tablas/columnas que usa.
+  # Secret requerido: SUPABASE_DB_URL (cadena del "Session pooler" de Supabase:
+  # Project Settings → Database → Connection string; el host directo es solo
+  # IPv6 y los runners de GitHub no lo alcanzan).
+  migrar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Aplicar migraciones pendientes
+        run: bash scripts/migrar.sh
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
   deploy:
+    needs: migrar
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

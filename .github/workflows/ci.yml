@@ -1,0 +1,45 @@
+# Verificaciones en cada pull request. Es el check que debe exigir la
+# protección de la rama main para poder fusionar (a mano o con auto-merge).
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Numeración de migraciones sin duplicados
+        run: |
+          duplicadas=$(ls supabase/migrations | cut -c1-4 | sort | uniq -d)
+          if [ -n "$duplicadas" ]; then
+            echo "::error::Números de migración repetidos: $duplicadas"
+            exit 1
+          fi
+
+      - name: Lint y verificaciones de esquema
+        run: npm run verificar
+
+      - name: Pruebas del escáner de inspección
+        run: npm run probar:escaner
+
+      - name: Compilar
+        run: npx vite build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
