@@ -9,6 +9,7 @@ import BloqueFirma from '../components/BloqueFirma'
 import BloqueTotales from '../components/BloqueTotales'
 import ResumenInspeccion from '../components/ResumenInspeccion'
 import { formatearPatente } from '../lib/patente'
+import { BUCKET_INSPECCION } from '../lib/escaner/subida'
 
 function nombreCliente(cliente) {
   if (!cliente) return ''
@@ -32,6 +33,7 @@ function OrdenIngreso() {
   const [inspeccion, setInspeccion] = useState(null)
   const [propietario, setPropietario] = useState(null)
   const [cargando, setCargando] = useState(true)
+  const [fotosPorId, setFotosPorId] = useState({})
   const [error, setError] = useState(null)
 
   const cargar = useCallback(async () => {
@@ -76,6 +78,31 @@ function OrdenIngreso() {
   useEffect(() => {
     cargar()
   }, [cargar])
+
+  // Fotos vinculadas a las marcas del diagrama (las que dejó el escáner): el
+  // bucket es privado, así que se piden URLs firmadas.
+  const idsFotosMarcas = (Array.isArray(inspeccion?.diagrama_danos) ? inspeccion.diagrama_danos : [])
+    .flatMap((marca) => marca.fotos || [])
+    .join(',')
+  useEffect(() => {
+    if (!idsFotosMarcas) return undefined
+    let cancelado = false
+    async function cargarFotos() {
+      const { data: filas } = await supabase.from('inspeccion_fotos').select('id, storage_path').in('id', idsFotosMarcas.split(','))
+      if (cancelado || !filas?.length) return
+      const { data: firmadas } = await supabase.storage.from(BUCKET_INSPECCION).createSignedUrls(
+        filas.map((f) => f.storage_path),
+        3600
+      )
+      if (cancelado) return
+      const urlPorRuta = Object.fromEntries((firmadas || []).filter((f) => f.signedUrl).map((f) => [f.path, f.signedUrl]))
+      setFotosPorId(Object.fromEntries(filas.filter((f) => urlPorRuta[f.storage_path]).map((f) => [f.id, urlPorRuta[f.storage_path]])))
+    }
+    cargarFotos()
+    return () => {
+      cancelado = true
+    }
+  }, [idsFotosMarcas])
 
   if (cargando) return <div className="p-6 text-slate-500">Cargando…</div>
   if (error) return <div className="p-6 text-red-600">{error}</div>
@@ -131,7 +158,7 @@ function OrdenIngreso() {
           <div className="mb-3 border-b border-slate-300 pb-3">
             <p className="mb-1 font-bold">Diagrama de daños/detalles:</p>
             <div className="max-w-xs print:max-w-[45%]">
-              <DiagramaVehiculo tipo={vehiculo?.tipo_carroceria} marcas={marcas} onCambio={() => {}} soloLectura />
+              <DiagramaVehiculo tipo={vehiculo?.tipo_carroceria} marcas={marcas} onCambio={() => {}} soloLectura fotosPorId={fotosPorId} />
             </div>
           </div>
         )}

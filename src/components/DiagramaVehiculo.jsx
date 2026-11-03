@@ -122,8 +122,13 @@ function estiloContenedorRecorte(caja) {
   return { ...base, height: '100%', width: 'auto' }
 }
 
-function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura }) {
+// `fotosPorId` (opcional): { fotoId: url } para mostrar, junto a cada marca, las
+// fotos vinculadas a esa observación (las que dejó el escáner de inspección).
+// Una marca `pendiente` es una sugerencia del escáner cuya ubicación en el
+// dibujo todavía no fue confirmada por una persona.
+function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
   const [vistaActiva, setVistaActiva] = useState(null)
+  const [reubicando, setReubicando] = useState(null)
   const recuadros = RECUADROS[tipo] || RECUADROS.sedan
   const imagen = IMAGENES[tipo] || IMAGENES.sedan
   const vistas = DISTRIBUCIONES[tipo] || DISTRIBUCION_ESTANDAR
@@ -133,18 +138,34 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura }) {
     const rect = evento.currentTarget.getBoundingClientRect()
     const x = (evento.clientX - rect.left) / rect.width
     const y = (evento.clientY - rect.top) / rect.height
+    if (reubicando !== null) {
+      // Ubicar una marca existente (p. ej. una sugerida por el escáner): al
+      // fijar su posición queda confirmada.
+      onCambio(marcas.map((marca, i) => (i === reubicando ? { ...marca, vista, x, y, pendiente: false } : marca)))
+      setReubicando(null)
+      return
+    }
     const nueva = { vista, x, y, nota: '' }
     onCambio([...marcas, nueva])
     setVistaActiva(marcas.length)
   }
 
   function actualizarNota(indice, texto) {
-    const copia = marcas.map((marca, i) => (i === indice ? { ...marca, nota: texto } : marca))
+    const copia = marcas.map((marca, i) => (i === indice ? { ...marca, nota: texto, notaDeFoto: false } : marca))
     onCambio(copia)
   }
 
+  function confirmarUbicacion(indice) {
+    onCambio(marcas.map((marca, i) => (i === indice ? { ...marca, pendiente: false } : marca)))
+  }
+
   function quitarMarca(indice) {
+    setReubicando(null)
     onCambio(marcas.filter((_, i) => i !== indice))
+  }
+
+  function fotosDeMarca(marca) {
+    return (marca.fotos || []).map((id) => fotosPorId?.[id]).filter(Boolean)
   }
 
   return (
@@ -186,7 +207,9 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura }) {
                           if (!soloLectura) setVistaActiva(indice)
                         }}
                         title={marca.nota || `Marca ${indice + 1}`}
-                        className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-2 ring-white"
+                        className={`absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ${
+                          marca.pendiente ? 'bg-amber-500 ring-amber-200' : 'bg-red-600 ring-white'
+                        }`}
                         style={{ left: `${marca.x * 100}%`, top: `${marca.y * 100}%` }}
                       >
                         {indice + 1}
@@ -200,32 +223,75 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura }) {
         })}
       </div>
 
+      {!soloLectura && reubicando !== null && (
+        <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-xs text-amber-900">
+          Haz clic en el dibujo, en la vista y el punto donde está el daño de la marca {reubicando + 1}.{' '}
+          <button type="button" onClick={() => setReubicando(null)} className="underline">
+            Cancelar
+          </button>
+        </p>
+      )}
+
       {marcas.length > 0 && (
-        <div className="mt-3 space-y-1">
+        <div className="mt-3 space-y-2">
           {marcas.map((marca, indice) => (
-            <div key={indice} className="flex items-center gap-2 text-sm">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
-                {indice + 1}
-              </span>
-              {soloLectura ? (
-                <span className="text-slate-700">{marca.nota || '(sin nota)'}</span>
-              ) : (
-                <>
-                  <input
-                    value={marca.nota}
-                    onChange={(evento) => actualizarNota(indice, evento.target.value)}
-                    autoFocus={vistaActiva === indice}
-                    placeholder="Ej. rayón, abolladura, parabrisas trizado…"
-                    className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => quitarMarca(indice)}
-                    className="text-xs text-slate-400 hover:text-red-600"
-                  >
-                    quitar
+            <div key={indice} className="text-sm">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${
+                    marca.pendiente ? 'bg-amber-500' : 'bg-red-600'
+                  }`}
+                >
+                  {indice + 1}
+                </span>
+                {soloLectura ? (
+                  <span className="text-slate-700">{marca.nota || '(sin nota)'}</span>
+                ) : (
+                  <>
+                    <input
+                      value={marca.nota}
+                      onChange={(evento) => actualizarNota(indice, evento.target.value)}
+                      autoFocus={vistaActiva === indice}
+                      placeholder="Ej. rayón, abolladura, parabrisas trizado…"
+                      className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setReubicando(indice)}
+                      className="text-xs text-slate-500 hover:text-slate-900"
+                    >
+                      ubicar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => quitarMarca(indice)}
+                      className="text-xs text-slate-400 hover:text-red-600"
+                    >
+                      quitar
+                    </button>
+                  </>
+                )}
+              </div>
+              {!soloLectura && marca.pendiente && (
+                <p className="ml-7 mt-1 text-xs text-amber-800">
+                  Sugerida desde el escáner (vista {marca.vista.replace('_', ' ')}). Ubícala en el dibujo con «ubicar», o{' '}
+                  <button type="button" onClick={() => confirmarUbicacion(indice)} className="font-medium underline">
+                    confirma que está bien ahí
                   </button>
-                </>
+                  .
+                </p>
+              )}
+              {fotosDeMarca(marca).length > 0 && (
+                <div className="ml-7 mt-1 flex flex-wrap gap-1">
+                  {fotosDeMarca(marca).map((url) => (
+                    <img
+                      key={url}
+                      src={url}
+                      alt={`Foto de la marca ${indice + 1}`}
+                      className="h-12 w-16 rounded border border-slate-300 object-cover print:h-16 print:w-24"
+                    />
+                  ))}
+                </div>
               )}
             </div>
           ))}

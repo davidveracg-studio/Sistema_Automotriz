@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
@@ -6,6 +6,7 @@ import { invocarFuncion } from '../lib/invocarFuncion'
 import FirmaCanvas from '../components/FirmaCanvas'
 import EscanerCaptura from '../components/EscanerCaptura'
 import { subirFotos } from '../lib/escaner/subida'
+import { contarPendientes, limpiarMarcas, sincronizarMarcasConFotos } from '../lib/escaner/diagrama'
 import DiagramaVehiculo from '../components/DiagramaVehiculo'
 import EncabezadoDocumento from '../components/EncabezadoDocumento'
 import CampoDato from '../components/CampoDato'
@@ -104,10 +105,30 @@ function NuevoIngreso() {
   const [mostrarEscaner, setMostrarEscaner] = useState(false)
   const [subiendoFotos, setSubiendoFotos] = useState(false)
   const fotosInspeccionRef = useRef([])
+  // Fotos de daño cuya marca sugerida la persona quitó a propósito del diagrama.
+  const fotosIgnoradasRef = useRef(new Set())
 
   useEffect(() => {
     fotosInspeccionRef.current = fotosInspeccion
   }, [fotosInspeccion])
+
+  // Cada foto marcada como daño en el escáner deja una marca sugerida, con su
+  // foto vinculada, en la vista del diagrama que se estaba escaneando.
+  useEffect(() => {
+    setDiagramaDanos((previas) => sincronizarMarcasConFotos(previas, fotosInspeccion, fotosIgnoradasRef.current))
+  }, [fotosInspeccion, diagramaDanos])
+
+  const fotosPorId = useMemo(() => Object.fromEntries(fotosInspeccion.map((foto) => [foto.id, foto.url])), [fotosInspeccion])
+
+  function cambiarDiagrama(nuevas) {
+    const siguen = new Set(nuevas.flatMap((marca) => marca.fotos || []))
+    diagramaDanos.forEach((marca) =>
+      (marca.fotos || []).forEach((id) => {
+        if (!siguen.has(id)) fotosIgnoradasRef.current.add(id)
+      })
+    )
+    setDiagramaDanos(nuevas)
+  }
   useEffect(
     () => () => {
       fotosInspeccionRef.current.forEach((f) => URL.revokeObjectURL(f.url))
@@ -326,6 +347,15 @@ function NuevoIngreso() {
 
   async function manejarEnvioFinal(evento) {
     evento.preventDefault()
+    // El diagrama es parte del documento que firma el cliente: una marca
+    // sugerida por el escáner sin ubicar (en el centro de la vista) induciría a error.
+    const pendientes = contarPendientes(diagramaDanos)
+    if (pendientes > 0) {
+      setError(
+        `Hay ${pendientes} marca(s) sugerida(s) por el escáner sin ubicar en el diagrama. Ubícalas con «ubicar» o confírmalas antes de registrar el ingreso.`
+      )
+      return
+    }
     setGuardando(true)
     setError(null)
 
@@ -403,7 +433,7 @@ function NuevoIngreso() {
       const { error: errorInspeccion } = await supabase.from('inspecciones_ingreso').insert({
         trabajo_id: trabajo.id,
         cliente_solicita: clienteSolicita || null,
-        diagrama_danos: diagramaDanos.length > 0 ? diagramaDanos : null,
+        diagrama_danos: diagramaDanos.length > 0 ? limpiarMarcas(diagramaDanos) : null,
         danos_visibles: danosVisibles || null,
         accesorios: accesorios || null,
         observaciones: observaciones || null,
@@ -562,7 +592,7 @@ function NuevoIngreso() {
             <div className="mb-3 border-b border-slate-300 pb-3">
               <p className="mb-1 font-bold">Diagrama de daños/detalles:</p>
               <div className="max-w-xs print:max-w-[45%]">
-                <DiagramaVehiculo tipo={tipoCarroceria} marcas={diagramaDanos} onCambio={() => {}} soloLectura />
+                <DiagramaVehiculo tipo={tipoCarroceria} marcas={diagramaDanos} onCambio={() => {}} soloLectura fotosPorId={fotosPorId} />
               </div>
             </div>
           )}
@@ -859,7 +889,7 @@ function NuevoIngreso() {
 
           <div className="mb-4 rounded border border-slate-200 p-3">
             <p className="mb-2 text-sm font-medium text-slate-700">Diagrama de daños/detalles al ingreso</p>
-            <DiagramaVehiculo tipo={tipoCarroceria} marcas={diagramaDanos} onCambio={setDiagramaDanos} />
+            <DiagramaVehiculo tipo={tipoCarroceria} marcas={diagramaDanos} onCambio={cambiarDiagrama} fotosPorId={fotosPorId} />
           </div>
 
           <div className="mb-4 flex gap-4 text-sm">
