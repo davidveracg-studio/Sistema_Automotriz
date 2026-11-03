@@ -119,22 +119,23 @@ const foto = (id, zona, subzona, extra = {}) => ({ id, zona, subzona, esDano: fa
 assert.equal(vistaDeFoto(foto('a', 'exterior', 'frontal')), 'frontal')
 assert.equal(vistaDeFoto(foto('a', 'exterior', 'trasera')), 'posterior')
 assert.equal(vistaDeFoto(foto('a', 'exterior', 'techo')), 'superior')
-assert.equal(vistaDeFoto(foto('a', 'exterior', 'esquina_tra_der')), 'lateral_der')
+// (sedán: el dibujo que muestra el lado derecho del auto es 'lateral_izq'; ver diagramaZonas.js)
+assert.equal(vistaDeFoto(foto('a', 'exterior', 'esquina_tra_der')), 'lateral_izq')
 assert.equal(vistaDeFoto(foto('a', 'interior', 'tablero')), null, 'el interior no tiene vista en el diagrama')
 
 // Una foto de daño crea una marca pendiente en la vista de su zona, con la foto vinculada.
 let marcas = []
-const fd1 = foto('f1', 'exterior', 'lateral_izq', { esDano: true, nota: 'raya en puerta' })
-marcas = sincronizarMarcasConFotos(marcas, [fd1, foto('f2', 'exterior', 'frontal')])
+const fd1 = foto('f1', 'exterior', 'frontal', { esDano: true, nota: 'raya en puerta' })
+marcas = sincronizarMarcasConFotos(marcas, [fd1, foto('f2', 'exterior', 'trasera')])
 assert.equal(marcas.length, 1, 'solo la foto marcada como daño genera marca')
 assert.deepEqual(
   { vista: marcas[0].vista, fotos: marcas[0].fotos, nota: marcas[0].nota, pendiente: marcas[0].pendiente },
-  { vista: 'lateral_izq', fotos: ['f1'], nota: 'raya en puerta', pendiente: true }
+  { vista: 'frontal', fotos: ['f1'], nota: 'raya en puerta', pendiente: true }
 )
 assert.equal(contarPendientes(marcas), 1)
 
 // Idempotente: sin cambios devuelve la misma lista (evita bucles de render).
-assert.equal(sincronizarMarcasConFotos(marcas, [fd1, foto('f2', 'exterior', 'frontal')]), marcas)
+assert.equal(sincronizarMarcasConFotos(marcas, [fd1, foto('f2', 'exterior', 'trasera')]), marcas)
 
 // Mientras está pendiente, la nota sigue a la de la foto; una vez confirmada ya no.
 const fd1b = { ...fd1, nota: 'raya profunda en puerta' }
@@ -165,4 +166,56 @@ assert.deepEqual(limpiarMarcas([{ vista: 'frontal', x: 0.5, y: 0.5, nota: 'n', f
   { vista: 'frontal', x: 0.2, y: 0.3, nota: 'a mano' },
 ])
 
-console.log('✓ Escáner: nitidez, cambio de escena, decisión de captura y puente con el diagrama correctos.')
+// --- Piezas del vehículo sobre los dibujos --------------------------------
+import { ETIQUETA_PIEZA, ZONAS, centroide, etiquetaDeVista, ladoDeVista, vistaDeLado, zonaEn, zonasDeVista } from '../src/lib/diagramaZonas.js'
+
+const TIPOS = ['sedan', 'suv', 'hatchback', 'pickup', 'furgon']
+const VISTAS = ['superior', 'frontal', 'posterior', 'lateral_der', 'lateral_izq']
+for (const tipo of TIPOS) {
+  for (const vista of VISTAS) {
+    const zonas = zonasDeVista(tipo, vista)
+    assert.ok(zonas.length >= 3, `${tipo}/${vista} tiene zonas`)
+    const ids = zonas.map((z) => z.id)
+    assert.equal(new Set(ids).size, ids.length, `${tipo}/${vista}: ids de pieza sin repetir`)
+    for (const z of zonas) {
+      assert.ok(ETIQUETA_PIEZA[z.id], `${z.id} tiene rótulo`)
+      assert.ok(z.poligono.length >= 3 && z.poligono.every(([x, y]) => x >= 0 && x <= 1 && y >= 0 && y <= 1), `${tipo}/${vista}/${z.id} dentro de la vista`)
+      const [cx, cy] = centroide(z)
+      assert.ok(cx >= 0 && cx <= 1 && cy >= 0 && cy <= 1)
+    }
+  }
+}
+
+// Una pieza se identifica por el punto: parabrisas y capó del sedán (frontal), lado de las puertas.
+assert.equal(zonaEn('sedan', 'frontal', 0.5, 0.2).id, 'parabrisas')
+assert.equal(zonaEn('sedan', 'frontal', 0.5, 0.4).id, 'capo')
+assert.equal(zonaEn('sedan', 'frontal', 0.5, 0.75).id, 'parachoques_del')
+assert.equal(zonaEn('sedan', 'frontal', 0.2, 0.53).id, 'faro_der', 'en la imagen frontal, la izquierda de la imagen es el lado DERECHO del auto')
+assert.equal(zonaEn('sedan', 'posterior', 0.2, 0.5).id, 'luz_tra_izq', 'en la trasera, la izquierda de la imagen es el lado IZQUIERDO')
+assert.equal(zonaEn('sedan', 'lateral_der', 0.4, 0.55).id, 'puerta_del_izq', 'sedán: el dibujo "lateral_der" muestra el lado izquierdo (frente a la izquierda)')
+assert.equal(zonaEn('sedan', 'lateral_izq', 0.6, 0.55).id, 'puerta_del_der')
+assert.equal(zonaEn('hatchback', 'lateral_der', 0.6, 0.55).id, 'puerta_del_der', 'hatchback: su dibujo "lateral_der" sí es el lado derecho (frente a la derecha)')
+assert.equal(zonaEn('pickup', 'superior', 0.85, 0.5).id, 'caja')
+assert.equal(zonaEn('furgon', 'posterior', 0.35, 0.4).id, 'portalon_izq')
+assert.equal(zonaEn('sedan', 'frontal', 0.01, 0.01), null, 'fuera de toda pieza')
+assert.equal(zonaEn('desconocido', 'frontal', 0.5, 0.2).id, 'parabrisas', 'tipo desconocido usa el sedán')
+
+// Rótulos y vistas según el lado REAL que muestra cada dibujo.
+assert.equal(ladoDeVista('sedan', 'lateral_der'), 'izq')
+assert.equal(ladoDeVista('hatchback', 'lateral_der'), 'der')
+assert.equal(etiquetaDeVista('sedan', 'lateral_der', 'Lateral derecho'), 'Lateral izquierdo')
+assert.equal(etiquetaDeVista('hatchback', 'lateral_der', 'Lateral derecho'), 'Lateral derecho')
+assert.equal(etiquetaDeVista('sedan', 'frontal', 'Frontal'), 'Frontal')
+assert.equal(vistaDeLado('sedan', 'izq'), 'lateral_der')
+assert.equal(vistaDeLado('hatchback', 'izq'), 'lateral_izq')
+
+// El escáner manda la foto al dibujo que muestra el lado correcto de CADA tipo.
+assert.equal(vistaDeFoto(foto('x', 'exterior', 'lateral_izq'), 'sedan'), 'lateral_der')
+assert.equal(vistaDeFoto(foto('x', 'exterior', 'lateral_izq'), 'hatchback'), 'lateral_izq')
+assert.equal(vistaDeFoto(foto('x', 'exterior', 'esquina_tra_der'), 'suv'), 'lateral_izq')
+assert.equal(vistaDeFoto(foto('x', 'exterior', 'esquina_tra_der'), 'hatchback'), 'lateral_der')
+assert.equal(sincronizarMarcasConFotos([], [foto('h', 'exterior', 'lateral_der', { esDano: true })], new Set(), 'hatchback')[0].vista, 'lateral_der')
+assert.equal(sincronizarMarcasConFotos([], [foto('h', 'exterior', 'lateral_der', { esDano: true })], new Set(), 'sedan')[0].vista, 'lateral_izq')
+assert.ok(ZONAS.sedan.superior)
+
+console.log('✓ Escáner: nitidez, cambio de escena, decisión de captura, puente con el diagrama y piezas del vehículo correctos.')

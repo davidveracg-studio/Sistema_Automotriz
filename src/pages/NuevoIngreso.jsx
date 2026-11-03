@@ -115,8 +115,8 @@ function NuevoIngreso() {
   // Cada foto marcada como daño en el escáner deja una marca sugerida, con su
   // foto vinculada, en la vista del diagrama que se estaba escaneando.
   useEffect(() => {
-    setDiagramaDanos((previas) => sincronizarMarcasConFotos(previas, fotosInspeccion, fotosIgnoradasRef.current))
-  }, [fotosInspeccion, diagramaDanos])
+    setDiagramaDanos((previas) => sincronizarMarcasConFotos(previas, fotosInspeccion, fotosIgnoradasRef.current, tipoCarroceria))
+  }, [fotosInspeccion, diagramaDanos, tipoCarroceria])
 
   const fotosPorId = useMemo(() => Object.fromEntries(fotosInspeccion.map((foto) => [foto.id, foto.url])), [fotosInspeccion])
 
