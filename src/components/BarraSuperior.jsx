@@ -12,8 +12,9 @@ import Icono from './Icono'
 
 const ROLES_DEMO = Object.keys(CORREO_DEMO_POR_ROL)
 
+// Botones redondos con fondo azul suave al pasar el cursor (estilo MaterialM).
 const BOTON_ICONO =
-  'relative grid h-9 w-9 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-deep'
+  'relative grid h-10 w-10 place-items-center rounded-full text-mm-link transition-colors hover:bg-brand-accent/10 hover:text-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent dark:text-mm-darklink dark:hover:bg-brand-accent/20 dark:hover:text-brand-accentSoft'
 
 // Menú "Mi cuenta": datos de quien inició sesión, editar perfil y cerrar sesión.
 function MenuCuenta() {
@@ -67,9 +68,9 @@ function MenuCuenta() {
         aria-haspopup="menu"
         aria-expanded={abierto}
         onClick={() => setAbierto((valor) => !valor)}
-        className="flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-deep"
+        className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 transition-colors hover:bg-brand-accent/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent dark:hover:bg-brand-accent/20"
       >
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-deep text-sm font-semibold text-white">
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-white">
           {nombre.slice(0, 1).toUpperCase()}
         </span>
         <span className="hidden text-left leading-tight md:block">
@@ -83,7 +84,7 @@ function MenuCuenta() {
         <div
           role="menu"
           aria-label="Mi cuenta"
-          className="absolute right-0 top-full z-40 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+          className="absolute right-0 top-full z-40 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl"
         >
           <div className="border-b border-slate-100 px-3 pb-3 pt-2">
             <p className="truncate text-sm font-semibold text-slate-900">{nombre}</p>
@@ -175,11 +176,11 @@ function BarraSuperior() {
   const oscuro = tema === 'oscuro'
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-4 print:hidden">
+    <header className="sticky top-0 z-30 flex h-[70px] shrink-0 items-center gap-2 bg-mm-lightgray/85 px-4 backdrop-blur sm:px-6 dark:bg-mm-dark/85 print:hidden">
       <BuscadorGlobal />
 
       <div className="ml-auto flex items-center gap-1">
-        <Link to="/ingresos/nuevo" onClick={empezarNuevoIngreso} className="btn-primary mr-2 hidden whitespace-nowrap lg:inline-flex">
+        <Link to="/ingresos/nuevo" onClick={empezarNuevoIngreso} className="btn-primary mr-2 hidden whitespace-nowrap rounded-full px-5 lg:inline-flex">
           <Icono nombre="mas" className="h-4 w-4" />
           Nuevo ingreso
         </Link>

@@ -52,7 +52,7 @@ function Layout({ children }) {
   // quedan siempre con su aspecto de siempre.
   return (
     <div className={oscuro ? 'dark' : ''} style={{ colorScheme: oscuro ? 'dark' : 'light' }}>
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-mm-lightgray dark:bg-mm-dark">
         <Menu />
         <div className="flex min-w-0 flex-1 flex-col">
           <BarraSuperior />
