@@ -339,7 +339,7 @@ function EscanerInspeccion() {
     setGuardando(false)
     if (fotosRef.current.every((f) => f.estado === 'subida')) {
       await borrarBorrador(id)
-      navigate(`/trabajos/${id}`)
+      navigate(`/trabajos/${id}`, { state: { analizar: true } })
     } else {
       setError('Algunas fotos no se pudieron subir. Revisa la conexión y vuelve a intentar: las ya subidas no se duplican.')
     }

@@ -7,6 +7,7 @@ import EncabezadoDocumento from '../components/EncabezadoDocumento'
 import CampoDato from '../components/CampoDato'
 import BloqueFirma from '../components/BloqueFirma'
 import BloqueTotales from '../components/BloqueTotales'
+import ResumenInspeccion from '../components/ResumenInspeccion'
 import { formatearPatente } from '../lib/patente'
 
 function nombreCliente(cliente) {
@@ -134,6 +135,8 @@ function OrdenIngreso() {
             </div>
           </div>
         )}
+
+        <ResumenInspeccion trabajoId={id} />
 
         <div className="mb-3 border-b border-slate-300 pb-3 text-xs">
           <p className="mb-1 font-bold">POLITICAS DE SERVICIO</p>

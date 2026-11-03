@@ -21,6 +21,17 @@ MODO="${1:-aplicar}"
 
 : "${SUPABASE_DB_URL:?Falta SUPABASE_DB_URL (cadena de conexión de Postgres)}"
 
+# Sin esquema, psql toma el valor como nombre de base y se conecta al socket
+# local, con un error que no dice la causa. Se valida el formato sin mostrar el
+# valor (lleva la contraseña).
+case "$SUPABASE_DB_URL" in
+  postgres://*|postgresql://*) ;;
+  *)
+    echo "::error::SUPABASE_DB_URL no es una URI de Postgres: debe empezar con postgresql:// (cadena del Session pooler de Supabase)."
+    exit 1
+    ;;
+esac
+
 sql() { psql "$SUPABASE_DB_URL" -X -q -v ON_ERROR_STOP=1 "$@"; }
 
 sql -c "create table if not exists public.migraciones_aplicadas (
