@@ -26,6 +26,7 @@ import { respuestaJson, respuestaPreflight } from '../_shared/cors.ts'
 import { formatearPatente } from '../_shared/patente.ts'
 import { enviarCorreo } from '../_shared/brevo.ts'
 import { correoValido, firmarCorreoAsesorDemo, normalizarCorreo } from '../_shared/demo.ts'
+import { igualesEnTiempoConstante } from '../_shared/seguridad.ts'
 
 interface EncuestaPendiente {
   id: string
@@ -175,7 +176,7 @@ Deno.serve(async (req) => {
   // Quién llama: el service role (job de sistema) o una persona con sesión.
   const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
   let empresaDelUsuario: string | null = null
-  if (!jwt || jwt !== Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) {
+  if (!jwt || !igualesEnTiempoConstante(jwt, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')) {
     // Mismo patrón que whatsapp y facturacion-emitir: la sesión se valida con
     // un cliente de clave anónima y el JWT de la persona (con el cliente de
     // service role, getUser(jwt) no reconoce la sesión).

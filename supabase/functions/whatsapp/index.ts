@@ -35,6 +35,7 @@
 // reprocesar si algún nombre de campo resulta distinto en producción real.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { sincronizarCitasPendientes } from '../_shared/clickupCitas.ts'
+import { enmascararTelefono, errorSeguro, igualesEnTiempoConstante } from '../_shared/seguridad.ts'
 
 const GRAPH_BASE = 'https://graph.facebook.com/v23.0'
 
@@ -117,7 +118,7 @@ function manejarVerificacion(url: URL): Response {
   const modo = url.searchParams.get('hub.mode')
   const token = url.searchParams.get('hub.verify_token')
   const desafio = url.searchParams.get('hub.challenge')
-  if (modo === 'subscribe' && token && token === Deno.env.get('WA_VERIFY_TOKEN')) {
+  if (modo === 'subscribe' && token && igualesEnTiempoConstante(token, Deno.env.get('WA_VERIFY_TOKEN') ?? '')) {
     return new Response(desafio ?? '', { status: 200 })
   }
   return new Response('Verificación fallida.', { status: 403 })
@@ -141,7 +142,7 @@ async function firmaValida(cuerpoCrudo: string, firmaRecibida: string | null): P
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('')
 
-  return firmaHex === firmaRecibida
+  return igualesEnTiempoConstante(firmaHex, firmaRecibida)
 }
 
 function json(cuerpo: unknown, status = 200) {
@@ -226,7 +227,7 @@ async function registrarContacto(
     p_wa_id: waId,
     p_nombre_whatsapp: nombreWhatsapp,
   })
-  if (error) console.error('whatsapp: error registrando contacto', error)
+  if (error) console.error('whatsapp: error registrando contacto', errorSeguro(error))
 }
 
 // deno-lint-ignore no-explicit-any
@@ -242,7 +243,7 @@ async function marcarSincronizacion(supabase: any, phoneNumberId: string, tipo: 
 
   if (existente) {
     const { error } = await supabase.from('whatsapp_sincronizaciones').update(cambios).eq('id', existente.id)
-    if (error) console.error('whatsapp: error actualizando sincronización', error)
+    if (error) console.error('whatsapp: error actualizando sincronización', errorSeguro(error))
     return
   }
 
@@ -254,7 +255,7 @@ async function marcarSincronizacion(supabase: any, phoneNumberId: string, tipo: 
   const { error } = await supabase
     .from('whatsapp_sincronizaciones')
     .insert({ empresa_id: empresaId, phone_number_id: phoneNumberId, tipo, ...cambios })
-  if (error) console.error('whatsapp: error creando sincronización', error)
+  if (error) console.error('whatsapp: error creando sincronización', errorSeguro(error))
 }
 
 // ---------------------------------------------------------------------------
@@ -291,7 +292,7 @@ async function procesarMensajes(supabase: any, valor: Record<string, any>) {
       },
       { onConflict: 'wamid', ignoreDuplicates: true }
     )
-    if (error) console.error('whatsapp: error insertando mensaje entrante', error)
+    if (error) console.error('whatsapp: error insertando mensaje entrante', errorSeguro(error))
 
     const contacto = await obtenerContacto(supabase, phoneNumberId, mensaje.from)
     await manejarBot(supabase, contacto, mensaje)
@@ -299,7 +300,7 @@ async function procesarMensajes(supabase: any, valor: Record<string, any>) {
 
   for (const estado of valor.statuses ?? []) {
     const { error } = await supabase.from('whatsapp_mensajes').update({ estado_entrega: estado.status }).eq('wamid', estado.id)
-    if (error) console.error('whatsapp: error actualizando estado de entrega', error)
+    if (error) console.error('whatsapp: error actualizando estado de entrega', errorSeguro(error))
   }
 }
 
@@ -335,7 +336,7 @@ async function procesarEcos(supabase: any, valor: Record<string, any>) {
       },
       { onConflict: 'wamid', ignoreDuplicates: true }
     )
-    if (error) console.error('whatsapp: error insertando eco de mensaje', error)
+    if (error) console.error('whatsapp: error insertando eco de mensaje', errorSeguro(error))
   }
 }
 
@@ -399,7 +400,7 @@ async function procesarHistorial(supabase: any, valor: Record<string, any>) {
           },
           { onConflict: 'wamid', ignoreDuplicates: true }
         )
-        if (error) console.error('whatsapp: error insertando mensaje de historial', error)
+        if (error) console.error('whatsapp: error insertando mensaje de historial', errorSeguro(error))
       }
     }
   }
@@ -425,7 +426,7 @@ async function procesarSincronizacionContactos(supabase: any, valor: Record<stri
       const nombre = item.contact?.full_name || item.contact?.first_name || null
       await registrarContacto(supabase, empresaId, phoneNumberId, item.contact?.phone_number, nombre)
     } else if (item.action === 'remove') {
-      console.log(`whatsapp: contacto eliminado en la app del celular (${item.contact?.phone_number ?? 'desconocido'})`)
+      console.log(`whatsapp: contacto eliminado en la app del celular (${enmascararTelefono(item.contact?.phone_number)})`)
     }
   }
 }
@@ -449,7 +450,7 @@ async function procesarEventoCuenta(supabase: any, wabaIdEntrada: string, valor:
     iniciado_por: valor?.disconnection_info?.initiated_by ?? null,
     payload_original: valor,
   })
-  if (error) console.error('whatsapp: error insertando evento de cuenta', error)
+  if (error) console.error('whatsapp: error insertando evento de cuenta', errorSeguro(error))
 
   if (valor?.event === 'PARTNER_REMOVED' && empresaId) {
     const { error: errorNotif } = await supabase.from('notificaciones').insert({
@@ -458,7 +459,7 @@ async function procesarEventoCuenta(supabase: any, wabaIdEntrada: string, valor:
       titulo: 'WhatsApp desconectado',
       mensaje: `El número quedó desconectado de la API (WABA ${wabaId}). Hay que repetir la conexión desde Embedded Signup dentro de las próximas 24 horas para no perder mensajes.`,
     })
-    if (errorNotif) console.error('whatsapp: error creando notificación de desconexión', errorNotif)
+    if (errorNotif) console.error('whatsapp: error creando notificación de desconexión', errorSeguro(errorNotif))
   }
 }
 
@@ -535,7 +536,7 @@ async function manejarEnvio(supabase: any, empresaId: string, body: Record<strin
       },
       { onConflict: 'wamid', ignoreDuplicates: true }
     )
-    if (error) console.error('whatsapp: error registrando mensaje enviado', error)
+    if (error) console.error('whatsapp: error registrando mensaje enviado', errorSeguro(error))
 
     await registrarContacto(supabase, empresaId, phoneNumberId, waId, null)
     await supabase.from('whatsapp_contactos').update({ bot_pausado: true }).eq('phone_number_id', phoneNumberId).eq('wa_id', waId)
@@ -589,7 +590,7 @@ async function enviarBot(supabase: any, contacto: any, texto: string) {
     },
     { onConflict: 'wamid', ignoreDuplicates: true }
   )
-  if (error) console.error('whatsapp: error registrando mensaje del bot', error)
+  if (error) console.error('whatsapp: error registrando mensaje del bot', errorSeguro(error))
 }
 
 // deno-lint-ignore no-explicit-any
@@ -598,7 +599,7 @@ async function actualizarBotEstado(supabase: any, contacto: any, botEstado: stri
     .from('whatsapp_contactos')
     .update({ bot_estado: botEstado, bot_contexto: botContexto, ...extra })
     .eq('id', contacto.id)
-  if (error) console.error('whatsapp: error actualizando estado del bot', error)
+  if (error) console.error('whatsapp: error actualizando estado del bot', errorSeguro(error))
 }
 
 // Interpreta la respuesta numérica del cliente contra las opciones
@@ -858,7 +859,7 @@ async function confirmarReservaBot(
       .single()
 
     if (errorCliente || !nuevoCliente) {
-      console.error('whatsapp: error creando cliente desde el bot', errorCliente)
+      console.error('whatsapp: error creando cliente desde el bot', errorSeguro(errorCliente))
       await enviarBot(supabase, contacto, 'Tuvimos un problema agendando tu hora. Un asesor te va a contactar para coordinar directamente.')
       await actualizarBotEstado(supabase, contacto, null, null, { bot_pausado: true })
       return
@@ -881,7 +882,7 @@ async function confirmarReservaBot(
   })
 
   if (errorCita) {
-    console.error('whatsapp: error agendando cita desde el bot', errorCita)
+    console.error('whatsapp: error agendando cita desde el bot', errorSeguro(errorCita))
     await enviarBot(supabase, contacto, 'Tuvimos un problema agendando tu hora. Un asesor te va a contactar para coordinar directamente.')
     await actualizarBotEstado(supabase, contacto, null, null, { bot_pausado: true })
     return
@@ -900,7 +901,7 @@ async function confirmarReservaBot(
   try {
     await sincronizarCitasPendientes(supabase, contacto.empresa_id)
   } catch (error) {
-    console.error('whatsapp: no se pudo enviar la cita a ClickUp', error)
+    console.error('whatsapp: no se pudo enviar la cita a ClickUp', errorSeguro(error))
   }
 }
 
