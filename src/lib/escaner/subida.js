@@ -74,3 +74,30 @@ export async function subirFoto({ foto, trabajo, usuario }) {
     { esDefinitivo: esErrorDefinitivo }
   )
 }
+
+// Sube varias fotos con un pequeño paralelismo. `alCambiar(fotoId, cambios)`
+// se llama con { estado: 'subiendo' | 'subida' | 'error', mensajeError? } para
+// que la pantalla muestre el avance. Una foto que falla no detiene las demás.
+// Devuelve { subidas, fallidas } con el resultado de ESTA corrida: quien llama
+// decide con eso, no leyendo el estado de React, que aún no se actualizó.
+export async function subirFotos({ fotos, trabajo, usuario, alCambiar, paralelo = 3 }) {
+  let siguiente = 0
+  let subidas = 0
+  let fallidas = 0
+  async function trabajador() {
+    while (siguiente < fotos.length) {
+      const foto = fotos[siguiente++]
+      alCambiar(foto.id, { estado: 'subiendo' })
+      try {
+        await subirFoto({ foto, trabajo, usuario })
+        alCambiar(foto.id, { estado: 'subida' })
+        subidas++
+      } catch (e) {
+        alCambiar(foto.id, { estado: 'error', mensajeError: e?.message || String(e) })
+        fallidas++
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(paralelo, fotos.length) }, trabajador))
+  return { subidas, fallidas }
+}

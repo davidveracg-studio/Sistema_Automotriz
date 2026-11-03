@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { invocarFuncion } from '../lib/invocarFuncion'
 import FirmaCanvas from '../components/FirmaCanvas'
+import EscanerCaptura from '../components/EscanerCaptura'
+import { subirFotos } from '../lib/escaner/subida'
 import DiagramaVehiculo from '../components/DiagramaVehiculo'
 import EncabezadoDocumento from '../components/EncabezadoDocumento'
 import CampoDato from '../components/CampoDato'
@@ -96,6 +98,22 @@ function NuevoIngreso() {
   const [observaciones, setObservaciones] = useState('')
   const [respuestasDescubrimiento, setRespuestasDescubrimiento] = useState({})
   const [firmaPng, setFirmaPng] = useState(null)
+  // Fotos del escáner de inspección: viven en el teléfono hasta que la OT
+  // existe; se suben al registrar el ingreso (el video nunca se guarda).
+  const [fotosInspeccion, setFotosInspeccion] = useState([])
+  const [mostrarEscaner, setMostrarEscaner] = useState(false)
+  const [subiendoFotos, setSubiendoFotos] = useState(false)
+  const fotosInspeccionRef = useRef([])
+
+  useEffect(() => {
+    fotosInspeccionRef.current = fotosInspeccion
+  }, [fotosInspeccion])
+  useEffect(
+    () => () => {
+      fotosInspeccionRef.current.forEach((f) => URL.revokeObjectURL(f.url))
+    },
+    []
+  )
   const [firmadoPor, setFirmadoPor] = useState('')
   const [firmadoCelular, setFirmadoCelular] = useState('')
   const [rolPersonaPresente, setRolPersonaPresente] = useState('dueno')
@@ -290,6 +308,22 @@ function NuevoIngreso() {
     }
   }
 
+  function actualizarFotoInspeccion(fotoId, cambios) {
+    setFotosInspeccion((previas) => previas.map((f) => (f.id === fotoId ? { ...f, ...cambios } : f)))
+  }
+
+  async function reintentarFotos() {
+    if (!otCreada) return
+    setSubiendoFotos(true)
+    await subirFotos({
+      fotos: fotosInspeccionRef.current.filter((f) => f.estado !== 'subida'),
+      trabajo: otCreada,
+      usuario,
+      alCambiar: actualizarFotoInspeccion,
+    })
+    setSubiendoFotos(false)
+  }
+
   async function manejarEnvioFinal(evento) {
     evento.preventDefault()
     setGuardando(true)
@@ -421,6 +455,15 @@ function NuevoIngreso() {
         // crear después (el asesor no debe quedar bloqueado por esto).
       }
 
+      // Fotos del escáner: se suben ahora que la OT existe. Un fallo de red no
+      // deshace el ingreso (ya está guardado): las que fallen quedan en la
+      // pantalla de confirmación con un botón para reintentar.
+      if (fotosInspeccion.length > 0) {
+        setSubiendoFotos(true)
+        await subirFotos({ fotos: fotosInspeccion, trabajo, usuario, alCambiar: actualizarFotoInspeccion })
+        setSubiendoFotos(false)
+      }
+
       setOtCreada(trabajo)
     } catch {
       setError('No se pudo conectar con el servidor. Revisa la conexión e intenta de nuevo.')
@@ -444,6 +487,22 @@ function NuevoIngreso() {
         <div className="mb-4 rounded border border-green-300 bg-green-50 p-4 text-green-900 print:hidden">
           <p className="font-medium">Ingreso registrado — OT {otCreada.numero_ot}</p>
           {avisoKilometraje && <p className="mt-1 text-sm text-amber-700">{avisoKilometraje}</p>}
+          {fotosInspeccion.length > 0 && (
+            <p className="mt-1 text-sm">
+              Fotos de inspección: {fotosInspeccion.filter((f) => f.estado === 'subida').length} de {fotosInspeccion.length}{' '}
+              guardadas en la OT.
+              {fotosInspeccion.some((f) => f.estado !== 'subida') && (
+                <button
+                  type="button"
+                  onClick={reintentarFotos}
+                  disabled={subiendoFotos}
+                  className="ml-2 rounded border border-amber-400 bg-white px-2 py-0.5 text-xs font-medium text-amber-800 hover:bg-amber-50 disabled:opacity-50"
+                >
+                  {subiendoFotos ? 'Subiendo…' : 'Reintentar las que faltan'}
+                </button>
+              )}
+            </p>
+          )}
           <div className="mt-3 flex gap-2">
             <button
               type="button"
@@ -454,6 +513,7 @@ function NuevoIngreso() {
             </button>
             <Link
               to={`/trabajos/${otCreada.id}`}
+              state={fotosInspeccion.length > 0 ? { analizar: true } : undefined}
               className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
             >
               Ver OT
@@ -955,6 +1015,30 @@ function NuevoIngreso() {
             </div>
           )}
 
+          <div className="mb-4 rounded border border-slate-200 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium text-slate-700">Fotos de inspección (escáner)</p>
+                <p className="text-xs text-slate-500">
+                  Recorre el vehículo con la cámara y se toman las fotos solas; el video no se guarda.
+                  {fotosInspeccion.length > 0 && ` ${fotosInspeccion.length} foto(s) listas para guardar con el ingreso.`}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMostrarEscaner((visible) => !visible)}
+                className="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                {mostrarEscaner ? 'Ocultar escáner' : fotosInspeccion.length > 0 ? 'Abrir escáner' : 'Escanear vehículo'}
+              </button>
+            </div>
+            {mostrarEscaner && (
+              <div className="mt-3">
+                <EscanerCaptura fotos={fotosInspeccion} setFotos={setFotosInspeccion} />
+              </div>
+            )}
+          </div>
+
           <div className="mb-4">
             <label className="mb-1 block text-sm font-medium text-slate-700">Firma de conformidad</label>
             <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -989,7 +1073,7 @@ function NuevoIngreso() {
             disabled={guardando}
             className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
           >
-            {guardando ? 'Guardando…' : 'Registrar ingreso'}
+            {subiendoFotos ? 'Subiendo fotos…' : guardando ? 'Guardando…' : 'Registrar ingreso'}
           </button>
         </form>
       )}
