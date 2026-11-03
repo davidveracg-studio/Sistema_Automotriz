@@ -1,10 +1,15 @@
 # Verificaciones en cada pull request. Es el check que debe exigir la
 # protección de la rama main para poder fusionar (a mano o con auto-merge).
+# También corre al hacer push de las ramas de desarrollo: un PR abierto por
+# Actions (pr-automatico.yml) no dispara el evento pull_request, y así el
+# check queda igual asociado al último commit del PR.
 name: CI
 
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: ['ccr-*', 'claude/**']
   workflow_dispatch:
 
 concurrency:
