@@ -294,7 +294,7 @@ function TarjetaOt({ ot, estado, color, subtareas, elemento, nombreTecnico, arra
           </p>
         </div>
         {prioridad && (
-          <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ring-1 ${prioridad.clases}`}>{prioridad.etiqueta}</span>
+          <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ring-1 ${prioridad.clases}`}>{prioridad.etiqueta}</span>
         )}
       </div>
 

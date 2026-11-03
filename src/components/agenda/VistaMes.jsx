@@ -37,7 +37,7 @@ function VistaMes({ fecha, citas, tiposIsla, horarios, corteMediodia, personal, 
 
   return (
     <div className="overflow-x-auto">
-      <div className="min-w-[720px] overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="min-w-[720px] overflow-hidden rounded-2xl bg-white shadow-mm print:shadow-none">
         <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-medium text-slate-500">
           {ENCABEZADOS.map((nombre) => (
             <div key={nombre} className="px-2 py-1.5">

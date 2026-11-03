@@ -74,7 +74,7 @@ function Turnos() {
 
   return (
     <div className="p-6">
-      <h1 className="mb-1 text-xl font-semibold text-slate-900">Turnos y asistencia</h1>
+      <h1 className="mb-1 text-2xl font-bold text-mm-link dark:text-white">Turnos y asistencia</h1>
       <p className="mb-4 text-sm text-slate-500">Rotación de grupos, importación del reloj control y jornadas fuera de turno.</p>
 
       <div role="tablist" aria-label="Secciones de turnos" className="flex flex-wrap gap-1 border-b border-slate-200">
@@ -262,9 +262,9 @@ function PanelResumen({ empresaId, usuarioId, personal }) {
       ) : (
         <>
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Resumen del período</h2>
-          <div className="mb-6 overflow-x-auto rounded border border-slate-200">
+          <div className="mb-6 overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500">
+              <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
                 <tr>
                   <th className="px-3 py-2">Persona</th>
                   <th className="px-3 py-2">Grupo</th>
@@ -309,9 +309,9 @@ function PanelResumen({ empresaId, usuarioId, personal }) {
           </div>
 
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Detalle diario</h2>
-          <div className="overflow-x-auto rounded border border-slate-200">
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500">
+              <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
                 <tr>
                   <th className="px-3 py-2">Fecha</th>
                   <th className="px-3 py-2">Persona</th>
@@ -376,7 +376,7 @@ function FilaDetalle({ fila, justificativo, onGuardarJustificativo }) {
       <td className="px-3 py-2 text-slate-600">{Number(fila.horas_trabajadas) > 0 ? fila.horas_trabajadas.toFixed(2) : '—'}</td>
       <td className="px-3 py-2">
         {fila.clasificacion && (
-          <span className={`rounded px-2 py-0.5 text-xs font-medium ${COLOR_CLASIFICACION[fila.clasificacion]}`}>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLOR_CLASIFICACION[fila.clasificacion]}`}>
             {ETIQUETA_CLASIFICACION[fila.clasificacion]}
           </span>
         )}
@@ -386,7 +386,7 @@ function FilaDetalle({ fila, justificativo, onGuardarJustificativo }) {
           '—'
         ) : editando ? (
           <form onSubmit={guardar} className="flex flex-wrap items-center gap-1">
-            <select value={tipo} onChange={(evento) => setTipo(evento.target.value)} className="rounded border border-slate-300 px-1 py-0.5 text-xs">
+            <select value={tipo} onChange={(evento) => setTipo(evento.target.value)} className="rounded-lg border border-slate-300 px-1 py-0.5 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent">
               <option value="">Sin justificar</option>
               {Object.entries(ETIQUETA_JUSTIFICATIVO).map(([valor, etiqueta]) => (
                 <option key={valor} value={valor}>
@@ -400,10 +400,10 @@ function FilaDetalle({ fila, justificativo, onGuardarJustificativo }) {
                 value={fechaRecuperacion}
                 onChange={(evento) => setFechaRecuperacion(evento.target.value)}
                 aria-label="Fecha de recuperación"
-                className="rounded border border-slate-300 px-1 py-0.5 text-xs"
+                className="rounded-lg border border-slate-300 px-1 py-0.5 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             )}
-            <button type="submit" className="rounded bg-slate-900 px-1.5 py-0.5 text-white">
+            <button type="submit" className="rounded-lg bg-brand-accent px-1.5 py-0.5 text-white">
               Guardar
             </button>
             <button type="button" onClick={() => setEditando(false)} className="text-slate-500 underline">
@@ -529,7 +529,7 @@ function PanelImportar({ empresaId, usuarioId, personal }) {
       )}
 
       {vista && (
-        <div className="rounded border border-slate-200 p-3 text-sm">
+        <div className="rounded-xl border border-slate-200 p-3 text-sm">
           {vista.periodo && <p className="mb-1 text-slate-600">Período del archivo: {vista.periodo}</p>}
           <p className="mb-1 text-slate-700">
             {vista.personasEnArchivo} persona(s) en el archivo · {vista.totalMarcas} marca(s) reales (sin anuladas) ·{' '}
@@ -613,9 +613,9 @@ function PanelNomina({ empresaId, personal, onCambio }) {
   return (
     <div>
       {error && <p className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-      <div className="mb-4 overflow-x-auto rounded border border-slate-200">
+      <div className="mb-4 overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-500">
+          <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
             <tr>
               <th className="px-3 py-2">Nombre</th>
               <th className="px-3 py-2">RUT</th>
@@ -636,7 +636,7 @@ function PanelNomina({ empresaId, personal, onCambio }) {
                     value={p.grupo}
                     disabled={ocupado}
                     onChange={(evento) => guardarCampo(p.id, 'grupo', evento.target.value)}
-                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    className="rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                   >
                     {Object.entries(GRUPOS_TURNO).map(([valor, etiqueta]) => (
                       <option key={valor} value={valor}>
@@ -654,7 +654,7 @@ function PanelNomina({ empresaId, personal, onCambio }) {
                       const valor = evento.target.value || null
                       if (valor !== p.fecha_salida) guardarCampo(p.id, 'fecha_salida', valor)
                     }}
-                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    className="rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                   />
                 </td>
                 <td className="px-3 py-2">

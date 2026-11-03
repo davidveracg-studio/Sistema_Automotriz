@@ -114,7 +114,7 @@ function GaleriaInspeccion({ trabajoId, puedeEscanear }) {
   const totalDanos = fotos.reduce((suma, f) => suma + (f.danos_detectados?.length || 0), 0)
 
   return (
-    <section className="mb-6 max-w-4xl rounded border border-slate-200 bg-white p-4">
+    <section className="mb-6 max-w-4xl rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
           Fotos de inspección {fotos.length > 0 && `(${fotos.length})`}
@@ -126,14 +126,14 @@ function GaleriaInspeccion({ trabajoId, puedeEscanear }) {
                 type="button"
                 onClick={analizarPendientes}
                 disabled={Boolean(progreso)}
-                className="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
               >
                 {progreso ? `Analizando ${progreso.hechas}/${progreso.total}…` : `Analizar con IA (${pendientes})`}
               </button>
             )}
             <Link
               to={`/trabajos/${trabajoId}/escaner`}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep"
             >
               {fotos.length > 0 ? 'Escanear más' : 'Escanear inspección'}
             </Link>
@@ -158,7 +158,7 @@ function GaleriaInspeccion({ trabajoId, puedeEscanear }) {
               <button
                 type="button"
                 onClick={() => setAmpliada(foto)}
-                className="relative block w-full overflow-hidden rounded border border-slate-200"
+                className="relative block w-full overflow-hidden rounded-xl border border-slate-200"
               >
                 {urls[foto.storage_path] ? (
                   <img src={urls[foto.storage_path]} alt={etiquetaSubzona(foto.zona, foto.subzona)} className="aspect-[4/3] w-full object-cover" />
@@ -234,7 +234,7 @@ function GaleriaInspeccion({ trabajoId, puedeEscanear }) {
               <button
                 type="button"
                 onClick={() => setAmpliada(null)}
-                className="rounded border border-slate-300 px-3 py-1.5 text-sm text-white hover:bg-white/10"
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-white hover:bg-white/10"
               >
                 Cerrar
               </button>

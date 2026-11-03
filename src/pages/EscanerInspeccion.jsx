@@ -110,7 +110,7 @@ function EscanerInspeccion() {
     <div className="max-w-5xl p-6">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Escáner de inspección</h1>
+          <h1 className="text-2xl font-bold text-mm-link dark:text-white">Escáner de inspección</h1>
           {trabajo && (
             <p className="text-sm text-slate-500">
               OT {trabajo.numero_ot} — {formatearPatente(trabajo.vehiculos?.patente)} · {trabajo.vehiculos?.marca}{' '}
@@ -120,7 +120,7 @@ function EscanerInspeccion() {
         </div>
         <Link
           to={`/trabajos/${id}`}
-          className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
         >
           Volver a la OT
         </Link>
@@ -135,7 +135,7 @@ function EscanerInspeccion() {
           type="button"
           disabled={guardando || fotos.length === 0}
           onClick={confirmar}
-          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
         >
           {guardando ? 'Subiendo…' : fallidas > 0 ? `Reintentar ${fallidas} fallida(s)` : 'Confirmar y guardar en la OT'}
         </button>

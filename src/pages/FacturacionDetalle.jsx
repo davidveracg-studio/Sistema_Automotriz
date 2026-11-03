@@ -452,22 +452,22 @@ function FacturacionDetalle() {
     { etiqueta: 'TOTAL', valor: formatoNumero(montos.total), destacado: true },
   ]
 
-  const entrada = 'w-full rounded border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-500'
+  const entrada = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-500 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent'
 
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-2xl font-bold text-mm-link dark:text-white">
             {esNuevo && !documentoId ? 'Nuevo documento tributario' : TIPOS_DTE[tipo]}
             {documento?.folio != null && <span className="text-slate-500"> N° {documento.folio}</span>}
           </h1>
           <p className="mt-1 text-sm">
-            <span className={`rounded px-2 py-0.5 text-xs font-medium ${COLOR_ESTADO_DTE[estado] || ''}`}>{ETIQUETA_ESTADO_DTE[estado] || estado}</span>
-            {documento?.simulado && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">SIMULADO</span>}
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLOR_ESTADO_DTE[estado] || ''}`}>{ETIQUETA_ESTADO_DTE[estado] || estado}</span>
+            {documento?.simulado && <span className="ml-2 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">SIMULADO</span>}
           </p>
         </div>
-        <Link to="/facturacion" className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+        <Link to="/facturacion" className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
           Volver a la lista
         </Link>
       </div>
@@ -489,7 +489,7 @@ function FacturacionDetalle() {
       {mensaje && <p className="mb-4 rounded border border-green-200 bg-green-50 p-3 text-sm text-green-800">{mensaje}</p>}
 
       <fieldset disabled={!editable || guardando} className="max-w-4xl space-y-6">
-        <section className="rounded border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <h2 className="mb-3 text-sm font-semibold text-slate-800">Documento</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
@@ -522,7 +522,7 @@ function FacturacionDetalle() {
         </section>
 
         {TIPOS_QUE_REFERENCIAN.includes(tipo) && (
-          <section className="rounded border border-slate-200 bg-white p-4">
+          <section className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
             <h2 className="mb-3 text-sm font-semibold text-slate-800">Documento que corrige</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -553,7 +553,7 @@ function FacturacionDetalle() {
           </section>
         )}
 
-        <section className="rounded border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <h2 className="mb-3 text-sm font-semibold text-slate-800">Receptor</h2>
           {editable && (
             <form onSubmit={buscarCliente} className="mb-3 flex gap-2">
@@ -563,7 +563,7 @@ function FacturacionDetalle() {
                 placeholder="Buscar cliente por nombre o RUT para completar los datos"
                 className={entrada}
               />
-              <button type="submit" disabled={buscandoCliente} className="shrink-0 rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+              <button type="submit" disabled={buscandoCliente} className="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
                 Buscar
               </button>
             </form>
@@ -598,7 +598,7 @@ function FacturacionDetalle() {
           {(tipo === 39 || tipo === 41) && <p className="mt-2 text-xs text-slate-400">En una boleta el receptor es opcional.</p>}
         </section>
 
-        <section className="rounded border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <h2 className="mb-3 text-sm font-semibold text-slate-800">Detalle (precios con IVA incluido)</h2>
           <div className="space-y-2">
             {lineas.map((linea, indice) => (
@@ -641,10 +641,10 @@ function FacturacionDetalle() {
       <div className="mt-6 flex max-w-4xl flex-wrap items-center gap-2">
         {editable && (
           <>
-            <button type="button" onClick={manejarGuardar} disabled={guardando} className="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50">
+            <button type="button" onClick={manejarGuardar} disabled={guardando} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50">
               {guardando ? 'Guardando…' : 'Guardar borrador'}
             </button>
-            <button type="button" onClick={manejarEmitir} disabled={guardando} className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50">
+            <button type="button" onClick={manejarEmitir} disabled={guardando} className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50">
               Emitir documento
             </button>
             {documentoId && (
@@ -655,22 +655,22 @@ function FacturacionDetalle() {
           </>
         )}
         {puedeEmitir && estado === 'error' && (
-          <button type="button" onClick={manejarEmitir} disabled={guardando} className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50">
+          <button type="button" onClick={manejarEmitir} disabled={guardando} className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50">
             {guardando ? 'Reintentando…' : 'Reintentar emisión'}
           </button>
         )}
         {puedeEmitir && estado === 'aceptado' && [33, 34, 39, 41, 56].includes(tipo) && (
-          <Link to={`/facturacion/nuevo?ref=${documento.id}&tipo=61&codigo=1`} className="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+          <Link to={`/facturacion/nuevo?ref=${documento.id}&tipo=61&codigo=1`} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
             Anular con nota de crédito
           </Link>
         )}
         {puedeEmitir && estado === 'aceptado' && [33, 34].includes(tipo) && (
-          <Link to={`/facturacion/nuevo?ref=${documento.id}&tipo=56&codigo=3`} className="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+          <Link to={`/facturacion/nuevo?ref=${documento.id}&tipo=56&codigo=3`} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
             Emitir nota de débito
           </Link>
         )}
         {documento?.url_pdf && (
-          <a href={documento.url_pdf} target="_blank" rel="noreferrer" className="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+          <a href={documento.url_pdf} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
             Ver PDF
           </a>
         )}

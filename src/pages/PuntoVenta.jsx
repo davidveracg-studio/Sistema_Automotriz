@@ -251,7 +251,7 @@ function PuntoVenta() {
 
   return (
     <div className="p-6">
-      <h1 className="mb-4 text-xl font-semibold text-slate-900">Punto de venta</h1>
+      <h1 className="mb-4 text-2xl font-bold text-mm-link dark:text-white">Punto de venta</h1>
       <p className="mb-4 text-sm text-slate-500">
         Venta de mostrador sin orden de trabajo: servicios rápidos o productos de bodega como venta libre.
       </p>
@@ -259,7 +259,7 @@ function PuntoVenta() {
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
       <div className="grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
-        <section className="rounded border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <h2 className="mb-3 text-sm font-semibold text-slate-800">Agregar servicio rápido</h2>
           <form onSubmit={agregarServicio}>
             <input
@@ -267,7 +267,7 @@ function PuntoVenta() {
               value={detalleServicio}
               onChange={(evento) => setDetalleServicio(evento.target.value)}
               placeholder="Ej. Inflado de neumáticos"
-              className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
             <div className="mb-2 flex gap-2">
               <input
@@ -276,7 +276,7 @@ function PuntoVenta() {
                 step="0.01"
                 value={cantidadServicio}
                 onChange={(evento) => setCantidadServicio(evento.target.value)}
-                className="w-20 rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 title="Cantidad"
               />
               <input
@@ -286,27 +286,27 @@ function PuntoVenta() {
                 value={precioServicio}
                 onChange={(evento) => setPrecioServicio(evento.target.value)}
                 placeholder="Precio"
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
             <button
               type="submit"
               disabled={guardando}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               Agregar
             </button>
           </form>
         </section>
 
-        <section className="rounded border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
           <h2 className="mb-3 text-sm font-semibold text-slate-800">Agregar producto de bodega</h2>
           <form onSubmit={agregarProducto}>
             <select
               required
               value={productoId}
               onChange={(evento) => setProductoId(evento.target.value)}
-              className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">Elegir producto…</option>
               {productos.map((p) => (
@@ -322,7 +322,7 @@ function PuntoVenta() {
                 step="0.01"
                 value={cantidadProducto}
                 onChange={(evento) => setCantidadProducto(evento.target.value)}
-                className="w-20 rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 title="Cantidad"
               />
               <input
@@ -332,13 +332,13 @@ function PuntoVenta() {
                 value={precioProducto}
                 onChange={(evento) => setPrecioProducto(evento.target.value)}
                 placeholder="Precio"
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
             <button
               type="submit"
               disabled={guardando}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               Agregar
             </button>
@@ -348,9 +348,9 @@ function PuntoVenta() {
 
       <section className="mt-6 max-w-4xl">
         <h2 className="mb-2 text-lg font-semibold text-slate-900">Venta actual</h2>
-        <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
+            <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
               <tr>
                 <th className="px-3 py-2">Detalle</th>
                 <th className="px-3 py-2">Cant.</th>
@@ -400,11 +400,11 @@ function PuntoVenta() {
         </div>
 
         {lineas.length > 0 && (
-          <form onSubmit={cerrarVenta} className="mt-4 rounded border border-slate-200 bg-white p-4">
+          <form onSubmit={cerrarVenta} className="mt-4 rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
             <h3 className="mb-2 text-sm font-medium text-slate-700">Cobrar</h3>
 
             {clienteSeleccionado ? (
-              <div className="mb-2 flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+              <div className="mb-2 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
                 <span>{nombreVisible(clienteSeleccionado)}</span>
                 <button
                   type="button"
@@ -421,12 +421,12 @@ function PuntoVenta() {
                     value={terminoCliente}
                     onChange={(evento) => setTerminoCliente(evento.target.value)}
                     placeholder="Cliente (opcional): nombre o teléfono"
-                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                   />
                   <button
                     type="button"
                     onClick={buscarCliente}
-                    className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                   >
                     Buscar
                   </button>
@@ -456,13 +456,13 @@ function PuntoVenta() {
               value={numeroDocumento}
               onChange={(evento) => setNumeroDocumento(evento.target.value)}
               placeholder="N° de documento (Dimasoft, opcional)"
-              className="mb-3 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
 
             <button
               type="submit"
               disabled={cerrando}
-              className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               {cerrando ? 'Cerrando…' : `Cerrar venta · ${formatoMoneda(total)}`}
             </button>
@@ -472,9 +472,9 @@ function PuntoVenta() {
 
       <section className="mt-8 max-w-4xl">
         <h2 className="mb-2 text-lg font-semibold text-slate-900">Ventas recientes</h2>
-        <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
+            <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
               <tr>
                 <th className="px-3 py-2">Fecha</th>
                 <th className="px-3 py-2">Cliente</th>

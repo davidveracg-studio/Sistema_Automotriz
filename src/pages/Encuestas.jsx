@@ -70,7 +70,7 @@ function Encuestas() {
 
   return (
     <div className="p-6">
-      <h1 className="mb-1 text-xl font-semibold text-slate-900">Encuestas de postventa</h1>
+      <h1 className="mb-1 text-2xl font-bold text-mm-link dark:text-white">Encuestas de postventa</h1>
       <p className="mb-4 text-sm text-slate-500">
         Respuestas de clientes tras el retiro del vehículo.
         {negativasPendientes > 0 && (
@@ -157,7 +157,7 @@ function Encuestas() {
           })}
 
         {!cargando && encuestasFiltradas.length === 0 && (
-          <p className="rounded border border-slate-200 bg-white p-6 text-center text-slate-400">
+          <p className="rounded-2xl bg-white p-6 text-center text-slate-400 shadow-mm print:shadow-none">
             Sin encuestas respondidas para este filtro.
           </p>
         )}

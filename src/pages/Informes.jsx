@@ -33,7 +33,7 @@ function BarraPorcentaje({ etiqueta, valor, detalle }) {
 
 function Tarjeta({ titulo, children }) {
   return (
-    <div className="rounded border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
       <h2 className="mb-3 text-sm font-semibold text-slate-800">{titulo}</h2>
       {children}
     </div>
@@ -86,7 +86,7 @@ function Informes() {
 
   return (
     <div className="p-6">
-      <h1 className="mb-1 text-xl font-semibold text-slate-900">Informes</h1>
+      <h1 className="mb-1 text-2xl font-bold text-mm-link dark:text-white">Informes</h1>
       <p className="mb-4 text-sm text-slate-500">
         Los tres números que definen el estado del negocio. Desconfía de los indicadores perfectos: un 100% casi
         siempre significa que la medición está mal hecha, no que el negocio sea impecable.

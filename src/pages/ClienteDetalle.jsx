@@ -106,18 +106,18 @@ function ClienteDetalle() {
         ← Volver a clientes
       </button>
 
-      <h1 className="mb-4 text-xl font-semibold text-slate-900">
+      <h1 className="mb-4 text-2xl font-bold text-mm-link dark:text-white">
         {cliente.tipo === 'empresa' ? cliente.razon_social : `${cliente.nombre} ${cliente.apellido || ''}`}
       </h1>
 
-      <form onSubmit={guardarCambios} className="mb-8 grid max-w-2xl grid-cols-2 gap-3 rounded border border-slate-200 bg-white p-4">
+      <form onSubmit={guardarCambios} className="mb-8 grid max-w-2xl grid-cols-2 gap-3 rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
         {cliente.tipo === 'empresa' ? (
           <div className="col-span-2">
             <label className="mb-1 block text-sm font-medium text-slate-700">Razón social</label>
             <input
               value={cliente.razon_social || ''}
               onChange={(evento) => actualizarCampo('razon_social', evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         ) : (
@@ -127,7 +127,7 @@ function ClienteDetalle() {
               <input
                 value={cliente.nombre || ''}
                 onChange={(evento) => actualizarCampo('nombre', evento.target.value)}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
             <div>
@@ -135,7 +135,7 @@ function ClienteDetalle() {
               <input
                 value={cliente.apellido || ''}
                 onChange={(evento) => actualizarCampo('apellido', evento.target.value)}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
           </>
@@ -146,7 +146,7 @@ function ClienteDetalle() {
           <input
             value={cliente.rut || ''}
             onChange={(evento) => actualizarCampo('rut', evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
         <div>
@@ -154,7 +154,7 @@ function ClienteDetalle() {
           <input
             value={cliente.telefono || ''}
             onChange={(evento) => actualizarCampo('telefono', evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
         <div>
@@ -162,7 +162,7 @@ function ClienteDetalle() {
           <input
             value={cliente.email || ''}
             onChange={(evento) => actualizarCampo('email', evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
         <div>
@@ -170,7 +170,7 @@ function ClienteDetalle() {
           <input
             value={cliente.direccion || ''}
             onChange={(evento) => actualizarCampo('direccion', evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
         <div className="col-span-2">
@@ -179,7 +179,7 @@ function ClienteDetalle() {
             value={cliente.notas || ''}
             onChange={(evento) => actualizarCampo('notas', evento.target.value)}
             rows={2}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -189,7 +189,7 @@ function ClienteDetalle() {
           <button
             type="submit"
             disabled={guardando}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {guardando ? 'Guardando…' : 'Guardar cambios'}
           </button>
@@ -202,15 +202,15 @@ function ClienteDetalle() {
           <button
             type="button"
             onClick={() => setMostrarFormularioVehiculo(true)}
-            className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100"
           >
             Agregar vehículo
           </button>
         </div>
 
-        <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
+            <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
               <tr>
                 <th className="px-3 py-2">Patente</th>
                 <th className="px-3 py-2">Marca / Modelo</th>
@@ -354,7 +354,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
             value={patente}
             onChange={(evento) => setPatente(formatearPatenteEntrada(evento.target.value))}
             placeholder="GH TY 34"
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm uppercase"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm uppercase focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -365,7 +365,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
               required
               value={marca}
               onChange={(evento) => setMarca(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -374,7 +374,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
               required
               value={modelo}
               onChange={(evento) => setModelo(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -386,7 +386,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
               type="number"
               value={anio}
               onChange={(evento) => setAnio(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -395,7 +395,7 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
               type="number"
               value={kilometraje}
               onChange={(evento) => setKilometraje(evento.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -420,14 +420,14 @@ function FormularioNuevoVehiculo({ clienteId, empresaId, onCancelar, onVinculado
           <button
             type="button"
             onClick={onCancelar}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={guardando}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {guardando ? 'Guardando…' : 'Guardar'}
           </button>

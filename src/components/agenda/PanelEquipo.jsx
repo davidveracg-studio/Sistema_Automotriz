@@ -4,7 +4,7 @@ import { hoyLocalISO } from '../../lib/agenda'
 import { MOTIVOS_AUSENCIA, NOMBRES_DIA, ORDEN_DIAS, horaCorta, resumenAusencia, resumenHorario } from '../../lib/personal'
 
 const CAMPO = 'rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800'
-const BOTON = 'rounded border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50'
+const BOTON = 'rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50'
 const BOTON_PRIMARIO = 'rounded bg-slate-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50'
 
 function formularioAusenciaVacio(personalId) {

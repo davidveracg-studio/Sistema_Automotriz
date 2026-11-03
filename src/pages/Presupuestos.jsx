@@ -100,7 +100,7 @@ function Presupuestos() {
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Presupuestos</h1>
+          <h1 className="text-2xl font-bold text-mm-link dark:text-white">Presupuestos</h1>
           {pendientesRespuesta > 0 && (
             <p className="text-sm text-amber-700">
               {pendientesRespuesta} presupuesto{pendientesRespuesta === 1 ? '' : 's'} esperando respuesta del cliente.
@@ -110,7 +110,7 @@ function Presupuestos() {
         <select
           value={filtroEstado}
           onChange={(evento) => setFiltroEstado(evento.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         >
           <option value="todos">Todos los estados</option>
           {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
@@ -126,9 +126,9 @@ function Presupuestos() {
       {cargando ? (
         <p className="text-slate-500">Cargando…</p>
       ) : (
-        <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
+            <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
               <tr>
                 <th className="px-3 py-2">Correlativo</th>
                 <th className="px-3 py-2">OT</th>
@@ -162,7 +162,7 @@ function Presupuestos() {
                       {formatearPatente(trabajo?.vehiculos?.patente)} {trabajo?.vehiculos?.marca} {trabajo?.vehiculos?.modelo}
                     </td>
                     <td className="px-3 py-2">
-                      <span className={`rounded px-2 py-0.5 text-xs ${COLOR_ESTADO[p.estado] || 'bg-slate-100'}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-xs ${COLOR_ESTADO[p.estado] || 'bg-slate-100'}`}>
                         {ETIQUETA_ESTADO[p.estado] || p.estado}
                       </span>
                     </td>

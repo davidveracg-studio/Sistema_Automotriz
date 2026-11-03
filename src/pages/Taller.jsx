@@ -626,7 +626,7 @@ function Taller() {
     <div className="p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Taller</h1>
+          <h1 className="text-2xl font-bold text-mm-link dark:text-white">Taller</h1>
           <p className="text-sm text-slate-500">
             {editando
               ? 'Editando el plano: los cambios se guardan al soltar. Cada cuadro mide 1 m.'
@@ -700,7 +700,7 @@ function Taller() {
       {vista === 'plano' && (
         <>
       {editando && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-3">
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl bg-white p-3 shadow-mm print:shadow-none">
           <span className="mr-1 text-xs font-medium uppercase tracking-wide text-slate-500">Agregar</span>
           {ORDEN_PALETA.map((tipo) => (
             <button
@@ -717,7 +717,7 @@ function Taller() {
       )}
 
       {!cargando && elementos.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+        <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-2xl bg-white px-3 py-2 text-sm shadow-mm print:shadow-none">
           {Object.entries(CATEGORIAS_PLANO).map(([clave, categoria]) => (
             <span key={clave} className="flex items-center gap-2 text-slate-700">
               <span className={`h-3 w-6 rounded-sm border-2 ${categoria.muestra}`} />
@@ -813,7 +813,7 @@ function Taller() {
               />
             ) : (
               <>
-                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <div className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
                   <h2 className="mb-2 text-sm font-semibold text-slate-900">Resumen</h2>
                   <p className="text-sm text-slate-600">
                     {puestos.length} puesto{puestos.length === 1 ? '' : 's'} · {puestosOcupados} con vehículo ·{' '}
@@ -840,7 +840,7 @@ function Taller() {
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <div className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
                   <h2 className="mb-2 text-sm font-semibold text-slate-900">
                     OT activas sin puesto ({otsSinPuesto.length})
                   </h2>
@@ -906,7 +906,7 @@ function PanelElemento({
   const nombreElemento = (id) => elementos.find((e) => e.id === id)?.nombre
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
       <div className="mb-3">
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{config.etiqueta}</div>
         <h2 className="text-base font-semibold text-slate-900">{elemento.nombre}</h2>
@@ -1047,7 +1047,7 @@ function PanelElemento({
                         </div>
                         <div className="text-xs text-slate-500">{nombreCliente(uno(ot?.clientes))}</div>
                         <div className="mt-1 flex items-center justify-between text-xs">
-                          <span className="rounded bg-slate-200 px-2 py-0.5 text-slate-700">
+                          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-slate-700">
                             {ot?.clickup_estado_actual || ot?.estado}
                           </span>
                           <span className="text-slate-500">en puesto hace {formatoTranscurrido(fila.desde)}</span>

@@ -143,7 +143,7 @@ function FilaValorizarPendiente({ tarea, puedeValorizar, onGuardar }) {
             placeholder="Precio"
             className="w-24 rounded border border-amber-300 px-2 py-0.5 text-xs"
           />
-          <button type="submit" disabled={guardando || !precio} className="rounded bg-slate-900 px-2 py-0.5 text-xs text-white disabled:opacity-50">
+          <button type="submit" disabled={guardando || !precio} className="rounded-lg bg-brand-accent px-2 py-0.5 text-xs text-white disabled:opacity-50">
             Guardar
           </button>
         </form>
@@ -227,7 +227,7 @@ function ControlTareaTecnico({ tarea, nombreTecnico, onCompletar, onGuardarObser
                   Guardar y marcar ejecutada
                 </button>
               )}
-              <button type="submit" disabled={guardando} className="rounded bg-slate-900 px-2 py-1 text-xs text-white disabled:opacity-50">
+              <button type="submit" disabled={guardando} className="rounded-lg bg-brand-accent px-2 py-1 text-xs text-white disabled:opacity-50">
                 Solo guardar
               </button>
               <button
@@ -883,7 +883,7 @@ function TrabajoDetalle() {
     <div className="p-6">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-2xl font-bold text-mm-link dark:text-white">
             OT {trabajo.numero_ot} — {formatearPatente(trabajo.vehiculos?.patente)}
           </h1>
           <p className="text-sm text-slate-500">
@@ -894,13 +894,13 @@ function TrabajoDetalle() {
         <div className="flex items-start gap-2 text-right">
           <Link
             to={`/trabajos/${id}/ingreso`}
-            className="rounded border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
             Orden de ingreso
           </Link>
           <Link
             to={`/trabajos/${id}/radar`}
-            className="rounded border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
             {trabajo.tipo_ingreso === 'diagnostico' ? 'RADAR' : 'Revisión del asesor'}
           </Link>
@@ -910,7 +910,7 @@ function TrabajoDetalle() {
                 type="button"
                 onClick={sincronizarConClickUp}
                 disabled={sincronizando}
-                className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
               >
                 {sincronizando ? 'Sincronizando…' : 'Sincronizar con ClickUp'}
               </button>
@@ -976,10 +976,10 @@ function TrabajoDetalle() {
 
       <GaleriaInspeccion trabajoId={id} puedeEscanear={['admin', 'socia', 'asesor'].includes(usuario?.rol)} />
 
-      <section className="mb-6 max-w-4xl rounded border border-slate-200 bg-white p-4">
+      <section className="mb-6 max-w-4xl rounded-2xl bg-white p-4 shadow-mm print:shadow-none">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Observaciones del asesor</h2>
         {observacionesAsesor.length > 0 && (
-          <ul className="mb-3 max-h-48 divide-y divide-slate-100 overflow-y-auto rounded border border-slate-200">
+          <ul className="mb-3 max-h-48 divide-y divide-slate-100 overflow-y-auto rounded-xl border border-slate-200">
             {observacionesAsesor.map((observacion) => (
               <li key={observacion.id} className="px-3 py-2 text-sm">
                 <p className="whitespace-pre-line text-slate-800">{observacion.texto}</p>
@@ -997,12 +997,12 @@ function TrabajoDetalle() {
             onChange={(evento) => setTextoObservacionAsesor(evento.target.value)}
             rows={2}
             placeholder="Ej. cliente prefiere que lo llamen después de las 18:00, pidió el presupuesto por WhatsApp…"
-            className="min-w-0 flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
+            className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
           <button
             type="submit"
             disabled={guardandoObservacionAsesor}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {guardandoObservacionAsesor ? 'Guardando…' : 'Agregar'}
           </button>
@@ -1017,7 +1017,7 @@ function TrabajoDetalle() {
               type="button"
               onClick={generarPresupuesto}
               disabled={generandoPresupuesto}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               {generandoPresupuesto ? 'Generando…' : 'Generar presupuesto'}
             </button>
@@ -1047,7 +1047,7 @@ function TrabajoDetalle() {
                       href={linkWhatsapp}
                       target="_blank"
                       rel="noreferrer"
-                      className="ml-2 rounded bg-green-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-700"
+                      className="ml-2 rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-700"
                     >
                       WhatsApp
                     </a>
@@ -1087,7 +1087,7 @@ function TrabajoDetalle() {
 
         <div role="tabpanel" className="rounded-b border border-t-0 border-slate-200 bg-white p-3">
           {esManoObra && !bloqueada && catalogoServicios.length > 0 && (
-            <div className="mb-4 rounded border border-slate-200 bg-slate-50 p-3">
+            <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
               <h3 className="mb-1 text-sm font-semibold text-slate-900">Agregar servicio del catálogo</h3>
               <p className="mb-3 text-xs text-slate-500">
                 Precio de mano de obra calculado para {ETIQUETA_CARROCERIA[vehiculoCatalogo?.tipo_carroceria] || 'este vehículo'} ·{' '}
@@ -1101,7 +1101,7 @@ function TrabajoDetalle() {
                     setCategoriaCatalogo(evento.target.value)
                     setServicioCatalogo('')
                   }}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 >
                   <option value="">Categoría…</option>
                   {[...categoriasPorSegmento.entries()].map(([segmento, categorias]) => (
@@ -1118,7 +1118,7 @@ function TrabajoDetalle() {
                   value={servicioCatalogo}
                   onChange={(evento) => setServicioCatalogo(evento.target.value)}
                   disabled={!categoriaCatalogo}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-400"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-400 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 >
                   <option value="">Servicio…</option>
                   {serviciosDeCategoria.map((s) => (
@@ -1130,7 +1130,7 @@ function TrabajoDetalle() {
                 <select
                   value={tecnicoCatalogo}
                   onChange={(evento) => setTecnicoCatalogo(evento.target.value)}
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 >
                   <option value="">Sin asignar todavía</option>
                   {tecnicos.map((tecnico) => (
@@ -1142,7 +1142,7 @@ function TrabajoDetalle() {
                 <button
                   type="submit"
                   disabled={!servicioCatalogo || agregandoServicioCatalogo}
-                  className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                  className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
                 >
                   {agregandoServicioCatalogo ? 'Agregando…' : 'Agregar servicio'}
                 </button>
@@ -1152,7 +1152,7 @@ function TrabajoDetalle() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500">
+              <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
                 <tr>
                   <th className="px-3 py-2">Detalle</th>
                   <th className="px-3 py-2">Cant.</th>
@@ -1223,7 +1223,7 @@ function TrabajoDetalle() {
                                   defaultValue={item.costo_unitario ?? ''}
                                   disabled={bloqueada}
                                   onBlur={(evento) => actualizarPrecioItem(item.id, 'costo_unitario', evento.target.value)}
-                                  className="w-24 rounded border border-slate-300 px-2 py-1 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+                                  className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-sm disabled:bg-slate-100 disabled:text-slate-500 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                                 />
                               </td>
                             )}
@@ -1235,7 +1235,7 @@ function TrabajoDetalle() {
                                     defaultValue={item.precio_unitario ?? ''}
                                     disabled={bloqueada}
                                     onBlur={(evento) => actualizarPrecioItem(item.id, 'precio_unitario', evento.target.value)}
-                                    className="w-24 rounded border border-slate-300 px-2 py-1 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+                                    className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-sm disabled:bg-slate-100 disabled:text-slate-500 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                                   />
                                 ) : (
                                   <span className="text-slate-800">{formatoMoneda(item.precio_unitario)}</span>
@@ -1257,7 +1257,7 @@ function TrabajoDetalle() {
                           value={item.decision}
                           disabled={bloqueada}
                           onChange={(evento) => actualizarDecisionItem(item.id, { decision: evento.target.value })}
-                          className="rounded border border-slate-300 px-2 py-1 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+                          className="rounded-lg border border-slate-300 px-2 py-1 text-sm disabled:bg-slate-100 disabled:text-slate-500 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         >
                           {Object.entries(ETIQUETA_DECISION).map(([valor, etiqueta]) => (
                             <option key={valor} value={valor}>
@@ -1271,7 +1271,7 @@ function TrabajoDetalle() {
                             defaultValue={item.motivo_rechazo || ''}
                             disabled={bloqueada}
                             onBlur={(evento) => actualizarDecisionItem(item.id, { motivo_rechazo: evento.target.value })}
-                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100 disabled:text-slate-500"
+                            className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100 disabled:text-slate-500 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                           />
                         )}
                         {item.decision === 'postergado' && (
@@ -1280,7 +1280,7 @@ function TrabajoDetalle() {
                             defaultValue={item.fecha_postergado || ''}
                             disabled={bloqueada}
                             onBlur={(evento) => actualizarDecisionItem(item.id, { fecha_postergado: evento.target.value || null })}
-                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100 disabled:text-slate-500"
+                            className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100 disabled:text-slate-500 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                           />
                         )}
                         </div>
@@ -1291,7 +1291,7 @@ function TrabajoDetalle() {
                                 type="button"
                                 disabled={eliminandoDetalle}
                                 onClick={() => eliminarDetalle(item.id)}
-                                className="rounded bg-red-600 px-1.5 py-0.5 font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                                className="rounded-full bg-red-600 px-1.5 py-0.5 font-medium text-white hover:bg-red-700 disabled:opacity-50"
                               >
                                 Confirmar
                               </button>
@@ -1315,7 +1315,7 @@ function TrabajoDetalle() {
                             <select
                               value={tarea?.tecnico_id || ''}
                               onChange={(evento) => asignarTecnicoATarea(tarea.id, evento.target.value || null)}
-                              className="rounded border border-slate-300 px-2 py-1 text-xs"
+                              className="rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                             >
                               <option value="">Sin asignar</option>
                               {tecnicos.map((tecnico) => (
@@ -1344,17 +1344,17 @@ function TrabajoDetalle() {
           </div>
 
           {bloqueada ? (
-            <p className="mt-3 rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-400">OT cerrada, no se pueden agregar {esManoObra ? 'tareas' : 'ítems'}.</p>
+            <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-400">OT cerrada, no se pueden agregar {esManoObra ? 'tareas' : 'ítems'}.</p>
           ) : esManoObra ? (
-            <form onSubmit={agregarTarea} className="mt-3 grid grid-cols-1 gap-2 rounded border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_14rem_auto]">
+            <form onSubmit={agregarTarea} className="mt-3 grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_14rem_auto]">
               <input
                 required
                 value={descripcionTarea}
                 onChange={(evento) => setDescripcionTarea(evento.target.value)}
                 placeholder="Ej. Cambio de pastillas de freno delanteras"
-                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
-              <select value={tecnicoTarea} onChange={(evento) => setTecnicoTarea(evento.target.value)} className="rounded border border-slate-300 px-3 py-2 text-sm">
+              <select value={tecnicoTarea} onChange={(evento) => setTecnicoTarea(evento.target.value)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent">
                 <option value="">Sin asignar todavía</option>
                 {tecnicos.map((tecnico) => (
                   <option key={tecnico.id} value={tecnico.id}>
@@ -1365,13 +1365,13 @@ function TrabajoDetalle() {
               <button
                 type="submit"
                 disabled={guardandoTarea}
-                className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
               >
                 Agregar tarea
               </button>
             </form>
           ) : (
-            <form onSubmit={agregarDetalle} className="mt-3 rounded border border-slate-200 bg-slate-50 p-3">
+            <form onSubmit={agregarDetalle} className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
               {(pestana === 'repuestos' || pestana === 'lubricantes_insumos') && (
                 <div className="mb-2 flex flex-wrap items-center gap-3">
                   {!provistoPorCliente && productos.length > 0 && (
@@ -1382,7 +1382,7 @@ function TrabajoDetalle() {
                         const elegido = productos.find((p) => p.id === evento.target.value)
                         if (elegido) setDetalleTexto(elegido.nombre)
                       }}
-                      className="min-w-0 flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     >
                       <option value="">Sin vincular a bodega</option>
                       {productos.map((p) => (
@@ -1412,19 +1412,19 @@ function TrabajoDetalle() {
                   value={detalleTexto}
                   onChange={(evento) => setDetalleTexto(evento.target.value)}
                   placeholder={pestana === 'servicios_externos' ? 'Ej. Rectificado de discos' : 'Ej. Filtro de aceite'}
-                  className="min-w-0 flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <input
                   type="number"
                   min="1"
                   value={cantidadDetalle}
                   onChange={(evento) => setCantidadDetalle(evento.target.value)}
-                  className="w-20 rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
                 <button
                   type="submit"
                   disabled={guardandoDetalle}
-                  className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                  className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
                 >
                   Agregar ítem
                 </button>
@@ -1504,13 +1504,13 @@ function TrabajoDetalle() {
                 )}
               </div>
             )}
-            <form onSubmit={cerrarTrabajo} className="rounded border border-slate-200 bg-white p-3">
+            <form onSubmit={cerrarTrabajo} className="rounded-2xl bg-white p-3 shadow-mm print:shadow-none">
             <label className="mb-1 block text-sm font-medium text-slate-700">N° de documento (Dimasoft)</label>
             <input
               value={numeroDocumento}
               onChange={(evento) => setNumeroDocumento(evento.target.value)}
               placeholder="Boleta o factura emitida"
-              className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
 
             {numeroDocumento && (
@@ -1519,7 +1519,7 @@ function TrabajoDetalle() {
                 <select
                   value={tipoDocumento}
                   onChange={(evento) => setTipoDocumento(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 >
                   <option value="">Selecciona…</option>
                   <option value="boleta">Boleta</option>
@@ -1529,7 +1529,7 @@ function TrabajoDetalle() {
             )}
 
             {numeroDocumento && tipoDocumento === 'factura' && (
-              <div className="mb-2 rounded border border-slate-200 p-2">
+              <div className="mb-2 rounded-xl border border-slate-200 p-2">
                 <label className="mb-1 block text-sm font-medium text-slate-700">Estado del pago</label>
                 <div className="mb-2 flex gap-4 text-sm">
                   <label className="flex items-center gap-1">
@@ -1548,7 +1548,7 @@ function TrabajoDetalle() {
                       type="date"
                       value={fechaVencimiento}
                       onChange={(evento) => setFechaVencimiento(evento.target.value)}
-                      className="rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                     <p className="mt-1 text-xs text-amber-700">Va a aparecer en Cuentas por cobrar hasta que se marque pagada.</p>
                   </div>
@@ -1562,7 +1562,7 @@ function TrabajoDetalle() {
                 type="number"
                 value={kilometrajeEgreso}
                 onChange={(evento) => setKilometrajeEgreso(evento.target.value)}
-                className="w-full max-w-xs rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
               {avisoKmEgreso && <p className="mt-1 text-xs text-amber-700">{avisoKmEgreso}</p>}
             </div>
@@ -1573,7 +1573,7 @@ function TrabajoDetalle() {
                 <input
                   value={retiradoPorNombre}
                   onChange={(evento) => setRetiradoPorNombre(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               <div>
@@ -1581,7 +1581,7 @@ function TrabajoDetalle() {
                 <input
                   value={retiradoPorRut}
                   onChange={(evento) => setRetiradoPorRut(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
               <div>
@@ -1589,7 +1589,7 @@ function TrabajoDetalle() {
                 <input
                   value={retiradoPorContacto}
                   onChange={(evento) => setRetiradoPorContacto(evento.target.value)}
-                  className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 />
               </div>
             </div>
@@ -1600,7 +1600,7 @@ function TrabajoDetalle() {
               onChange={(evento) => setObservacionesCierre(evento.target.value)}
               rows={2}
               placeholder="Ej. hallazgos confirmados, pendientes para la próxima visita"
-              className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
 
             <label className="mb-1 block text-sm font-medium text-slate-700">Comentario</label>
@@ -1608,7 +1608,7 @@ function TrabajoDetalle() {
               value={comentarioEgreso}
               onChange={(evento) => setComentarioEgreso(evento.target.value)}
               rows={2}
-              className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
 
             <label className="mb-1 block text-sm font-medium text-slate-700">Firma de conformidad al retiro</label>
@@ -1620,7 +1620,7 @@ function TrabajoDetalle() {
               type="submit"
               disabled={cerrando || tareasSinValorizar.length > 0}
               title={tareasSinValorizar.length > 0 ? 'Hay tareas de mano de obra sin precio' : undefined}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               {cerrando ? 'Cerrando…' : 'Marcar como entregado'}
             </button>
@@ -1631,7 +1631,7 @@ function TrabajoDetalle() {
 
       <section className="mt-8 max-w-md">
         <h2 className="mb-2 text-lg font-semibold text-slate-900">Observaciones de postventa</h2>
-        <ul className="mb-3 divide-y divide-slate-100 rounded border border-slate-200 bg-white">
+        <ul className="mb-3 divide-y divide-slate-100 rounded-2xl bg-white shadow-mm print:shadow-none">
           {observaciones.map((observacion) => (
             <li key={observacion.id} className="px-3 py-2 text-sm">
               <p className="text-slate-800 whitespace-pre-line">{observacion.texto}</p>
@@ -1646,25 +1646,25 @@ function TrabajoDetalle() {
           )}
         </ul>
         {trabajo.estado === 'entregado' ? (
-          <form onSubmit={agregarObservacionPostventa} className="rounded border border-slate-200 bg-white p-3">
+          <form onSubmit={agregarObservacionPostventa} className="rounded-2xl bg-white p-3 shadow-mm print:shadow-none">
             <textarea
               required
               value={textoObservacion}
               onChange={(evento) => setTextoObservacion(evento.target.value)}
               rows={2}
               placeholder="Ej. cliente llamó por ruido en freno, se agendó revisión"
-              className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
             <button
               type="submit"
               disabled={guardandoObservacion}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
             >
               {guardandoObservacion ? 'Guardando…' : 'Agregar observación'}
             </button>
           </form>
         ) : (
-          <p className="rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-400">
+          <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-400">
             Las observaciones de postventa se agregan una vez que la OT esté entregada.
           </p>
         )}

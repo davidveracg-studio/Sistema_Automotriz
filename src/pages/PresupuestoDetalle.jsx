@@ -204,7 +204,7 @@ function PresupuestoDetalle() {
         <button
           type="button"
           onClick={() => window.print()}
-          className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep"
         >
           Imprimir / guardar como PDF
         </button>
@@ -224,11 +224,11 @@ function PresupuestoDetalle() {
         )}
         <Link
           to={`/trabajos/${presupuesto.trabajo_id}`}
-          className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
         >
           Ver OT
         </Link>
-        <Link to="/presupuestos" className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+        <Link to="/presupuestos" className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
           Volver a Presupuestos
         </Link>
 
@@ -266,7 +266,7 @@ function PresupuestoDetalle() {
               type="button"
               disabled={actualizando}
               onClick={() => cambiarEstado('anulado')}
-              className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-50"
             >
               Anular
             </button>
@@ -277,7 +277,7 @@ function PresupuestoDetalle() {
             type="button"
             disabled={actualizando}
             onClick={() => cambiarEstado('enviado')}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-50"
           >
             Revertir a &quot;enviado&quot;
           </button>
@@ -291,7 +291,7 @@ function PresupuestoDetalle() {
             <select
               value={presupuesto.condiciones}
               onChange={(evento) => cambiarCondiciones(evento.target.value)}
-              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 sm:w-96"
+              className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 sm:w-96 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               {OPCIONES_CONDICIONES.map((opcion) => (
                 <option key={opcion.valor} value={opcion.valor}>
@@ -317,7 +317,7 @@ function PresupuestoDetalle() {
         </p>
       )}
 
-      <div className="max-w-3xl rounded border border-slate-200 bg-white p-6 text-sm text-slate-900 print:flex print:min-h-[250mm] print:flex-col print:border-0 print:p-0">
+      <div className="max-w-3xl rounded-2xl bg-white p-6 text-sm text-slate-900 print:flex print:min-h-[250mm] print:flex-col print:border-0 print:p-0 shadow-mm print:shadow-none">
         <EncabezadoDocumento
           empresa={empresa}
           lineas={[`PRESUPUESTO N° ${presupuesto.correlativo}`]}

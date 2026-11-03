@@ -60,11 +60,11 @@ function Clientes() {
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Clientes</h1>
+        <h1 className="text-2xl font-bold text-mm-link dark:text-white">Clientes</h1>
         <button
           type="button"
           onClick={() => setMostrarFormulario(true)}
-          className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep"
         >
           Nuevo cliente
         </button>
@@ -76,12 +76,12 @@ function Clientes() {
           value={busqueda}
           onChange={(evento) => setBusqueda(evento.target.value)}
           placeholder="Buscar por nombre, RUT o teléfono…"
-          className="w-full max-w-md rounded border border-slate-300 px-3 py-2 text-sm"
+          className="w-full max-w-md rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         />
         <button
           type="submit"
           disabled={buscando}
-          className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
         >
           {buscando ? 'Buscando…' : 'Buscar'}
         </button>
@@ -89,9 +89,9 @@ function Clientes() {
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-500">
+          <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
             <tr>
               <th className="px-3 py-2">Nombre</th>
               <th className="px-3 py-2">RUT</th>
@@ -250,7 +250,7 @@ function FormularioNuevoCliente({ empresaId, onCancelar, onCreado }) {
                 value={nombre}
                 onChange={(evento) => setNombre(evento.target.value)}
                 onBlur={revisarDuplicados}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
             <div>
@@ -259,7 +259,7 @@ function FormularioNuevoCliente({ empresaId, onCancelar, onCreado }) {
                 value={apellido}
                 onChange={(evento) => setApellido(evento.target.value)}
                 onBlur={revisarDuplicados}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
           </div>
@@ -271,7 +271,7 @@ function FormularioNuevoCliente({ empresaId, onCancelar, onCreado }) {
               value={razonSocial}
               onChange={(evento) => setRazonSocial(evento.target.value)}
               onBlur={revisarDuplicados}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         )}
@@ -284,7 +284,7 @@ function FormularioNuevoCliente({ empresaId, onCancelar, onCreado }) {
               onChange={(evento) => setRut(evento.target.value)}
               onBlur={revisarDuplicados}
               placeholder="12.345.678-9"
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -294,7 +294,7 @@ function FormularioNuevoCliente({ empresaId, onCancelar, onCreado }) {
               onChange={(evento) => setTelefono(evento.target.value)}
               onBlur={revisarDuplicados}
               placeholder="+56 9 1234 5678"
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -305,7 +305,7 @@ function FormularioNuevoCliente({ empresaId, onCancelar, onCreado }) {
             type="email"
             value={email}
             onChange={(evento) => setEmail(evento.target.value)}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -339,14 +339,14 @@ function FormularioNuevoCliente({ empresaId, onCancelar, onCreado }) {
           <button
             type="button"
             onClick={onCancelar}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={guardando || (duplicados.length > 0 && !confirmadoPeseADuplicados)}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             {guardando ? 'Guardando…' : 'Guardar'}
           </button>

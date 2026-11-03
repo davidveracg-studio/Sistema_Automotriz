@@ -107,13 +107,13 @@ function CuentasPorCobrar() {
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Cuentas por cobrar</h1>
+          <h1 className="text-2xl font-bold text-mm-link dark:text-white">Cuentas por cobrar</h1>
           <p className="text-sm text-slate-500">Facturas pendientes de pago: {formatoMoneda(totalPendiente)}</p>
         </div>
         <select
           value={filtro}
           onChange={(evento) => setFiltro(evento.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
         >
           <option value="pendiente">Pendientes</option>
           <option value="pagado">Pagadas</option>
@@ -126,9 +126,9 @@ function CuentasPorCobrar() {
       {cargando ? (
         <p className="text-slate-500">Cargando…</p>
       ) : (
-        <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-mm print:shadow-none">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
+            <thead className="border-b border-slate-100 text-mm-link dark:text-slate-200">
               <tr>
                 <th className="px-3 py-2">OT</th>
                 <th className="px-3 py-2">Cliente</th>
@@ -169,7 +169,7 @@ function CuentasPorCobrar() {
                     <td className="px-3 py-2">{formatoMoneda(totales[f.id] || 0)}</td>
                     <td className="px-3 py-2">
                       <span
-                        className={`rounded px-2 py-0.5 text-xs ${
+                        className={`rounded-full px-2 py-0.5 text-xs ${
                           f.estado_pago === 'pagado' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
                         }`}
                       >

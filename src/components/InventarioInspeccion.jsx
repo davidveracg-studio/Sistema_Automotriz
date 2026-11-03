@@ -106,7 +106,7 @@ function InventarioInspeccion({ trabajoId, fotos, puedeEditar, onFotoActualizada
       {error && <p className="mb-2 text-sm text-red-700">{error}</p>}
 
       {confirmados.length > 0 ? (
-        <ul className="mb-3 divide-y divide-slate-100 rounded border border-slate-200 text-sm">
+        <ul className="mb-3 divide-y divide-slate-100 rounded-xl border border-slate-200 text-sm">
           {confirmados.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-2 px-3 py-1.5">
               <span className="text-slate-800">
@@ -149,14 +149,14 @@ function InventarioInspeccion({ trabajoId, fotos, puedeEditar, onFotoActualizada
                   <button
                     type="button"
                     onClick={() => aceptar(sugerencia)}
-                    className="rounded bg-slate-900 px-2 py-1 font-medium text-white hover:bg-slate-800"
+                    className="rounded-lg bg-brand-accent px-2 py-1 font-medium text-white hover:bg-deep"
                   >
                     Aceptar
                   </button>
                   <button
                     type="button"
                     onClick={() => descartar(sugerencia)}
-                    className="rounded border border-slate-300 px-2 py-1 text-slate-700 hover:bg-white"
+                    className="rounded-lg border border-slate-300 px-2 py-1 text-slate-700 hover:bg-white"
                   >
                     Descartar
                   </button>
@@ -173,9 +173,9 @@ function InventarioInspeccion({ trabajoId, fotos, puedeEditar, onFotoActualizada
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Agregar objeto (ej. Extintor)"
-            className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1.5"
+            className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1.5 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
-          <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded border border-slate-300 px-2 py-1.5">
+          <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-lg border border-slate-300 px-2 py-1.5 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent">
             {Object.entries(CATEGORIAS_INVENTARIO).map(([valor, etiqueta]) => (
               <option key={valor} value={valor}>
                 {etiqueta}
@@ -188,9 +188,9 @@ function InventarioInspeccion({ trabajoId, fotos, puedeEditar, onFotoActualizada
             max="99"
             value={cantidad}
             onChange={(e) => setCantidad(e.target.value)}
-            className="w-16 rounded border border-slate-300 px-2 py-1.5"
+            className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
-          <button type="submit" className="rounded border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">
+          <button type="submit" className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">
             Agregar
           </button>
         </form>

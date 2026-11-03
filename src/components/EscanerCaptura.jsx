@@ -333,7 +333,7 @@ function EscanerCaptura({ fotos, setFotos }) {
             type="button"
             disabled={!camaraActiva}
             onClick={() => capturar({ origen: 'manual', esDano: false })}
-            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-deep disabled:opacity-50"
           >
             Tomar foto ahora
           </button>
@@ -348,7 +348,7 @@ function EscanerCaptura({ fotos, setFotos }) {
           <button
             type="button"
             onClick={siguienteZona}
-            className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
             Siguiente zona
           </button>
@@ -356,7 +356,7 @@ function EscanerCaptura({ fotos, setFotos }) {
             <button
               type="button"
               onClick={() => setFase('interior')}
-              className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
               Pasar al interior
             </button>
@@ -364,7 +364,7 @@ function EscanerCaptura({ fotos, setFotos }) {
             <button
               type="button"
               onClick={() => irAFase('revision')}
-              className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
               Revisar fotos
             </button>
@@ -372,14 +372,14 @@ function EscanerCaptura({ fotos, setFotos }) {
           <button
             type="button"
             onClick={() => setMostrarAjustes((v) => !v)}
-            className="ml-auto rounded border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
+            className="ml-auto rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
           >
             Ajustes
           </button>
         </div>
 
         {mostrarAjustes && (
-          <div className="mb-3 grid gap-3 rounded border border-slate-200 bg-white p-3 text-sm sm:grid-cols-2">
+          <div className="mb-3 grid gap-3 rounded-2xl bg-white p-3 text-sm sm:grid-cols-2 shadow-mm print:shadow-none">
             <label className="block">
               <span className="text-slate-600">Intervalo mínimo: {(config.intervaloMinMs / 1000).toFixed(1)} s</span>
               <input
@@ -448,7 +448,7 @@ function EscanerCaptura({ fotos, setFotos }) {
             <select
               value={destinoManual}
               onChange={(e) => setDestinoManual(e.target.value)}
-              className="ml-auto rounded border border-slate-300 px-2 py-1.5"
+              className="ml-auto rounded-lg border border-slate-300 px-2 py-1.5 focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               {Object.entries(ZONAS_POR_FASE).flatMap(([zona, lista]) =>
                 lista.map((z) => (
@@ -458,7 +458,7 @@ function EscanerCaptura({ fotos, setFotos }) {
                 ))
               )}
             </select>
-            <label className="cursor-pointer rounded border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">
+            <label className="cursor-pointer rounded-lg border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">
               Agregar foto
               <input type="file" accept="image/*" capture="environment" multiple onChange={agregarManual} className="hidden" />
             </label>
@@ -480,20 +480,20 @@ function EscanerCaptura({ fotos, setFotos }) {
                 </h2>
                 <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                   {deZona.map((foto) => (
-                    <li key={foto.id} className="overflow-hidden rounded border border-slate-200 bg-white">
+                    <li key={foto.id} className="overflow-hidden rounded-2xl bg-white shadow-mm print:shadow-none">
                       <div className="relative">
                         <img src={foto.url} alt={etiquetaSubzona(foto.zona, foto.subzona)} className="aspect-[4/3] w-full object-cover" />
-                        <span className="absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-xs text-white">
+                        <span className="absolute left-1 top-1 rounded-full bg-black/60 px-1.5 py-0.5 text-xs text-white">
                           {etiquetaSubzona(foto.zona, foto.subzona)}
                         </span>
                         {foto.esDano && (
-                          <span className="absolute right-1 top-1 rounded bg-red-600 px-1.5 py-0.5 text-xs font-medium text-white">
+                          <span className="absolute right-1 top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-medium text-white">
                             Daño
                           </span>
                         )}
                         {foto.estado !== 'pendiente' && (
                           <span
-                            className={`absolute bottom-1 left-1 rounded px-1.5 py-0.5 text-xs text-white ${
+                            className={`absolute bottom-1 left-1 rounded-full px-1.5 py-0.5 text-xs text-white ${
                               foto.estado === 'subida' ? 'bg-green-600' : foto.estado === 'error' ? 'bg-red-600' : 'bg-slate-700'
                             }`}
                           >
@@ -508,21 +508,21 @@ function EscanerCaptura({ fotos, setFotos }) {
                           disabled={foto.estado === 'subida'}
                           onChange={(e) => actualizarFoto(foto.id, { nota: e.target.value })}
                           placeholder="Nota (ej. raya en puerta)"
-                          className="mb-2 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                          className="mb-2 w-full rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         />
                         {foto.estado !== 'subida' && (
                           <div className="flex flex-wrap gap-1 text-xs">
                             <button
                               type="button"
                               onClick={() => actualizarFoto(foto.id, { esDano: !foto.esDano })}
-                              className="rounded border border-slate-300 px-2 py-1 text-slate-700 hover:bg-slate-100"
+                              className="rounded-lg border border-slate-300 px-2 py-1 text-slate-700 hover:bg-slate-100"
                             >
                               {foto.esDano ? 'Quitar daño' : 'Marcar daño'}
                             </button>
                             <button
                               type="button"
                               onClick={() => repetirFoto(foto)}
-                              className="rounded border border-slate-300 px-2 py-1 text-slate-700 hover:bg-slate-100"
+                              className="rounded-lg border border-slate-300 px-2 py-1 text-slate-700 hover:bg-slate-100"
                             >
                               Repetir
                             </button>

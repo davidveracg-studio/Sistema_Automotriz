@@ -197,7 +197,7 @@ function DetalleOt({ trabajoId, usuario, tecnicos, nombreTecnico, onCerrar }) {
   const listaTecnicos = (tecnicos || []).filter((t) => t.rol === 'tecnico')
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white">
+    <div className="rounded-2xl bg-white shadow-mm print:shadow-none">
       <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 sm:px-6">
         <button type="button" onClick={onCerrar} className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900">
           ← Volver al tablero
@@ -410,7 +410,7 @@ function FilaSubtarea({ tarea, puedeAsignar, puedeEjecutar, listaTecnicos, nombr
             <select
               value={tarea.tecnico_id || ''}
               onChange={(evento) => onAsignar(evento.target.value || null)}
-              className="rounded border border-slate-300 px-2 py-1 text-xs"
+              className="rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">Sin asignar</option>
               {listaTecnicos.map((tecnico) => (
@@ -451,7 +451,7 @@ function FilaSubtarea({ tarea, puedeAsignar, puedeEjecutar, listaTecnicos, nombr
                     Guardar y marcar ejecutada
                   </button>
                 )}
-                <button type="submit" disabled={guardando} className="rounded bg-slate-900 px-2 py-1 text-xs text-white disabled:opacity-50">
+                <button type="submit" disabled={guardando} className="rounded-lg bg-brand-accent px-2 py-1 text-xs text-white disabled:opacity-50">
                   Solo guardar
                 </button>
                 <button
@@ -514,11 +514,11 @@ function DescripcionOt({ puedeEditar, descripcion, onGuardar }) {
           onChange={(evento) => setTexto(evento.target.value)}
           rows={5}
           autoFocus
-          className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+          className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           placeholder="Diagnóstico, presupuestos enviados, cualquier nota libre de la tarjeta…"
         />
         <div className="mt-1.5 flex gap-2">
-          <button type="submit" disabled={guardando} className="rounded bg-slate-900 px-2 py-1 text-xs text-white disabled:opacity-50">
+          <button type="submit" disabled={guardando} className="rounded-lg bg-brand-accent px-2 py-1 text-xs text-white disabled:opacity-50">
             Guardar
           </button>
           <button
@@ -594,16 +594,16 @@ function SeccionChecklist({ area, filas, puedeEditar, onAgregar, onEditar, onMar
             onChange={(evento) => setDetalleNuevo(evento.target.value)}
             autoFocus
             placeholder="Nombre del ítem"
-            className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
+            className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
           <input
             type="number"
             min="1"
             value={cantidadNueva}
             onChange={(evento) => setCantidadNueva(evento.target.value)}
-            className="w-16 rounded border border-slate-300 px-2 py-1 text-sm"
+            className="w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
-          <button type="submit" className="rounded bg-slate-900 px-2 py-1 text-xs text-white">
+          <button type="submit" className="rounded-lg bg-brand-accent px-2 py-1 text-xs text-white">
             Agregar
           </button>
           <button type="button" onClick={() => setAgregando(false)} className="text-xs text-slate-500 underline">
@@ -631,15 +631,15 @@ function FilaChecklist({ item, puedeEditar, onEditar, onMarcar }) {
     return (
       <li>
         <form onSubmit={guardar} className="flex flex-wrap items-center gap-1.5">
-          <input value={detalle} onChange={(evento) => setDetalle(evento.target.value)} autoFocus className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm" />
+          <input value={detalle} onChange={(evento) => setDetalle(evento.target.value)} autoFocus className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent" />
           <input
             type="number"
             min="1"
             value={cantidad}
             onChange={(evento) => setCantidad(evento.target.value)}
-            className="w-16 rounded border border-slate-300 px-2 py-1 text-sm"
+            className="w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
-          <button type="submit" className="rounded bg-slate-900 px-2 py-1 text-xs text-white">
+          <button type="submit" className="rounded-lg bg-brand-accent px-2 py-1 text-xs text-white">
             Guardar
           </button>
           <button

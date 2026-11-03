@@ -210,7 +210,7 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
                   este recuadro en vez de estirarlo, para no deformar ni
                   recortar de más el dibujo. */}
               <div
-                className="mx-auto flex items-center justify-center rounded border border-slate-200 bg-white"
+                className="mx-auto flex items-center justify-center rounded-2xl bg-white shadow-mm print:shadow-none"
                 style={{ width: BOX_ANCHO, height: BOX_ALTO }}
               >
                 <div
@@ -294,14 +294,14 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
                 ) : (
                   <>
                     {marca.pieza && (
-                      <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">{etiquetaPieza(marca.pieza)}</span>
+                      <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">{etiquetaPieza(marca.pieza)}</span>
                     )}
                     <input
                       value={marca.nota}
                       onChange={(evento) => actualizarNota(indice, evento.target.value)}
                       autoFocus={vistaActiva === indice}
                       placeholder="Ej. rayón, abolladura, parabrisas trizado…"
-                      className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
+                      className="flex-1 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                     <button
                       type="button"
