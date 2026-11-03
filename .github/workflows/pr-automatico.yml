@@ -1,0 +1,63 @@
+# Automatiza el paso del PR para las ramas de desarrollo (ccr-* y claude/**):
+#   1. al subir la rama, abre el PR hacia main si no existe;
+#   2. cuando el CI de esa rama termina en verde, fusiona el PR y lanza el deploy.
+# La lógica está en scripts/pr-automatico.sh.
+#
+# Requisito del repositorio: Settings → Actions → General → "Allow GitHub
+# Actions to create and approve pull requests" activado.
+# Para frenar un PR concreto: etiqueta `no-automerge` o pasarlo a borrador.
+# Solo actúa sobre ramas de ESTE repositorio: el CI de un fork con una rama
+# llamada ccr-algo no puede disparar una fusión.
+name: PR automático
+
+on:
+  push:
+    branches: ['ccr-*', 'claude/**']
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  abrir:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pr-abrir-${{ github.ref_name }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Abrir el PR si no existe
+        run: bash scripts/pr-automatico.sh abrir
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RAMA: ${{ github.ref_name }}
+          TITULO: ${{ github.event.head_commit.message }}
+          MENSAJE: ${{ github.event.head_commit.message }}
+
+  fusionar:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch != 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pr-fusionar-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fusionar el PR si el CI pasó sobre su último commit
+        run: bash scripts/pr-automatico.sh fusionar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RAMA: ${{ github.event.workflow_run.head_branch }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
