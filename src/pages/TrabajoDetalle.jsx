@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { invocarFuncion } from '../lib/invocarFuncion'
 import { useClickUpConectado } from '../lib/clickup'
 import FirmaCanvas from '../components/FirmaCanvas'
+import GaleriaInspeccion from '../components/GaleriaInspeccion'
 
 import DescuentoManoObra from '../components/DescuentoManoObra'
 import { formatearPatente } from '../lib/patente'
@@ -972,6 +973,8 @@ function TrabajoDetalle() {
           )}
         </div>
       )}
+
+      <GaleriaInspeccion trabajoId={id} puedeEscanear={['admin', 'socia', 'asesor'].includes(usuario?.rol)} />
 
       <section className="mb-6 max-w-4xl rounded border border-slate-200 bg-white p-4">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Observaciones del asesor</h2>
