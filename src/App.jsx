@@ -17,6 +17,7 @@ import NuevoIngreso from './pages/NuevoIngreso'
 import Trabajos from './pages/Trabajos'
 import TrabajoDetalle from './pages/TrabajoDetalle'
 import RadarSesion from './pages/RadarSesion'
+import EscanerInspeccion from './pages/EscanerInspeccion'
 import Oportunidades from './pages/Oportunidades'
 import Encuestas from './pages/Encuestas'
 import EncuestaPublica from './pages/EncuestaPublica'
@@ -92,6 +93,10 @@ function App() {
           <Route path="/trabajos" element={paginaProtegida(<Trabajos />)} />
           <Route path="/trabajos/:id" element={paginaProtegida(<TrabajoDetalle />)} />
           <Route path="/trabajos/:id/radar" element={paginaProtegida(<RadarSesion />)} />
+          <Route
+            path="/trabajos/:id/escaner"
+            element={paginaProtegida(<EscanerInspeccion />, ['admin', 'socia', 'asesor'])}
+          />
           <Route path="/oportunidades" element={paginaProtegida(<Oportunidades />)} />
           <Route path="/encuestas" element={paginaProtegida(<Encuestas />)} />
           <Route path="/agenda" element={paginaProtegida(<Agenda />)} />
