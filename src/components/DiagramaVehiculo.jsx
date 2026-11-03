@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { centroide, etiquetaDeVista, etiquetaPieza, zonaEn, zonasDeVista } from '../lib/diagramaZonas'
 import imagenSedan from '../assets/diagramas/sedan.jpg'
 import imagenFurgon from '../assets/diagramas/furgon.jpg'
 import imagenPickup from '../assets/diagramas/pickup.jpg'
@@ -129,23 +130,35 @@ function estiloContenedorRecorte(caja) {
 function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
   const [vistaActiva, setVistaActiva] = useState(null)
   const [reubicando, setReubicando] = useState(null)
+  const [sobre, setSobre] = useState(null) // { vista, zona } bajo el cursor
   const recuadros = RECUADROS[tipo] || RECUADROS.sedan
   const imagen = IMAGENES[tipo] || IMAGENES.sedan
   const vistas = DISTRIBUCIONES[tipo] || DISTRIBUCION_ESTANDAR
 
+  function fraccion(evento) {
+    const rect = evento.currentTarget.getBoundingClientRect()
+    return [(evento.clientX - rect.left) / rect.width, (evento.clientY - rect.top) / rect.height]
+  }
+
+  function manejarMovimiento(vista, evento) {
+    if (soloLectura) return
+    const [x, y] = fraccion(evento)
+    const zona = zonaEn(tipo, vista, x, y)
+    setSobre((previo) => (previo?.vista === vista && previo?.zona?.id === zona?.id ? previo : { vista, zona }))
+  }
+
   function manejarClick(vista, evento) {
     if (soloLectura) return
-    const rect = evento.currentTarget.getBoundingClientRect()
-    const x = (evento.clientX - rect.left) / rect.width
-    const y = (evento.clientY - rect.top) / rect.height
+    const [x, y] = fraccion(evento)
+    const pieza = zonaEn(tipo, vista, x, y)?.id
     if (reubicando !== null) {
       // Ubicar una marca existente (p. ej. una sugerida por el escáner): al
       // fijar su posición queda confirmada.
-      onCambio(marcas.map((marca, i) => (i === reubicando ? { ...marca, vista, x, y, pendiente: false } : marca)))
+      onCambio(marcas.map((marca, i) => (i === reubicando ? { ...marca, vista, x, y, pieza, pendiente: false } : marca)))
       setReubicando(null)
       return
     }
-    const nueva = { vista, x, y, nota: '' }
+    const nueva = { vista, x, y, nota: '', ...(pieza ? { pieza } : {}) }
     onCambio([...marcas, nueva])
     setVistaActiva(marcas.length)
   }
@@ -153,6 +166,16 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
   function actualizarNota(indice, texto) {
     const copia = marcas.map((marca, i) => (i === indice ? { ...marca, nota: texto, notaDeFoto: false } : marca))
     onCambio(copia)
+  }
+
+  // Elegir la pieza de una marca sugerida desde la lista: la marca pasa al centro
+  // de esa pieza y queda confirmada.
+  function elegirPieza(indice, idPieza) {
+    const marca = marcas[indice]
+    const zona = zonasDeVista(tipo, marca.vista).find((z) => z.id === idPieza)
+    if (!zona) return
+    const [x, y] = centroide(zona)
+    onCambio(marcas.map((m, i) => (i === indice ? { ...m, x, y, pieza: idPieza, pendiente: false } : m)))
   }
 
   function confirmarUbicacion(indice) {
@@ -175,7 +198,12 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
           const caja = recuadros[vista.clave]
           return (
             <div key={vista.clave} className={vista.ancho}>
-              <p className="mb-1 text-xs text-slate-500">{vista.etiqueta}</p>
+              <p className="mb-1 text-xs text-slate-500">
+                {etiquetaDeVista(tipo, vista.clave, vista.etiqueta)}
+                {!soloLectura && sobre?.vista === vista.clave && sobre.zona && (
+                  <span className="ml-1 font-medium text-blue-700">· {etiquetaPieza(sobre.zona.id)}</span>
+                )}
+              </p>
               {/* Recuadro de tamaño fijo e igual para las 5 vistas -las cajas
                   detectadas tienen proporciones distintas entre sí, así que
                   el recorte se ajusta (como "object-fit: contain") dentro de
@@ -189,6 +217,8 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
                   className="relative cursor-crosshair overflow-hidden"
                   style={estiloContenedorRecorte(caja)}
                   onClick={(evento) => manejarClick(vista.clave, evento)}
+                  onPointerMove={(evento) => manejarMovimiento(vista.clave, evento)}
+                  onPointerLeave={() => setSobre(null)}
                 >
                   <img
                     src={imagen}
@@ -197,6 +227,17 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
                     className="absolute select-none"
                     style={estiloImagenRecortada(caja)}
                   />
+                  {!soloLectura && sobre?.vista === vista.clave && sobre.zona && (
+                    <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+                      <polygon
+                        points={sobre.zona.poligono.map(([px, py]) => `${px},${py}`).join(' ')}
+                        fill="rgba(37, 99, 235, 0.18)"
+                        stroke="rgb(37, 99, 235)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  )}
                   {marcas.map((marca, indice) =>
                     marca.vista === vista.clave ? (
                       <button
@@ -245,9 +286,16 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
                   {indice + 1}
                 </span>
                 {soloLectura ? (
-                  <span className="text-slate-700">{marca.nota || '(sin nota)'}</span>
+                  <span className="text-slate-700">
+                    {marca.pieza && <strong>{etiquetaPieza(marca.pieza)}</strong>}
+                    {marca.pieza && ' — '}
+                    {marca.nota || '(sin nota)'}
+                  </span>
                 ) : (
                   <>
+                    {marca.pieza && (
+                      <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">{etiquetaPieza(marca.pieza)}</span>
+                    )}
                     <input
                       value={marca.nota}
                       onChange={(evento) => actualizarNota(indice, evento.target.value)}
@@ -274,7 +322,20 @@ function DiagramaVehiculo({ tipo, marcas, onCambio, soloLectura, fotosPorId }) {
               </div>
               {!soloLectura && marca.pendiente && (
                 <p className="ml-7 mt-1 text-xs text-amber-800">
-                  Sugerida desde el escáner (vista {marca.vista.replace('_', ' ')}). Ubícala en el dibujo con «ubicar», o{' '}
+                  Sugerida desde el escáner ({etiquetaDeVista(tipo, marca.vista, marca.vista).toLowerCase()}). Elige la pieza:{' '}
+                  <select
+                    value=""
+                    onChange={(evento) => elegirPieza(indice, evento.target.value)}
+                    className="rounded border border-amber-300 bg-white px-1 py-0.5 text-xs text-slate-800"
+                  >
+                    <option value="">¿qué pieza?</option>
+                    {zonasDeVista(tipo, marca.vista).map((zona) => (
+                      <option key={zona.id} value={zona.id}>
+                        {etiquetaPieza(zona.id)}
+                      </option>
+                    ))}
+                  </select>
+                  , ubícala con «ubicar» o{' '}
                   <button type="button" onClick={() => confirmarUbicacion(indice)} className="font-medium underline">
                     confirma que está bien ahí
                   </button>
