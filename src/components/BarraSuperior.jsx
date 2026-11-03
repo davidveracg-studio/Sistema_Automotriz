@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { ETIQUETAS_ROL } from '../lib/navegacion'
 import { pedirCorreosDemo } from '../lib/correosDemo'
@@ -158,6 +158,20 @@ function MenuCuenta() {
 function BarraSuperior() {
   const noLeidas = useNoLeidas()
   const { tema, alternar } = useTema()
+  const ubicacion = useLocation()
+  const navegar = useNavigate()
+
+  // Estando ya en el formulario de ingreso, el enlace no reiniciaba nada (la
+  // ruta no cambia) y parecía roto. Ahora empieza un ingreso nuevo, pero antes
+  // confirma: el formulario tiene firma y muchos campos, y un clic accidental
+  // no debe borrarlos.
+  function empezarNuevoIngreso(evento) {
+    if (ubicacion.pathname !== '/ingresos/nuevo') return
+    evento.preventDefault()
+    if (window.confirm('Ya estás registrando un ingreso. ¿Empezar uno nuevo y descartar lo que llevas?')) {
+      navegar('/ingresos/nuevo')
+    }
+  }
   const oscuro = tema === 'oscuro'
 
   return (
@@ -165,7 +179,7 @@ function BarraSuperior() {
       <BuscadorGlobal />
 
       <div className="ml-auto flex items-center gap-1">
-        <Link to="/ingresos/nuevo" className="btn-primary mr-2 hidden whitespace-nowrap lg:inline-flex">
+        <Link to="/ingresos/nuevo" onClick={empezarNuevoIngreso} className="btn-primary mr-2 hidden whitespace-nowrap lg:inline-flex">
           <Icono nombre="mas" className="h-4 w-4" />
           Nuevo ingreso
         </Link>

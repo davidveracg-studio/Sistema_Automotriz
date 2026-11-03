@@ -66,6 +66,14 @@ function Layout({ children }) {
   )
 }
 
+// Una navegación nueva a /ingresos/nuevo (botón "Nuevo ingreso" estando ya
+// ahí) trae un location.key distinto: usarlo de key vuelve a montar el
+// formulario y lo deja en blanco.
+function NuevoIngresoRuta() {
+  const ubicacion = useLocation()
+  return <NuevoIngreso key={ubicacion.key} />
+}
+
 function paginaProtegida(elemento, rolesPermitidos) {
   return (
     <Layout>
@@ -89,7 +97,7 @@ function App() {
           <Route path="/perfil" element={paginaProtegida(<Perfil />)} />
           <Route path="/clientes" element={paginaProtegida(<Clientes />)} />
           <Route path="/clientes/:id" element={paginaProtegida(<ClienteDetalle />)} />
-          <Route path="/ingresos/nuevo" element={paginaProtegida(<NuevoIngreso />)} />
+          <Route path="/ingresos/nuevo" element={paginaProtegida(<NuevoIngresoRuta />)} />
           <Route path="/trabajos" element={paginaProtegida(<Trabajos />)} />
           <Route path="/trabajos/:id" element={paginaProtegida(<TrabajoDetalle />)} />
           <Route path="/trabajos/:id/radar" element={paginaProtegida(<RadarSesion />)} />
