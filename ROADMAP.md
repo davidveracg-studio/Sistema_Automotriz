@@ -5,6 +5,7 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 **Convención de evidencia**
 - **[H]** Hecho: verificado en código del repo (archivo/ruta citados).
 - **[W]** Lo que la web de Automovity afirma (leída vía Apify el 2026-11-06). No probado funcionalmente.
+- **[A]** Observado dentro de la app de Automovity (sesión de prueba con tu cuenta, 2026-11-06, solo lectura).
 - **[U]** Dato aportado por ti (lista del encargo); donde [W] lo confirma, se indica.
 - **[S]** Suposición/inferencia mía, a confirmar.
 
@@ -12,7 +13,7 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 
 ## 0. Advertencias antes de leer (importante)
 
-1. **Fuente de la web de Automovity [W].** Desde mi red directa `automovity.com` estaba bloqueado, así que la leí vía Apify (`apify/web-fetch`, 2026-11-06). **Páginas leídas:** home (incluye precios, FAQ y datos estructurados), `/para-talleres`, `/para-desabolladura` y `sitemap.xml`. También leí `app.automovity.com/terminos` y `/privacidad` (vigentes desde 2026-10-20). El enlace de tu mensaje (`app.automovity.com/panel`) redirige a un acceso por correo (`/entrar`), así que **no vi el interior de la app**: no creé cuenta ni inicié sesión. **No leí:** las páginas de los otros 5 rubros (`/para-electricidad-automotriz`, `-lubricentros`, `-servitecas`, `-car-wash`, `-instalaciones`), las páginas públicas de negocios clientes del sitemap ni las fichas de las tiendas de apps. Lo que dice la web es lo que **Automovity afirma**; no probé que funcione. Perplexity no estaba disponible para búsqueda (solo ofrece importar dashboards).
+1. **Fuente de la web de Automovity [W].** Desde mi red directa `automovity.com` estaba bloqueado, así que la leí vía Apify (`apify/web-fetch`, 2026-11-06). **Páginas leídas:** home (incluye precios, FAQ y datos estructurados), `/para-talleres`, `/para-desabolladura` y `sitemap.xml`. También leí `app.automovity.com/terminos` y `/privacidad` (vigentes desde 2026-10-20). El enlace de tu mensaje (`app.automovity.com/panel`) redirige a un acceso por correo (`/entrar`). Con tu autorización entré con tu correo a una cuenta de prueba que ya existía y recorrí el panel en modo lectura (sección 1d, etiqueta [A]); no creé cuentas ni cambié datos. **No leí:** las páginas de los otros 5 rubros (`/para-electricidad-automotriz`, `-lubricentros`, `-servitecas`, `-car-wash`, `-instalaciones`), las páginas públicas de negocios clientes del sitemap ni las fichas de las tiendas de apps. Lo que dice la web es lo que **Automovity afirma**; no probé que funcione. Perplexity no estaba disponible para búsqueda (solo ofrece importar dashboards).
 2. **El repo es una versión demo/portafolio**, no el producto de producción (`README.md`: "versión de demostración, adaptada de un proyecto en producción real"). El código de producción de Didial podría tener cosas que aquí no están (p. ej. el esquema dice que el tenant real "se siembra aparte", `0001_esquema_roles.sql`). Mi auditoría cubre **solo lo que hay en este repo**.
 3. Revisé arquitectura, migraciones (74), Edge Functions (11), rutas, CI y componentes clave. **No ejecuté la app ni la base de datos**, así que nada aquí está probado en ejecución.
 
@@ -45,7 +46,7 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 - **Cobro**: caja como punto de venta (carrito de productos y servicios), **anticipos en % o en pesos**, **arqueo** y movimientos, **link de pago** de la OT; en desabolladura, abono al aprobar y saldo al retirar.
 - **Seguimientos automáticos**: aviso de recepción y de "listo" (con botón de pago), **recordatorios de visita y de mantención**, y **seguimiento de cotizaciones por vencer**.
 - **Equipamiento**: bahías, elevadores, rampas, escáner con ocupación en vivo; un equipo ocupado no ofrece horas.
-- **Página pública por negocio** con reservas y espera en vivo (el sitemap lista varias, p. ej. `/pacifico-automotriz`, `/alfa-detailing`: son URLs de clientes).
+- **Página pública por negocio** con reservas y espera en vivo (el sitemap lista varias; `/pacifico-automotriz` resultó ser la página de tu propia cuenta de prueba [A] y las demás, p. ej. `/alfa-detailing`, son de otros negocios).
 - **Aseguradoras/liquidadores**: estado "esperando liquidador" y respaldo de cada aprobación (quién y cuándo).
 - **App Staff "Mi día"** (técnico/lavador ve sus trabajos, sube fotos, marca avances; no ve precios ni caja) y **apps en App Store y Google Play** (enlaces en la home).
 - **Importación desde Excel**; **configuración y capacitación incluidas** en ambos planes; **estados por rubro** (mecánico: por recibir → diagnóstico → esperando aprobación → reparación → listo → entregado; DyP: peritaje, desabolladura, pintura, armado).
@@ -86,6 +87,34 @@ Estos documentos muestran **cómo opera** Automovity, no solo qué funciones ven
 | Cumplimiento | Citan Ley 19.628 "y sus modificaciones"; no nombran la Ley 21.719 en el texto | Tu trabajo de derechos de titulares y retención (`0073`/`0074`) es más explícito; es argumento de confianza, no una brecha |
 
 > No copies sus textos legales: redacta los tuyos con asesoría. Esto es un mapa de qué temas cubrir.
+
+---
+
+## 1d. Lo observado dentro de la app de Automovity [A]
+
+**Alcance.** Entré con tu correo (código de un solo uso) a una cuenta que ya existía: negocio "PA", rubro taller mecánico, prueba gratis que **termina el 20 nov 2026**. Recorrí 35 pantallas en modo lectura, en formato móvil (390 px), sin pulsar acciones ni cambiar datos. **La cuenta está vacía** (0 OT, 0 clientes, 0 cotizaciones, 0 inventario), así que **no vi** el detalle de una OT, la cotización que recibe el cliente, un cobro real, un aviso de WhatsApp ni comisiones con datos. Lo que sigue es estructura y configuración, no comportamiento probado.
+
+| Área | Qué vi [A] | Implicancia para VPAI |
+|---|---|---|
+| **Navegación móvil** | Barra inferior fija: Resumen · Trabajos · Chat · Caja · Más, con botón central "+" (ingreso) y campana de avisos; buscador arriba. Diseñada para teléfono | Es el mayor contraste de UX: el menú de VPAI no tiene breakpoints (`Menu.jsx`). Un técnico o asesor en el taller usa el celular |
+| **Resumen** | Vendido hoy, vehículos, ticket promedio, "en carpeta", contadores (por recibir, en reparación, listo, atrasadas), "para atender", staff ahora (libre/ocupado), más vendidos; filtros hoy/semana/mes/fecha | Tu `Inicio.jsx` muestra OT abiertas, citas, notificaciones y facturas vencidas, pero no ventas ni ticket promedio |
+| **Trabajos** | Tablero de 8 columnas (Por recibir, Diagnóstico, Esperando aprobación, Aprobado, En reparación, Esperando repuesto, Listo, Entregado) y vista lista con filtros de etapa y período. Etapas internas: entrada, cotización, aprobado, ejecución, bloqueado, terminado | Estados propios, sin depender de una herramienta externa (tu Kanban depende de ClickUp) |
+| **Caja** | Abrir/cerrar caja; servicios del catálogo como botones; monto libre; carrito; "Cobrar"; búsqueda por patente, OT, producto o servicio | Tu POS (`PuntoVenta.jsx`) no maneja pago ni caja |
+| **Catálogo** | Por tipo de vehículo (Auto / SUV y camioneta), categorías, duración y precio o "A cotizar"; **viene precargado con servicios típicos del rubro** | Tu catálogo existe (`0027`, `0057`) pero se siembra por migración, no al crear el taller |
+| **Agenda y reservas** | Vista por día y próximos días con horas comprometidas y días cerrados. Reservas configurables: por día u hora, ver por staff o equipamiento, capacidad por horas del staff o cupos, tolerancia de atraso, anticipación mínima y máxima, plazo para cambiar/anular, qué hacer si no confirma (nada, avisar, **liberar la hora**) y anticipo fijo o en % | Tu agenda es más fina por habilidades, pero no tiene política de reservas online ni liberación automática |
+| **Equipamiento** | Elevador con ocupación por hora, %, vehículos hoy y "esperan lugar" | Parcial en VPAI (plano del taller) |
+| **Clientes** | Filtros **Todos · Frecuentes · No vuelven**; vehículos aparte | Automovity ya tiene un CRM de retención básico: tu ventaja ahí es el flujo de oportunidades y la encuesta, no la idea |
+| **Reportes** | Pestañas Ventas · Mecánicos · Operación · Caja; hoy/semana/mes; comparación con ayer; exportar CSV | Tus informes son de calidad, no financieros (ver brecha #14) |
+| **Staff** | "Agrega a tu primer mecánico: le asignas OT y ves cuánto vende y cuánto gana" | Confirma comisiones por persona |
+| **Primeros pasos** | Lista de 8 tareas con avance "0 de 8": datos del negocio, revisar catálogo, horario, compartir página de reservas, invitar equipo, primera OT, primer cobro, elegir plan. Horario y catálogo **vienen preconfigurados** (L–V 9–19, S 9–15) | Onboarding guiado que tú no tienes; es la base de "probar en 30 min" |
+| **Mi página** | Publicada y visible en Google, con portada, descripción, opción de mostrar precios y reservas online | Brecha #26 |
+| **Configuración** | Rubro del negocio (7 + otro) y "otros rubros"; local o domicilio; checklist de entrada y de salida; interruptor "los mecánicos ven los precios"; tipos de vehículo; **textos de recepción y entrega editables**; **campos obligatorios por cliente, vehículo y OT** y hasta 10 campos propios | Tu esquema es fijo por taller; configurar por tenant es parte de la Fase 0/3 |
+| **Cobros** | Link de pago y QR y **Boletas electrónicas: "Pide activarlo"** (activación asistida, no inmediata); TUU: se instala "Automovity" desde las apps de la máquina y cobra a nombre de quien la vincula | El DTE y los pagos online no son autoservicio ni siquiera para ellos: hay un paso de activación con el proveedor. Planifica lo mismo |
+| **Plan** | Prueba hasta el 20 nov, 10 personas incluidas en la prueba; Starter $49.900 y Premium $99.900 + IVA (con IVA: $59.381 y $118.881) | Confirma precios [W] |
+| **Créditos** | Incluidos: WhatsApp 200, correo 1.000, **IA 200** por mes. Bolsas que no vencen, cada una a **$5.950 con IVA**: 50 de WhatsApp, 500 de correo o 200 de IA | Por unidad: WhatsApp ≈ $119, IA ≈ $30, correo ≈ $12 (con IVA, cálculo mío). La IA es un producto medido; tu costo por llamada a visión debe medirse igual |
+| **Chat y soporte** | Bandeja de WhatsApp con "sin responder / todas / todo respondido" y chat de soporte con el equipo | Similar a tu `Mensajes.jsx`; falta el soporte integrado |
+
+> La sesión de prueba quedó guardada solo en el directorio temporal de esta sesión y no modifiqué datos de la cuenta. Si prefieres, cierra sesiones activas desde "Mi cuenta" de Automovity.
 
 ---
 
@@ -197,6 +226,14 @@ Esfuerzo: S (≤1 semana), M (1–4 semanas), L (>1 mes) — estimación mía pa
 | 36 | Comisión por pagos online (modelo de ingreso) [W] | **Falta** | Sin pasarela (#9) | M | Medio | #9 |
 | 37 | Acceso de soporte auditado [W] | **Parcial** | Monitor de uso (`0056`), sin acceso de soporte registrado | S–M | Medio | Fase 0 |
 | 38 | Push nativo y monitoreo de errores [W] | **Falta** | Sin Sentry ni FCM/APNs en el repo | S–M | Medio | #19 |
+| 39 | Navegación móvil con barra inferior y botón "+" de ingreso [A] | **Falta** | `Menu.jsx` sin breakpoints; menú lateral `sticky h-screen` | S–M | **Alto** (uso diario en taller) | Responsive (Fase 0) |
+| 40 | Onboarding guiado "Primeros pasos" con catálogo y horario precargados por rubro [A] | **Falta** | Puesta en marcha manual (`README.md`); catálogo sembrado por migración (`0027`, `0057`) | M | **Alto** | #21 |
+| 41 | Política de reservas online: por día/hora, plazos, anticipo, liberar hora si no confirma [A] | **Parcial** | Agenda con horario de atención y bot (`0034`, `0035`); sin plazos ni anticipo | M | Medio | #26, #23 |
+| 42 | Campos obligatorios y campos propios configurables por negocio [A] | **Falta** | Esquema de `clientes`/`vehiculos`/`trabajos_taller` fijo (`0002`, `0003`) | M | Medio | Fase 0 |
+| 43 | Textos de recepción/entrega y checklists editables por negocio [A] | **Parcial** | Checklists RADAR/tareas editables en el taller (`README.md`); textos legales fijos en código (`lib/legal/*`) para privacidad y términos | S–M | Medio | — |
+| 44 | Filtros de cartera "Frecuentes / No vuelven" [A] | **Existe (distinto)** | Informe "Clientes que vuelven" y `oportunidades` (`0011`, `Oportunidades.jsx`) | S | Medio | — |
+| 45 | Instalar la app en la máquina TUU y cobrar con boleta en un paso [A] | **Falta** | Sin integración TUU | M–L | Medio | #9; acuerdo con TUU |
+| 46 | Activación asistida de boleta y link de pago [A] | **Falta** (proceso) | DTE solo sandbox | S | Medio | #8, #9 |
 
 Fila extra, para no olvidar lo no listado: **notificaciones de repuestos, bloqueo de OT cerrada, descuentos con tope, turnos/RRHH, cumplimiento de datos** existen y no tienen equivalente en la lista [U].
 
@@ -229,7 +266,7 @@ Entregables (en orden):
 3. **Autenticación real**: usuarios con correo propio, invitación, recuperación de clave; el selector de rol queda solo para `es_demo`. Quitar contraseña demo del bundle de producción.
 4. **Desacoplar ClickUp**: tabla propia de estados/tablero (`ot_estado`) con ClickUp como sincronización opcional. Sin esto no existe "fila" propia ni espera en vivo.
 5. **Alta de tenant** (script o endpoint admin): crea empresa, admin, horarios, catálogo base. Elimina "primera empresa activa" del trigger.
-6. **Responsive móvil** del Menú y de ingreso/OT/técnico (drawer, tablas → tarjetas).
+6. **Responsive móvil** del Menú y de ingreso/OT/técnico (drawer, tablas → tarjetas). Patrón observado en Automovity [A] como referencia funcional (no de diseño): barra inferior con 4–5 destinos y una acción primaria "ingreso" siempre a mano.
 7. Partir `TrabajoDetalle`/`NuevoIngreso` en módulos; runbook de backup/restauración; revisar `.mcp.json` y secretos.
 8. **Acceso de soporte auditado**, monitoreo de errores (p. ej. Sentry, sin datos personales) y, al elegir auth, evaluar acceso por código al correo como alternativa a contraseñas [W: lo usa Automovity].
 
@@ -285,7 +322,7 @@ Criterios de aceptación:
 
 Entregables:
 1. **Planes y límites** (Starter/Premium propios) + **prueba de 14 días** + cobro de suscripción. Referencia [W]: Automovity limita por personas y por cantidad de WhatsApp/correos, no por funciones; el consumo de WhatsApp tiene costo real para ti, así que medirlo por tenant es obligatorio. Definir además si la configuración/capacitación será servicio incluido o de pago.
-2. **Autoservicio de alta** con asistente (datos del taller, importar clientes/catálogo desde Excel, invitar equipo).
+2. **Autoservicio de alta** con asistente (datos del taller, importar clientes/catálogo desde Excel, invitar equipo). Referencia [A]: lista de "Primeros pasos" de 8 tareas con avance, catálogo y horario precargados según el rubro elegido, y activación asistida de boletas y pagos online (no inmediata). Planifica ese paso manual con el proveedor.
 3. Marca por tenant (logo ya existe: `0024`), dominio/subdominio, portal público con marca del taller.
 4. Mercado Pago / TUU para cobro en caja y links de pago.
 5. Observabilidad, monitor por tenant (ya hay base: `0056`), soporte y límites de uso de IA/WhatsApp.
@@ -304,7 +341,7 @@ Criterios de aceptación:
 
 | Ventaja | Evidencia | Cómo convertirla en ventaja competitiva |
 |---|---|---|
-| **CRM y retención** | `Oportunidades.jsx`, informe "Clientes que vuelven" (`0011`: 65,9 % de vehículos vienen una sola vez, dato del taller original) | Posicionar "no solo ordena el taller, trae clientes de vuelta". Automatizar recordatorios por km/fecha y reportar ingresos recuperados |
+| **CRM y retención** (ventaja moderada: Automovity también filtra clientes "Frecuentes / No vuelven" [A]) | `Oportunidades.jsx`, informe "Clientes que vuelven" (`0011`: 65,9 % de vehículos vienen una sola vez, dato del taller original) | Posicionar "no solo ordena el taller, trae clientes de vuelta". Automatizar recordatorios por km/fecha y reportar ingresos recuperados |
 | **Encuestas de postventa** | `encuestas`, envío al día siguiente, alerta de nota negativa | Mostrar NPS por técnico, cerrar el ciclo con acción del asesor, pedir reseña en Google a promotores |
 | **IA de inspección** (ventaja parcial) | `analizar-inspeccion` (Claude visión), escáner por video, aceptación humana. **Automovity también tiene IA [W]**, pero de captura de datos (patente, padrón, km, dictado, consultas), no de detección de daños/inventario que yo haya visto | Tu diferencial es el daño y el inventario sugeridos con aceptación humana. Súmale la captura (OCR patente/padrón, dictado) para igualar, y la cotización sugerida para superar. Cuidar costo por OT |
 | **Análisis de calidad/financiero** | Retrabajos por técnico, captura de datos, presupuestos por decisión. *Análisis financiero propiamente dicho aún no existe* (ver F2.4) | Completar con margen por OT. Hoy la ventaja es de calidad, no de finanzas |
