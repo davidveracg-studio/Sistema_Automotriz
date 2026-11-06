@@ -158,7 +158,40 @@ Leí las 7 páginas de rubro. Hallazgo central: **no son 7 productos; es un solo
 | **Caja** | Abrir caja con efectivo inicial; lista "Por cobrar" (OT y cotizaciones aprobadas) y catálogo como botones; cobro por efectivo, transferencia o tarjeta, descuento, **cobro parcial** ("otro monto") y, en efectivo, **monto recibido y vuelto**; al terminar: comprobante de 80 mm o carta. **Cierre con arqueo**: "debería haber" frente a "efectivo contado". Sin boleta porque no está activada | Es el módulo que tú no tienes (`0013`: "sin manejo de pago real"). Estos son los casos mínimos: apertura, métodos, parcial, vuelto, comprobante, arqueo |
 | **Reportes y resumen** | Con el cobro hecho, "Vendido hoy" siguió en $0 y Reportes dijo "nada en este período": la OT seguía en "Por recibir". El texto del reporte habla de "lo que quedó listo y lo que se vendió en la caja" [S: las ventas parecen reconocerse al terminar la OT, no al cobrar]. El resumen del mecánico muestra "Mi cola" con sus OT | Decide pronto qué es una "venta" en VPAI (cobro vs OT entregada); afecta reportes, comisiones y caja |
 
-**Límites de esta prueba:** un solo ítem y un solo cobro en efectivo; sin WhatsApp, boleta, link de pago, tarjeta/TUU ni comisiones; no cerré la caja ni finalicé la OT. Dejé la caja abierta y los datos de prueba en tu cuenta (cliente, OT-1, COT-1 aprobada y un cobro de $25.000), por si quieres revisarlos o borrarlos.
+**Límites de esta primera prueba:** un solo ítem y un solo cobro en efectivo; sin WhatsApp, boleta, link de pago, tarjeta/TUU ni comisiones. Las pruebas posteriores (varios ítems, opcionales, ciclo completo de la OT, inventario, reportes) están en la sección 1g.
+
+---
+
+## 1g. Revisión de las opciones restantes de Automovity [A]
+
+Continué el recorrido en tu cuenta de prueba (2026-11-06) hasta cerrar el ciclo de una OT. **Evité** lo que envía mensajes o correos a terceros (WhatsApp, "Enviar para firmar", invitar staff, "Pide activarlo", compras de créditos). El sistema de permisos también bloqueó, con razón, completar una **reserva pública** (es una transacción real que puede generar avisos); vi solo sus primeros pasos: elegir servicio y luego la patente (con la opción "No sé la patente").
+
+**1. Ciclo de vida de la OT: un botón principal por etapa.** Checklist de entrada completo → pasa solo a **Diagnóstico** → **Aprobar** (aprobación presencial) → **Empezar** (En reparación) → **Marcar lista** → **Cobrar** → **Entregar**. Cada paso queda en un historial con autor y hora ("Aprobado", "En reparación", "Listo · checklist de salida: 5 puntos", "Dio por hecho lo pendiente al marcarla lista: 2 trabajos"). La OT muestra una hora estimada de término ("aprox. 17:49") calculada con la duración de los servicios. **Marcar lista** abre un checklist de salida de 5 puntos (con atajo "Todo bien"). **Entregar** abre una pantalla "así llegó y así sale" (fotos de llegada y de salida por cada lado), repite el checklist de salida, pide firma de conformidad, quién retira y permite "retira con observaciones". No pude completar la entrega: el botón no actúa hasta firmar o marcar "No firmó".
+
+**2. Checklist de entrada configurable y con trazabilidad.**
+- Ajustes: hacerlo al ingresar, exigirlo antes de empezar, fotos obligatorias, kilometraje obligatorio, firma al recibir, video al recibir, y puntos de revisión editables con "Obligatorio" por punto y "Agregar punto".
+- Fotos por lado (frente, derecha, atrás, izquierda, más tablero e interior). **Detecta fotos repetidas**: "Esa misma foto ya está en la OT. Saca una nueva".
+- Hay versión completa y **liviana** (5 pasos); el asistente retoma en el primer paso incompleto. El kilometraje bloquea el cierre si falta.
+- **Firma:** texto de consentimiento editable con número de versión; al firmar queda "Firmó en persona el 6 nov, 17:03 · texto versión 1 · código de integridad" (16 caracteres). También existe "Enviar para firmar" (por link), que no probé.
+
+**3. Inventario con reserva y consumo.** Un producto tiene nombre, categoría, precio, costo, stock mínimo, "se vende en caja", marca, SKU, código de barras e IVA. Se registra con "Recibir compra" (cantidad, costo, proveedor) o "Contar/Ajustar". Muestra el margen ("Ganas $5.000"), disponible, en mano y reservado, filtros "sin stock" y "stock bajo", y "alcanza para N días". **Al agregarlo a una OT queda reservado; al marcar la OT lista se consume** ("Gastado en OT-1"), con movimientos de entradas, salidas y ajustes.
+
+**4. Catálogo y comisiones.** El servicio se define con categoría, "se puede reservar", precio y tiempo **por tamaño de vehículo o único**, y **comisión del mecánico en %** (las comisiones se fijan por servicio). Equipamiento: 13 tipos (elevador, scanner, compresor, alineadora, foso, balanceadora, desmontadora, bahía, box de lavado, cabina de pintura, hidrolavadora, unidad móvil, otro), con capacidad "a la vez" y servicios que lo usan. Staff se agrega con nombre, teléfono y correo (invitación; no la envié).
+
+**5. Cotización con opcionales.** Cada ítem tiene cantidad y un selector **Incluido / Opcional**; se pueden agregar trabajos fuera del catálogo (qué es + precio), título, mensaje, nota interna y validez. El total del taller muestra "Opcionales $12.000 si los aprueba" aparte. **En el link del cliente**, cada ítem es un interruptor (incluidos activados, opcionales desactivados, con "Recomendado"); al activar un opcional el total cambió de $62.000 a $74.000. Esto confirma la aprobación **ítem por ítem** con opcionales. No aprobé COT-2.
+
+**6. Reportes con datos (la OT cuenta como venta al marcarla lista, no al cobrar).**
+- **Ventas:** vendido con IVA, número de ventas, promedio, por hora y detalle.
+- **Mecánicos:** vehículos listos, monto, tiempo promedio, vehículos por hora, detalle por persona y **"Repasos"** (retrabajos).
+- **Operación:** tiempo de llegada a lista, de lista a retirada, **tiempo promedio por etapa**, reabiertas, atrasadas y **"listas después de lo comprometido"** (puntualidad).
+- **Caja:** cobrado, por medio de pago, anulado o devuelto, cobrado por hora y movimientos.
+- **Resumen:** "para atender" (OT lista para entregar), staff ahora con su monto y "más vendidos" con porcentaje.
+
+**7. Otras pantallas.** Página pública del negocio ("Abierto ahora", precios por tamaño, horario, "Reservar hora"); Agenda con vistas Día y Próximos días y botón "Reservar"; Chat con filtros; "Mi cuenta"; menú "Más" con Agenda, Cotizaciones, Clientes, Vehículos, Catálogo, Inventario, Equipamiento, Reportes, Staff, Ajustes, Ayuda y soporte.
+
+**Sigue sin probar:** entrega completa con firma, "Enviar para firmar", reserva pública completa, aviso de WhatsApp, boleta, link de pago, tarjeta/TUU, anticipo, importación desde Excel, pago de comisiones calculado y "Invitar a la app" del cliente.
+
+**Datos de prueba que quedan en tu cuenta de Automovity:** cliente "Cliente Prueba VPAI" (VPAI01), OT-1 en "Listo" y cobrada ($37.000 en efectivo), COT-1 aprobada, COT-2 enviada y sin aprobar (con ítems repetidos por mis pruebas), producto "Aceite 5W30 (prueba)" con 9 unidades, 5 fotos de prueba y la caja abierta.
 
 ---
 
@@ -293,6 +326,16 @@ Esfuerzo: S (≤1 semana), M (1–4 semanas), L (>1 mes) — estimación mía pa
 | 59 | Ingreso rápido: cliente + vehículo + OT en una pantalla corta [A] | **Parcial** | `NuevoIngreso.jsx` (1.244 líneas) con dos flujos y muchos campos | M | **Alto** | #1, #47 |
 | 60 | Checklist de entrada corto por defecto, con versión profunda opcional [A] | **Parcial** | RADAR 48 puntos (`0029`) y escáner (`0068`); sin versión liviana | S–M | Medio | #47 |
 | 61 | Anticipo/abono al aprobar la cotización [A] | **Falta** | Sin pagos (#7) | S–M | Medio | #57 |
+| 62 | Flujo guiado de la OT: un botón principal por etapa (Aprobar → Empezar → Marcar lista → Cobrar → Entregar) con historial de autor y hora [A] | **Parcial** | Kanban y detalle (`Taller.jsx`, `DetalleOt.jsx`), estados desde ClickUp; cierre con bloqueo (`0026`) | M | **Alto** | #2, #47 |
+| 63 | Checklist de salida y pantalla de entrega "así llegó y así sale" (fotos de llegada vs salida) [A] | **Parcial** | Orden de egreso con firma (`OrdenEgreso.jsx`, `0020`) y fotos de inspección (`0068`); sin comparación de fotos llegada/salida | M | Medio–Alto | #4 |
+| 64 | Detección de foto duplicada en la OT [A] | **Falta** | `inspeccion_fotos` sin huella de imagen (`0068`) | S | Medio (anti-fraude) | — |
+| 65 | Inventario con reserva al agregar a la OT y consumo al marcarla lista; "alcanza para N días" [A] | **Parcial** | Stock por movimientos con `uso_ot` (`0012`); sin reserva ni proyección | S–M | Medio | #49 |
+| 66 | Reportes operativos: tiempo por etapa, puntualidad vs hora comprometida, reabiertas, repasos, vehículos por hora [A] | **Parcial** | Retrabajos por técnico (`0011`); sin tiempos por etapa ni puntualidad (`Informes.jsx`) | M | Alto | #62 |
+| 67 | Cotización con ítems incluidos/opcionales y total dinámico para el cliente [A] | **Falta** | Aceptación parcial solo por el personal | S–M | Alto | #5 |
+| 68 | Comisión del mecánico como % por servicio en el catálogo [A] | **Falta** | Sin comisiones (#11) | S | Medio | #11 |
+| 69 | Hora estimada de término de la OT según duración de los servicios [A] | **Falta** | `duracion` existe en agenda (`0010`); sin cálculo en la OT | S | Medio | — |
+| 70 | Checklist de entrada configurable (puntos obligatorios, fotos/km/firma/video exigibles) con modo liviano [A] | **Parcial** | Checklists editables en el taller (`README.md`); RADAR fijo (`0029`) | M | Medio | #47, #60 |
+| 71 | Textos de firma con versión y código de integridad [A] | **Falta** | Firma PNG sin versión (`0003`, `0020`, `FirmaCanvas.jsx`); ver #34 | S | Medio | — |
 
 Fila extra, para no olvidar lo no listado: **notificaciones de repuestos, bloqueo de OT cerrada, descuentos con tope, turnos/RRHH, cumplimiento de datos** existen y no tienen equivalente en la lista [U].
 
@@ -371,6 +414,9 @@ Entregables (en orden):
 7. **Gastos simples** y alerta de stock mínimo.
 8. **Anticipos/abonos y arqueo** (parte de la caja) y **seguimiento automático** de cotizaciones por vencer (usa la cola de avisos del punto 4).
 9. **Importación desde Excel** de clientes y vehículos (necesaria para onboarding en Fase 3; puede adelantarse si hay un segundo taller).
+10. **Flujo guiado de la OT** (#62): un botón principal por etapa con historial, estados propios y hora estimada de término (#69), más checklist de salida y pantalla de entrega con fotos llegada/salida (#63).
+11. **Cotización con opcionales** (#67) en el link público y **reserva/consumo de stock** ligados a la OT (#65), incluidos desde el diseño del vínculo cotización ↔ OT ↔ cobro.
+12. **Reportes operativos** (#66): ventas, por mecánico, tiempo por etapa y puntualidad, sobre las marcas de tiempo del flujo guiado.
 
 Criterios de aceptación:
 - Un cliente aprueba una cotización desde el celular sin cuenta y el asesor ve el cambio en <1 min.
@@ -421,14 +467,14 @@ Criterios de aceptación:
 
 ## 6. Dónde VPAI ya supera a Automovity [H vs W/A]
 
-*(Comparo contra lo que Automovity afirma en las páginas que leí [W]. En ellas no vi encuestas de postventa, IA de inspección, informes de calidad/retrabajos ni cumplimiento de datos personales; tampoco vi la app con datos reales, así que "no lo vi" no prueba que no exista. Ojo: sí ofrecen recordatorios de mantención y seguimiento de cotizaciones, que acercan su "retención" a la tuya.)*
+*(Comparo contra lo que Automovity afirma [W] y lo que vi en su app [A]. No vi encuestas de postventa, IA de inspección con detección de daños ni cumplimiento de datos personales con solicitudes de titulares. **Sí vi "Repasos" (retrabajos) por mecánico, reabiertas, tiempo por etapa y puntualidad**, así que tu informe de retrabajos ya no es un diferencial por sí solo. No vi WhatsApp, boleta ni encuestas en uso, y "no lo vi" no prueba que no exista. Ojo: sí ofrecen recordatorios de mantención y seguimiento de cotizaciones, que acercan su "retención" a la tuya.)*
 
 | Ventaja | Evidencia | Cómo convertirla en ventaja competitiva |
 |---|---|---|
 | **CRM y retención** (ventaja moderada: Automovity también filtra clientes "Frecuentes / No vuelven" [A]) | `Oportunidades.jsx`, informe "Clientes que vuelven" (`0011`: 65,9 % de vehículos vienen una sola vez, dato del taller original) | Posicionar "no solo ordena el taller, trae clientes de vuelta". Automatizar recordatorios por km/fecha y reportar ingresos recuperados |
 | **Encuestas de postventa** | `encuestas`, envío al día siguiente, alerta de nota negativa | Mostrar NPS por técnico, cerrar el ciclo con acción del asesor, pedir reseña en Google a promotores |
 | **IA de inspección** (ventaja parcial) | `analizar-inspeccion` (Claude visión), escáner por video, aceptación humana. **Automovity también tiene IA [W]**, pero de captura de datos (patente, padrón, km, dictado, consultas), no de detección de daños/inventario que yo haya visto | Tu diferencial es el daño y el inventario sugeridos con aceptación humana. Súmale la captura (OCR patente/padrón, dictado) para igualar, y la cotización sugerida para superar. Cuidar costo por OT |
-| **Análisis de calidad/financiero** | Retrabajos por técnico, captura de datos, presupuestos por decisión. *Análisis financiero propiamente dicho aún no existe* (ver F2.4) | Completar con margen por OT. Hoy la ventaja es de calidad, no de finanzas |
+| **Análisis de calidad/financiero** (ventaja débil: Automovity ya mide repasos, reabiertas, tiempo por etapa y puntualidad [A]) | Retrabajos por técnico, captura de datos, presupuestos por decisión. *Análisis financiero propiamente dicho aún no existe* (ver F2.4) | Para diferenciarte, ve más allá de lo que vi: **margen por OT** (tienes columnas de costo protegidas), costo de los retrabajos y calidad de captura de datos. Automovity muestra monto y tiempo, no margen [A] |
 | **Agenda por habilidades** | `0048` | Evita sobreagendar; mostrar ocupación real vs capacidad |
 | **Cumplimiento Ley 21.719** | `0073`, `0074`, políticas legales | Argumento comercial de confianza para talleres/flotas; "listo para auditoría de datos" |
 | **Seguridad de precios** | RLS + REVOKE de columna | Rol técnico sin ver costos; atractivo para dueños con personal rotativo |
@@ -447,7 +493,7 @@ Criterios de aceptación:
 
 ## 8. Preguntas abiertas (necesito tu respuesta antes de asumir)
 
-1. En tu cuenta de Automovity quedaron datos de prueba (cliente, OT-1, COT-1 aprobada, un cobro de $25.000 y la caja abierta). ¿Los dejo o prefieres que cierre la caja? ¿Quieres que pruebe también varios ítems, opcionales o el aviso por WhatsApp? Este último envía un mensaje, así que necesito un número de prueba tuyo.
+1. En tu cuenta de Automovity quedaron datos de prueba (lista en la sección 1g). ¿Los dejo o prefieres que cierre la caja y complete la entrega de la OT-1? Para probar WhatsApp, "enviar para firmar", la reserva pública o la boleta necesito un número de teléfono de prueba tuyo, porque envían mensajes reales.
 2. ¿El **repo de producción de Didial** es otro? ¿Tiene cobro/caja, DTE real (el código menciona "Dimasoft" como facturador externo, `0013`) o WhatsApp aprobado que no están aquí?
 3. ¿VPAI es solo para Didial, o el objetivo es **vender a otros talleres** desde ya? Cambia el peso de la Fase 0.5 y la Fase 3.
 4. ¿Qué rubros además de mecánica/DyP quieres vender primero (sección 1e)? Sugiero electricidad y lubricentro/serviteca como siguientes. Si ninguno, dejo multirrubro fuera de las Fases 1 y 2.
