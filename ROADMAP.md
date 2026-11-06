@@ -166,7 +166,7 @@ Leí las 7 páginas de rubro. Hallazgo central: **no son 7 productos; es un solo
 
 Continué el recorrido en tu cuenta de prueba (2026-11-06) hasta cerrar el ciclo de una OT. **Evité** lo que envía mensajes o correos a terceros (WhatsApp, "Enviar para firmar", invitar staff, "Pide activarlo", compras de créditos). El sistema de permisos también bloqueó, con razón, completar una **reserva pública** (es una transacción real que puede generar avisos); vi solo sus primeros pasos: elegir servicio y luego la patente (con la opción "No sé la patente").
 
-**1. Ciclo de vida de la OT: un botón principal por etapa.** Checklist de entrada completo → pasa solo a **Diagnóstico** → **Aprobar** (aprobación presencial) → **Empezar** (En reparación) → **Marcar lista** → **Cobrar** → **Entregar**. Cada paso queda en un historial con autor y hora ("Aprobado", "En reparación", "Listo · checklist de salida: 5 puntos", "Dio por hecho lo pendiente al marcarla lista: 2 trabajos"). La OT muestra una hora estimada de término ("aprox. 17:49") calculada con la duración de los servicios. **Marcar lista** abre un checklist de salida de 5 puntos (con atajo "Todo bien"). **Entregar** abre una pantalla "así llegó y así sale" (fotos de llegada y de salida por cada lado), repite el checklist de salida, pide firma de conformidad, quién retira y permite "retira con observaciones". No pude completar la entrega: el botón no actúa hasta firmar o marcar "No firmó".
+**1. Ciclo de vida de la OT: un botón principal por etapa.** Checklist de entrada completo → pasa solo a **Diagnóstico** → **Aprobar** (aprobación presencial) → **Empezar** (En reparación) → **Marcar lista** → **Cobrar** → **Entregar**. Cada paso queda en un historial con autor y hora ("Aprobado", "En reparación", "Listo · checklist de salida: 5 puntos", "Dio por hecho lo pendiente al marcarla lista: 2 trabajos"). La OT muestra una hora estimada de término ("aprox. 17:49") calculada con la duración de los servicios. **Marcar lista** abre un checklist de salida de 5 puntos (con atajo "Todo bien"). **Entregar** abre una pantalla "así llegó y así sale" (fotos de llegada y de salida por cada lado), repite el checklist de salida, pide firma de conformidad, quién retira y permite "retira con observaciones". **Entrega completada después** (ver más abajo): el botón "Entregar" solo actúa tras firmar o marcar "No firmó".
 
 **2. Checklist de entrada configurable y con trazabilidad.**
 - Ajustes: hacerlo al ingresar, exigirlo antes de empezar, fotos obligatorias, kilometraje obligatorio, firma al recibir, video al recibir, y puntos de revisión editables con "Obligatorio" por punto y "Agregar punto".
@@ -189,9 +189,16 @@ Continué el recorrido en tu cuenta de prueba (2026-11-06) hasta cerrar el ciclo
 
 **7. Otras pantallas.** Página pública del negocio ("Abierto ahora", precios por tamaño, horario, "Reservar hora"); Agenda con vistas Día y Próximos días y botón "Reservar"; Chat con filtros; "Mi cuenta"; menú "Más" con Agenda, Cotizaciones, Clientes, Vehículos, Catálogo, Inventario, Equipamiento, Reportes, Staff, Ajustes, Ayuda y soporte.
 
-**Sigue sin probar:** entrega completa con firma, "Enviar para firmar", reserva pública completa, aviso de WhatsApp, boleta, link de pago, tarjeta/TUU, anticipo, importación desde Excel, pago de comisiones calculado y "Invitar a la app" del cliente.
+**8. Cierre del ciclo (con tu autorización, 17:2x).**
+- **Cierre de caja:** pide el efectivo contado y lo compara con lo que "debería haber" ($37.000 = $37.000). Al cerrar, la caja vuelve a "Abrir caja". **COT-1 siguió apareciendo como "por cobrar" ($25.000)** aunque la OT ya estaba pagada: confirma el riesgo de doble conteo si no se enlazan cotización, OT y cobro.
+- **Entrega:** firmé en persona la conformidad (de nuevo con versión del texto y código de integridad) y pulsé "Entregar": la OT pasó a **Entregado a las 17:23** con "Retiró *nombre*". Permitió entregar aunque las fotos de salida no estaban tomadas ("Sin foto"); no las exige.
+- **Ficha del cliente:** tras guardar el teléfono muestra gasto total, visitas, ticket promedio, última visita, cliente desde, **pendientes** ("Cotización sin respuesta · COT-2") e historial filtrable (OT / Cotizaciones).
+- **Estados de la cotización:** Borrador → Enviada → **Vista** (cuando el cliente abre el link) → Aprobada.
+- **Envío:** la hoja "Enviar cotización" ofrece WhatsApp, Correo o "Crear el link". En este negocio de prueba **WhatsApp aparece "apagado en tu negocio"** y el correo "Sin correo"; no encontré cómo activarlo desde Ajustes ni desde Chat, así que **no se envió ningún mensaje**. Es coherente con "Pide activarlo" en boleta y pagos: los canales parecen activarse con el equipo de Automovity.
 
-**Datos de prueba que quedan en tu cuenta de Automovity:** cliente "Cliente Prueba VPAI" (VPAI01), OT-1 en "Listo" y cobrada ($37.000 en efectivo), COT-1 aprobada, COT-2 enviada y sin aprobar (con ítems repetidos por mis pruebas), producto "Aceite 5W30 (prueba)" con 9 unidades, 5 fotos de prueba y la caja abierta.
+**Sigue sin probar:** WhatsApp (apagado), correo, "Enviar para firmar", reserva pública completa, boleta, link de pago, tarjeta/TUU, anticipo, importación desde Excel, pago de comisiones calculado y "Invitar a la app" del cliente.
+
+**Datos de prueba que quedan en tu cuenta de Automovity:** cliente "Cliente Prueba VPAI" (VPAI01, con tu teléfono +56 9 3462 5746), OT-1 entregada y cobrada ($37.000 en efectivo), caja cerrada, COT-1 aprobada, COT-2 enviada y vista (con ítems repetidos por mis pruebas), COT-3 en borrador, producto "Aceite 5W30 (prueba)" con 9 unidades y 5 fotos de prueba.
 
 ---
 
@@ -336,6 +343,9 @@ Esfuerzo: S (≤1 semana), M (1–4 semanas), L (>1 mes) — estimación mía pa
 | 69 | Hora estimada de término de la OT según duración de los servicios [A] | **Falta** | `duracion` existe en agenda (`0010`); sin cálculo en la OT | S | Medio | — |
 | 70 | Checklist de entrada configurable (puntos obligatorios, fotos/km/firma/video exigibles) con modo liviano [A] | **Parcial** | Checklists editables en el taller (`README.md`); RADAR fijo (`0029`) | M | Medio | #47, #60 |
 | 71 | Textos de firma con versión y código de integridad [A] | **Falta** | Firma PNG sin versión (`0003`, `0020`, `FirmaCanvas.jsx`); ver #34 | S | Medio | — |
+| 72 | Estados de cotización con seguimiento de lectura: Enviada → Vista → Aprobada [A] | **Falta** | Estados `borrador/enviado/aceptado/parcial/rechazado/anulado` (`0006`), sin "visto" | S | Medio | #5 |
+| 73 | Ficha de cliente con métricas (gasto, visitas, ticket, última visita) y pendientes (cotización sin respuesta) [A] | **Parcial** | `ClienteDetalle.jsx` con historial; sin métricas ni pendientes (no verificado en detalle) | S–M | Medio | #44 |
+| 74 | Envío por canal elegible (WhatsApp / correo / link) con canales activables por negocio [A] | **Falta** | WhatsApp solo bandeja/bot por número de taller (`whatsapp/index.ts`); correo solo encuestas (`brevo.ts`) | M | Alto | #31, #32 |
 
 Fila extra, para no olvidar lo no listado: **notificaciones de repuestos, bloqueo de OT cerrada, descuentos con tope, turnos/RRHH, cumplimiento de datos** existen y no tienen equivalente en la lista [U].
 
