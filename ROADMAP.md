@@ -12,7 +12,7 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 
 ## 0. Advertencias antes de leer (importante)
 
-1. **Fuente de la web de Automovity [W].** Desde mi red directa `automovity.com` estaba bloqueado, así que la leí vía Apify (`apify/web-fetch`, 2026-11-06). **Páginas leídas:** home (incluye precios, FAQ y datos estructurados), `/para-talleres`, `/para-desabolladura` y `sitemap.xml`. **No leí:** las páginas de los otros 5 rubros (`/para-electricidad-automotriz`, `-lubricentros`, `-servitecas`, `-car-wash`, `-instalaciones`), la app (`app.automovity.com`), las páginas públicas de negocios clientes del sitemap ni tiendas de apps. Lo que dice la web es lo que **Automovity afirma**; no probé que funcione. Perplexity no estaba disponible para búsqueda (solo ofrece importar dashboards).
+1. **Fuente de la web de Automovity [W].** Desde mi red directa `automovity.com` estaba bloqueado, así que la leí vía Apify (`apify/web-fetch`, 2026-11-06). **Páginas leídas:** home (incluye precios, FAQ y datos estructurados), `/para-talleres`, `/para-desabolladura` y `sitemap.xml`. También leí `app.automovity.com/terminos` y `/privacidad` (vigentes desde 2026-10-20). El enlace de tu mensaje (`app.automovity.com/panel`) redirige a un acceso por correo (`/entrar`), así que **no vi el interior de la app**: no creé cuenta ni inicié sesión. **No leí:** las páginas de los otros 5 rubros (`/para-electricidad-automotriz`, `-lubricentros`, `-servitecas`, `-car-wash`, `-instalaciones`), las páginas públicas de negocios clientes del sitemap ni las fichas de las tiendas de apps. Lo que dice la web es lo que **Automovity afirma**; no probé que funcione. Perplexity no estaba disponible para búsqueda (solo ofrece importar dashboards).
 2. **El repo es una versión demo/portafolio**, no el producto de producción (`README.md`: "versión de demostración, adaptada de un proyecto en producción real"). El código de producción de Didial podría tener cosas que aquí no están (p. ej. el esquema dice que el tenant real "se siembra aparte", `0001_esquema_roles.sql`). Mi auditoría cubre **solo lo que hay en este repo**.
 3. Revisé arquitectura, migraciones (74), Edge Functions (11), rutas, CI y componentes clave. **No ejecuté la app ni la base de datos**, así que nada aquí está probado en ejecución.
 
@@ -63,6 +63,29 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 | Prueba | 14 días | 14 días |
 
 **Lectura estratégica [S]:** la diferencia de plan es solo cantidad (personas y mensajes), no funciones. Un taller de 5 personas paga $49.900; con 10 serían $99.900 (= Premium). Referencia de precio para tu plan, no para copiarlo sin validar con clientes.
+
+---
+
+## 1c. Lo que revelan sus Términos y Política de Privacidad [W]
+
+Estos documentos muestran **cómo opera** Automovity, no solo qué funciones vende. Es la parte más útil para decidir tu modelo de negocio.
+
+| Tema | Qué dicen (paráfrasis) | Implicancia para VPAI |
+|---|---|---|
+| Empresa | La opera MercadoProveedor SpA (Las Condes). Apps iOS/Android más navegador | Es un competidor con empresa formal y soporte; no es un proyecto casero |
+| **WhatsApp** | Los avisos salen **desde un número único de Automovity**, con el nombre del negocio en el mensaje, usando **plantillas aprobadas por Meta**; solo a quien aceptó (queda registrado fecha, canal y quién lo tomó); el cliente corta respondiendo BAJA; no es para publicidad | **Hallazgo clave.** Tu modelo (un número por taller, modo Coexistencia, `whatsapp/index.ts`) exige que cada taller conecte su cuenta y que tú pases la aprobación de Meta, hoy pendiente. Un número central con plantillas del negocio evita esa fricción en el onboarding. Tu código no tiene registro de consentimiento ni baja (revisé `whatsapp/index.ts` y migraciones `0032`/`0034`) |
+| **Facturación** | Boleta/factura/NC con **OpenFactura (Haulmer)** usando la cuenta del propio negocio; el negocio responde por lo emitido | Responde tu pregunta de proveedor DTE con un ejemplo real del mercado: integrar el proveedor con la cuenta de cada taller. Tu interfaz `_shared/dte/proveedor.ts` ya está diseñada para eso |
+| **Cobros y monetización** | Pagos vía MercadoPago, Haulmer o máquina TUU, **a las cuentas del negocio** (no custodian dinero). En MercadoPago cobran **1,29 % + $85 + IVA por pago**; en TUU/Haulmer/efectivo/transferencia, sin comisión | Además de la suscripción, tienen ingreso por comisión de pagos online. Es una palanca de negocio a evaluar en Fase 3 |
+| **Planes** | Prueba 14 días; cobro mensual con renovación automática (MercadoPago en Chile, Stripe fuera); si no pagan, la cuenta pasa a **solo lectura**; créditos de WhatsApp, correo e IA con **bolsas adicionales**; si se acaba un canal, solo ese canal se detiene (OT, caja, boletas siguen) | Define reglas listas para copiar en concepto (no en texto): límites por canal, degradación a solo lectura, bolsas de créditos |
+| **Acceso** | Login **sin contraseña**, con código al correo | Opción simple para tu Fase 0 de autenticación (hoy tienes contraseña compartida demo). Contra: depende de la seguridad del correo |
+| **Firma** | Firma electrónica simple (Ley 19.799) con registro de quién, cuándo, **versión del documento y huella** | Tu firma guarda la imagen (`firma_png`); no vi huella ni versión del texto firmado (`0003`, `0020`). Agregarlo da valor probatorio |
+| **IA** | Lee fotos (**patente, padrón, kilometraje, lista de precios**), **dicta notas** a la OT y **responde preguntas sobre el negocio**; propone y la persona confirma; proveedores Google (Gemini) y Anthropic; el lector de patente corre en el teléfono | **Corrige mi análisis previo:** Automovity sí tiene IA, pero de otro tipo (captura de datos y consultas), distinta de tu detección de daños e inventario. No tienes OCR de patente/padrón ni dictado (grep sin resultados) |
+| **Soporte y auditoría** | El equipo puede ver la cuenta de un negocio para dar soporte y cada acceso queda registrado; registro de cambios no editable | Tu monitor (`0056`) es de uso, no de acceso de soporte. Falta un "acceso de soporte auditado" para vender SaaS |
+| **Datos** | Lo sensible de una OT (objetos dejados) se borra a los 7 días de entregada; IP y navegador del registro de cambios a 180 días; documentos tributarios 6 años; baja de cuenta con borrado de datos a los 30 días; eliminación autoservicio | Tu retención (`0074`) es configurable y más detallada, pero nace inactiva; considera plazos por defecto sensatos para vender |
+| **Infra** | Render (app), Supabase (BD/auth/archivos), Cloudflare, Postmark (correo), Sentry (errores sin datos personales), FCM/APNs (push) | Misma base que tú (Supabase). Tu correo usa Brevo, no Postmark; no tienes Sentry ni push nativo [H: grep del repo] |
+| Cumplimiento | Citan Ley 19.628 "y sus modificaciones"; no nombran la Ley 21.719 en el texto | Tu trabajo de derechos de titulares y retención (`0073`/`0074`) es más explícito; es argumento de confianza, no una brecha |
+
+> No copies sus textos legales: redacta los tuyos con asesoría. Esto es un mapa de qué temas cubrir.
 
 ---
 
@@ -166,6 +189,14 @@ Esfuerzo: S (≤1 semana), M (1–4 semanas), L (>1 mes) — estimación mía pa
 | 28 | App Staff sin precios ni caja [W] | **Existe** (vía rol) | Rol `tecnico` ve OT/RADAR; precios protegidos con RLS + REVOKE de columna (`README.md`) | S | Medio | Pulir móvil |
 | 29 | Importación desde Excel de clientes/vehículos [W] | **Falta** | Hay lectura de xlsx solo para reloj control (`Turnos.jsx`) | S–M | Alto (onboarding) | #21 |
 | 30 | Configuración y capacitación incluidas [W] | **Falta** (proceso, no código) | Puesta en marcha manual | — | Medio | Definir servicio de implantación |
+| 31 | Consentimiento y baja (BAJA) de avisos WhatsApp, con registro [W] | **Falta** | Sin tabla ni lógica de opt-in/opt-out (grep en `whatsapp/index.ts`, `0032`, `0034`) | S | **Alto** (prerrequisito legal y de Meta para #16) | — |
+| 32 | WhatsApp con número central y plantillas (sin que cada taller conecte Meta) [W] | **Falta** (VPAI usa 1 número por taller, Coexistencia) | `whatsapp/index.ts`, `0032` | M | **Alto** (onboarding) | Decisión de modelo (ver 1c); #16 |
+| 33 | IA de captura: leer patente/padrón/km, dictar notas, consultas al negocio [W] | **Falta** (IA existe solo en inspección) | `analizar-inspeccion` es el único uso de IA | M | Medio–Alto | Costo por uso (#20) |
+| 34 | Firma con huella y versión del documento [W] | **Parcial** | Firma como PNG (`firma_png`, `FirmaCanvas.jsx`); sin huella ni versión de texto | S | Medio | — |
+| 35 | Planes con degradación a solo lectura y bolsas de créditos [W] | **Falta** | Sin concepto de plan (#20) | M | Medio | #20 |
+| 36 | Comisión por pagos online (modelo de ingreso) [W] | **Falta** | Sin pasarela (#9) | M | Medio | #9 |
+| 37 | Acceso de soporte auditado [W] | **Parcial** | Monitor de uso (`0056`), sin acceso de soporte registrado | S–M | Medio | Fase 0 |
+| 38 | Push nativo y monitoreo de errores [W] | **Falta** | Sin Sentry ni FCM/APNs en el repo | S–M | Medio | #19 |
 
 Fila extra, para no olvidar lo no listado: **notificaciones de repuestos, bloqueo de OT cerrada, descuentos con tope, turnos/RRHH, cumplimiento de datos** existen y no tienen equivalente en la lista [U].
 
@@ -200,6 +231,7 @@ Entregables (en orden):
 5. **Alta de tenant** (script o endpoint admin): crea empresa, admin, horarios, catálogo base. Elimina "primera empresa activa" del trigger.
 6. **Responsive móvil** del Menú y de ingreso/OT/técnico (drawer, tablas → tarjetas).
 7. Partir `TrabajoDetalle`/`NuevoIngreso` en módulos; runbook de backup/restauración; revisar `.mcp.json` y secretos.
+8. **Acceso de soporte auditado**, monitoreo de errores (p. ej. Sentry, sin datos personales) y, al elegir auth, evaluar acceso por código al correo como alternativa a contraseñas [W: lo usa Automovity].
 
 Criterios de aceptación:
 - CI falla si un usuario de empresa A puede ver cualquier fila/archivo de empresa B.
@@ -213,8 +245,8 @@ Criterios de aceptación:
 Entregables (en orden):
 1. **Cotización por link** (token público, vista móvil, aceptar/rechazar por ítem, registro de IP/fecha) + **PDF**. Reutiliza la aceptación parcial ya existente.
 2. **Pagos y caja**: tabla `pagos` (efectivo/transferencia/tarjeta, parciales, vínculo a OT/venta POS), cierre diario. Reemplaza `estado_pago` booleano.
-3. **DTE real** con un proveedor (la interfaz ya existe, solo falta adaptador + estado asíncrono); boleta/factura desde el cobro.
-4. **Avisos automáticos por WhatsApp/correo**: recepción, "listo para retiro", recordatorio de cita; plantillas, cola con reintentos, opt-out. Requiere cerrar la aprobación de Meta (hoy pendiente).
+3. **DTE real** con un proveedor (la interfaz ya existe, solo falta adaptador + estado asíncrono); boleta/factura desde el cobro. Candidato con precedente en el mercado [W]: OpenFactura (Haulmer) con la cuenta de cada taller; validar costos y API antes de decidir.
+4. **Avisos automáticos por WhatsApp/correo**: recepción, "listo para retiro", recordatorio de cita; plantillas, cola con reintentos. **Primero**, registro de consentimiento y BAJA (#31). **Decisión de modelo** (#32): número central de VPAI con plantillas por taller [W: así lo hace Automovity], frente a un número por taller (tu diseño actual, con aprobación de Meta pendiente). El número central simplifica el onboarding pero te hace responsable ante Meta de la calidad de todos los talleres.
 5. **Fila propia + espera en vivo pública** (usa Fase 0.4): ruta pública por token con estado de la OT.
 6. **Informes financieros base**: ingresos por día/semana/mes, ticket promedio, cobrado vs pendiente, por técnico.
 7. **Gastos simples** y alerta de stock mínimo.
@@ -240,7 +272,8 @@ Entregables:
 6. Configuración multirrubro básica (catálogos y checklists por tipo de negocio) solo si hay demanda real.
 7. **Aseguradoras/liquidadores** (estado "esperando liquidador", PDF con fotos, respaldo de aprobación): refuerza DyP, donde ya tienes diagrama de daños y fotos.
 8. **Página pública del negocio con reservas** y recursos físicos (bahías/elevadores) que bloquean horas.
-9. Video corto de recepción/entrega y firma por link (evaluar costo de almacenamiento).
+9. Video corto de recepción/entrega y firma por link (evaluar costo de almacenamiento); firma con huella y versión del documento (#34).
+10. **IA de captura**: leer patente/padrón/kilometraje por foto y dictar notas a la OT (#33), con confirmación humana como ya haces en la inspección.
 
 Criterios de aceptación:
 - Un administrador ve margen real por OT y por técnico del mes.
@@ -273,7 +306,7 @@ Criterios de aceptación:
 |---|---|---|
 | **CRM y retención** | `Oportunidades.jsx`, informe "Clientes que vuelven" (`0011`: 65,9 % de vehículos vienen una sola vez, dato del taller original) | Posicionar "no solo ordena el taller, trae clientes de vuelta". Automatizar recordatorios por km/fecha y reportar ingresos recuperados |
 | **Encuestas de postventa** | `encuestas`, envío al día siguiente, alerta de nota negativa | Mostrar NPS por técnico, cerrar el ciclo con acción del asesor, pedir reseña en Google a promotores |
-| **IA de inspección** | `analizar-inspeccion` (Claude visión), escáner por video, aceptación humana | Vender "inspección en 2 minutos, sin tipear"; llevarlo a cotización sugerida. Cuidar costo por OT |
+| **IA de inspección** (ventaja parcial) | `analizar-inspeccion` (Claude visión), escáner por video, aceptación humana. **Automovity también tiene IA [W]**, pero de captura de datos (patente, padrón, km, dictado, consultas), no de detección de daños/inventario que yo haya visto | Tu diferencial es el daño y el inventario sugeridos con aceptación humana. Súmale la captura (OCR patente/padrón, dictado) para igualar, y la cotización sugerida para superar. Cuidar costo por OT |
 | **Análisis de calidad/financiero** | Retrabajos por técnico, captura de datos, presupuestos por decisión. *Análisis financiero propiamente dicho aún no existe* (ver F2.4) | Completar con margen por OT. Hoy la ventaja es de calidad, no de finanzas |
 | **Agenda por habilidades** | `0048` | Evita sobreagendar; mostrar ocupación real vs capacidad |
 | **Cumplimiento Ley 21.719** | `0073`, `0074`, políticas legales | Argumento comercial de confianza para talleres/flotas; "listo para auditoría de datos" |
@@ -297,6 +330,6 @@ Criterios de aceptación:
 2. ¿El **repo de producción de Didial** es otro? ¿Tiene cobro/caja, DTE real (el código menciona "Dimasoft" como facturador externo, `0013`) o WhatsApp aprobado que no están aquí?
 3. ¿VPAI es solo para Didial, o el objetivo es **vender a otros talleres** desde ya? Cambia el peso de la Fase 0.5 y la Fase 3.
 4. ¿Qué rubros además de mecánica/DyP interesan (Automovity [W] confirma 7: mecánico, electricidad, lubricentro, serviteca, DyP, car wash, instalaciones)? Si ninguno, descarto multirrubro por ahora.
-5. ¿Hay presupuesto/preferencia de **proveedor DTE** y de pasarela (Mercado Pago/TUU/Transbank)? Afecta F1.3 y F3.4.
-6. ¿Aprobó Meta la cuenta WhatsApp ("Tech Provider")? Condiciona F1.4.
+5. ¿Hay presupuesto/preferencia de **proveedor DTE** (¿OpenFactura/Haulmer u otro?) y de pasarela (Mercado Pago/TUU/Transbank)? Afecta F1.3 y F3.4. ¿Te interesa cobrar comisión por pagos online como Automovity [W]?
+6. ¿Aprobó Meta la cuenta WhatsApp ("Tech Provider")? ¿Prefieres **número central de VPAI** o **un número por taller**? Condiciona F1.4.
 7. ¿Cuántos usuarios simultáneos y cuántos talleres esperas el primer año? Para decidir plan de Supabase, backups y rendimiento.
