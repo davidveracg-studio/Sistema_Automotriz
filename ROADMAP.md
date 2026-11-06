@@ -29,7 +29,7 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 3. **Sin superficie pública para el cliente final**: la única ruta pública útil es la encuesta (`/encuesta/:token`). No hay aprobación de cotización por link, ni espera en vivo, ni PDF del servidor (solo impresión del navegador).
 4. **Comunicación saliente automática casi ausente**: WhatsApp es bandeja + bot entrante y envío manual; no hay avisos automáticos de "recibido/listo/recordatorio" (`whatsapp/index.ts` solo usa `type: 'text'`; sin plantillas). Además **la cuenta de Meta sigue sin aprobación** (comentario en `whatsapp/index.ts`: "nunca se ha probado contra un webhook real").
 5. **Comisiones, gastos y caja**: faltan (no existen tablas de gastos/comisiones; las únicas métricas por persona son retrabajos).
-6. **Dependencia de ClickUp** como motor del Kanban y estados, con IDs "DEMO_TEAM_ID" hardcodeados (`_shared/clickup.ts`): un freno de multi-tenant y de venta a terceros.
+6. **Acoplamiento a ClickUp en el modelo**: ya hay un modo local sin ClickUp (`0067`), pero columnas `clickup_*`, `lib/clickup.js` y constantes `DEMO_TEAM_ID` (`_shared/clickup.ts`) siguen frenando el multi-tenant y la venta a terceros.
 
 **Dónde VPAI ya gana [H]:** CRM de retorno/oportunidades, encuestas de postventa con alerta de nota negativa, IA de inspección, informes de calidad (retrabajos por técnico), agenda por habilidades, cumplimiento de datos personales, y RLS fino por rol con protección de precios por columna.
 
@@ -263,7 +263,7 @@ No existe ningún concepto de plan, límite, trial ni facturación de suscripci�
 ### 2.8 Calidad, CI, tests
 - CI (`ci.yml`): lint con `--max-warnings 0`, 3 verificadores de esquema propios (columnas, catálogos como texto, índices SQL), prueba del escáner, build. Verifica numeración de migraciones [H]. Buena disciplina.
 - Tests: solo 3 archivos `.test.ts` en funciones edge (seguridad, inspección, DTE) y un script de pruebas del escáner. **Sin tests de UI, sin tests de RLS, sin e2e**; `verificar:edge` (deno check) no está en CI [H].
-- Migraciones: se aplican "a mano en el SQL Editor, en orden" (`README.md`); existe `scripts/migrar.sh`. Sin rollback ni entorno staging documentado [H/S].
+- Migraciones: el `README.md` dice "a mano en el SQL Editor", pero **está desactualizado**: `deploy-vercel.yml` ejecuta `scripts/migrar.sh` (registro en `migraciones_aplicadas`, cada migración en su transacción) antes de publicar. Lo que falta es un entorno **staging** (se migra directo a producción) y un plan de vuelta atrás; las Edge Functions no se despliegan por CI (`README.md:61`) [H].
 - Archivos gigantes (`TrabajoDetalle` 1676, `NuevoIngreso` 1244, `Agenda` 1227, `Taller` 1109) → coste de cambio alto [H].
 
 ---
@@ -395,14 +395,16 @@ El paso 4 es el patrón que reutilizan la espera en vivo, el link de pago, la fi
 
 Orden dentro de cada fase = prioridad sugerida. Las estimaciones son [S].
 
-### Fase 0 — Base técnica y deuda (≈4–6 semanas)
-**Objetivo:** poder construir rápido sin romper y poder tener un segundo taller sin riesgo.
+### Fase 0 — Base técnica y deuda (≈7–9 semanas con 2 personas; 12–16 con 1)
+> **El plan detallado está en [`FASE0.md`](FASE0.md)**: 10 paquetes de trabajo con tareas numeradas, criterios de aceptación, calendario, riesgos y puerta de salida. Lo de abajo es el resumen. **Contexto nuevo:** VPAI es tu marca personal, el repo de Didial es otro y trabajas en otros rubros, así que la Fase 0 incluye un **núcleo configurable por rubro** (WP0.4) y la estimación subió de 4–6 semanas. **Correcciones:** las migraciones ya se aplican por CI (pero directo a producción), existe un modo local sin ClickUp (`0067`) y 67/67 tablas tienen RLS.
+
+**Objetivo:** poder construir rápido sin romper y dar de alta un segundo negocio, de otro rubro, sin riesgo.
 
 Entregables (en orden):
 1. **Tests de aislamiento multi-tenant (RLS)**: dos empresas, intentar leer/escribir cruzado en cada tabla y bucket; en CI.
-2. **Entorno staging + migraciones automatizadas** (reemplazar "SQL Editor a mano") y `verificar:edge` en CI.
+2. **Entorno staging** separado de producción (hoy las migraciones van directo a producción desde `deploy-vercel.yml`), despliegue de funciones Edge por CI y `verificar:edge`.
 3. **Autenticación real**: usuarios con correo propio, invitación, recuperación de clave; el selector de rol queda solo para `es_demo`. Quitar contraseña demo del bundle de producción.
-4. **Desacoplar ClickUp**: tabla propia de estados/tablero (`ot_estado`) con ClickUp como sincronización opcional. Sin esto no existe "fila" propia ni espera en vivo.
+4. **Estados de OT propios y ClickUp opcional**: ya existe un modo local (`0067`, `_shared/taller.ts`); falta neutralizar el modelo (`estados_ot`, `ot_eventos`, columnas `clickup_*`, `lib/clickup.js`, `DEMO_TEAM_ID`). Sin esto no existe "fila" propia ni espera en vivo. Además, **núcleo configurable por rubro** (`empresa_config`, perfiles, `aplicar_perfil`) en `FASE0.md`, WP0.4.
 5. **Alta de tenant** (script o endpoint admin): crea empresa, admin, horarios, catálogo base. Elimina "primera empresa activa" del trigger.
 6. **Responsive móvil** del Menú y de ingreso/OT/técnico (drawer, tablas → tarjetas). Patrón observado en Automovity [A] como referencia funcional (no de diseño): barra inferior con 4–5 destinos y una acción primaria "ingreso" siempre a mano.
 7. Partir `TrabajoDetalle`/`NuevoIngreso` en módulos; runbook de backup/restauración; revisar `.mcp.json` y secretos.
@@ -505,6 +507,8 @@ Criterios de aceptación:
 ---
 
 ## 8. Preguntas abiertas (necesito tu respuesta antes de asumir)
+
+> **Ya respondidas:** VPAI es tu marca personal (no es solo de Didial) y el repo de Didial es otro (preguntas 2 y 3 de abajo). Sigue abierta la **decisión D1 de `FASE0.md`**: "otros rubros" ¿son rubros automotrices distintos o industrias no automotrices? Cambia el modelo de datos.
 
 1. En tu cuenta de Automovity quedaron datos de prueba (lista en la sección 1g). ¿Los dejo o prefieres que cierre la caja y complete la entrega de la OT-1? Para probar WhatsApp, "enviar para firmar", la reserva pública o la boleta necesito un número de teléfono de prueba tuyo, porque envían mensajes reales.
 2. ¿El **repo de producción de Didial** es otro? ¿Tiene cobro/caja, DTE real (el código menciona "Dimasoft" como facturador externo, `0013`) o WhatsApp aprobado que no están aquí?
