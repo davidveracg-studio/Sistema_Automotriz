@@ -102,6 +102,26 @@ Estimaciones en **días-persona** para una persona que conoce el código [S]. La
 
 **Resultado sobre las empresas:** **0 fugas entre empresas** en las 2.232 pruebas de tablas, 9 de escalada de privilegios y 36 de storage. Eso es lo que prueba este arnés; no prueba la capa HTTP de PostgREST ni las Edge Functions.
 
+#### Corrección de H4 (rama `h4-funciones-agenda`, migración `0077`, **sin fusionar**)
+
+La rama tiene un nombre que **no** activa el flujo automático (`claude/**` y `ccr-*`).
+
+**Qué eran.** Seis funciones `SECURITY DEFINER` de agenda y catálogo (`agenda_cupos_bloque`, `citas_cupos_disponibles`, `citas_buscar_horarios`, `personal_disponible_en`, `catalogo_isla_para_servicio`, `catalogo_horas_servicio`) ejecutables sin sesión que recibían un id de isla, persona o servicio **sin comprobar a qué empresa pertenece**. Con un id de otra empresa devolvían su disponibilidad, sus horarios o sus horas de mano de obra. Necesitaban conocer un uuid de la otra empresa, así que el riesgo práctico es bajo, pero además dos de ellas hacen un cálculo costoso (`agenda_cupos_bloque` es exponencial en el número de islas), lo que las hace un blanco de abuso si cualquiera puede llamarlas.
+
+**Quién las usa de verdad** (verificado en el repo): la pantalla de Agenda (`src/pages/Agenda.jsx`, con sesión de usuario), el bot de WhatsApp (`supabase/functions/whatsapp/index.ts`, con la clave de service role) y ellas entre sí. Ningún disparador, política ni otra función las llama.
+
+**Qué hace `0077`:**
+1. `puede_ver_empresa(empresa)`: verdadero solo si quien llama es `service_role` (mismo criterio de `0026`) o pertenece a esa empresa. Uso interno: nadie más que el dueño puede ejecutarla.
+2. Redefine las seis funciones con esa comprobación en el punto donde ya resolvían la empresa del id; con un id ajeno responden como con un id inexistente (`null`, `false` o sin filas). Los cuerpos se **generaron de las definiciones vigentes** con un reemplazo verificado por función, no se reescribieron a mano.
+3. Quita `EXECUTE` a `public` y `anon`, y lo concede a `authenticated` y `service_role`.
+
+**Qué se verificó** (sobre una base reconstruida desde las migraciones):
+- **Equivalencia:** sobre la misma base, antes y después de `0077`, la salida de las seis funciones es **idéntica** para un administrador, un asesor y un recepcionista de la empresa demo y para `service_role`: 423 llamadas por actor (islas × fechas × horas, horarios, servicios, tipos de vehículo y personas), 419 de ellas con datos.
+- **Protección:** 24 pruebas nuevas en el arnés: un admin de otra empresa no obtiene datos con ids ajenos, y sin sesión las seis dan "permiso denegado". Controles positivos: el usuario de la propia empresa y el bot siguen obteniendo datos. Sin `0077` hay 12 fallos y 6 hallazgos nuevos de higiene.
+- La línea base de higiene queda **sin entradas "SIN REVISAR"**.
+
+**Riesgos y lo que no se pudo verificar:** (1) El bot de WhatsApp funciona hoy con la clave de service role; si en producción las Edge Functions llamaran con otra credencial, perderían estas funciones. En el código usan `clienteServicio()`, pero no lo probé contra una Edge Function real. (2) `auth.role()` debe reflejar `service_role` en las llamadas del bot; es el mismo mecanismo que usa `0026`. (3) Un cliente externo que llamara estas funciones sin sesión dejaría de funcionar; en el repo no hay ninguno. (4) No hay staging.
+
 **La prueba sabe detectar fugas:** se introdujeron a propósito políticas rotas (un `SELECT` abierto en una tabla con `empresa_id`, otro en una tabla hija, un `INSERT` sin `with check`, y `SELECT` + `UPDATE` abiertos) y en cada caso falló. Un `UPDATE` abierto sin `SELECT` abierto no se marca porque en Postgres no es explotable.
 
 | # | Hallazgo | Gravedad [S] | Estado |
@@ -109,7 +129,7 @@ Estimaciones en **días-persona** para una persona que conoce el código [S]. La
 | **H1** | `ot_detalle`: el `REVOKE` de columna de `0006` (costo, precio y total) **no tiene efecto**, porque `authenticated` conserva `SELECT` a nivel de tabla. Un técnico lee costos y precios por la API aunque la interfaz use la vista `ot_detalle_con_permiso`. Reproducido con el técnico de la demo. Es una fuga entre **roles** de la misma empresa, no entre empresas | Media–alta | **Abierto.** Requiere diseño: quitar el `SELECT` de tabla, conceder solo las columnas permitidas y rehacer la vista (con `security_invoker` hoy fallaría para todos). Hay que auditar el uso de `ot_detalle` en `src/` antes de tocar nada. Registrado como "hallazgo conocido" en la línea base |
 | **H2** | `whatsapp_buscar_cliente_por_telefono` y `whatsapp_registrar_contacto` son `SECURITY DEFINER`, no verifican quién llama y eran ejecutables por `anon`: cualquiera podía obtener el id de un cliente de **otra empresa** por su teléfono y **escribir contactos en la bandeja de WhatsApp de otra empresa** | **Alta** | Corregido en la migración `0075` (quita `EXECUTE` a `public/anon/authenticated`; solo la Edge Function con service role las usa, verificado en `supabase/functions/whatsapp/index.ts` y por búsqueda en `src/`). Con `0075` aplicada la prueba pasa; sin ella reporta 5 fugas |
 | **H3** | `plataforma_empresa_ok` y `plataforma_exigir`: ayudantes internos del monitor, ejecutables por usuarios. Solo revelan si un uuid de empresa es demo | Baja | Incluido en `0075` |
-| **H4** | 6 funciones de agenda sin guarda visible, ejecutables por `anon`, que reciben ids y devuelven disponibilidad: `agenda_cupos_bloque`, `catalogo_horas_servicio`, `catalogo_isla_para_servicio`, `citas_buscar_horarios`, `citas_cupos_disponibles`, `personal_disponible_en` | Baja | Abierto: requieren revisión. Quedan como "SIN REVISAR" en la línea base |
+| **H4** | 6 funciones de agenda sin guarda visible, ejecutables por `anon`, que reciben ids y devuelven disponibilidad: `agenda_cupos_bloque`, `catalogo_horas_servicio`, `catalogo_isla_para_servicio`, `citas_buscar_horarios`, `citas_cupos_disponibles`, `personal_disponible_en` | Baja | **Corrección lista, sin fusionar:** migración `0077` en la rama `h4-funciones-agenda` (ver "Corrección de H4"). En `main` siguen abiertas |
 | **H5** | `registrar_acceso_fallido` es ejecutable por `anon` y no limita la tasa | Baja–media | Aceptada con seguimiento en WP0.3 |
 | **H6** | La dependencia `xlsx` se descarga desde `cdn.sheetjs.com`; con un host bloqueado `npm install` del proyecto falla | Media (cadena de suministro) | Ya previsto en T0.7.4. Por eso el arnés tiene su propio `package.json` |
 

@@ -45,7 +45,7 @@ Las filas "ajenas" salen de la empresa demo (que trae datos reales de las migrac
 
 Es la lista de funciones expuestas que alguien **revisó y aceptó**, cada una con su motivo. Las fugas de datos no tienen tolerancia; solo la higiene se compara con la línea base, para que un hallazgo **nuevo** haga fallar la prueba.
 
-- Una entrada con motivo `SIN REVISAR` es una función que aún nadie revisó: está tolerada, no aprobada. Hoy quedan 6 (funciones de disponibilidad de agenda que no tienen guarda visible y reciben ids).
+- Una entrada con motivo `SIN REVISAR` es una función que aún nadie revisó: está tolerada, no aprobada. Hoy no queda ninguna: las 6 funciones de agenda que había (H4) se cerraron con la migración `0077`.
 - No basta con regenerar el archivo para aceptar un hallazgo: hay que leer la función, probarla y escribir el motivo.
 
 ## Cómo comprobar que la prueba detecta fugas

@@ -1,13 +1,8 @@
 {
   "sin_search_path": {},
   "ejecutable_por_anon": {
-    "agenda_cupos_bloque(p_tipo_isla_id uuid, p_fecha date, p_minuto integer)": "SIN REVISAR",
     "agregar_servicio_catalogo(p_trabajo_id uuid, p_servicio_id uuid, p_tecnico_id uuid)": "Probada por explotación (WP0.2): anon y admin de otra empresa no producen efecto sobre una OT ajena.",
     "auth_rol()": "Ayuda de RLS: lee la identidad desde auth.uid() y solo informa sobre quien llama; anon recibe nulo/falso (definición en 0001).",
-    "catalogo_horas_servicio(p_servicio_id uuid, p_tipo_vehiculo text, p_combustible text)": "SIN REVISAR",
-    "catalogo_isla_para_servicio(p_servicio_id uuid)": "SIN REVISAR",
-    "citas_buscar_horarios(p_tipo_isla_id uuid, p_duracion_minutos integer, p_fecha_desde date, p_dias_a_buscar integer, p_limite integer)": "SIN REVISAR",
-    "citas_cupos_disponibles(p_tipo_isla_id uuid, p_fecha date, p_hora time without time zone, p_duracion_minutos integer)": "SIN REVISAR",
     "clientes_buscar_posibles_duplicados(p_rut text, p_telefono text, p_nombre text)": "Probada por explotación (WP0.2): no devuelve clientes de otra empresa.",
     "encuesta_marcar_notificada(p_token text)": "Encuesta pública por token (por diseño). PENDIENTE: revisar entropía del token y límite de intentos.",
     "encuesta_obtener_por_token(p_token text)": "Encuesta pública por token (por diseño). Probada por explotación (WP0.2): un token inventado no devuelve datos. PENDIENTE: revisar entropía del token y límite de intentos.",
@@ -30,7 +25,6 @@
     "ot_descuento_mano_obra_resolver(p_descuento_id uuid, p_aprobar boolean, p_nota text)": "Probada por explotación (WP0.2): anon y admin de otra empresa no cambian un descuento ajeno.",
     "ot_descuento_mano_obra_solicitar(p_trabajo_id uuid, p_porcentaje numeric, p_motivo text)": "Definición revisada: actúa sobre auth.uid() / mi_empresa_id(); anon no tiene identidad. Sin prueba de comportamiento todavía.",
     "perfil_actualizar_nombre(p_nombre text)": "Definición revisada: actúa sobre auth.uid() / mi_empresa_id(); anon no tiene identidad. Sin prueba de comportamiento todavía.",
-    "personal_disponible_en(p_personal_id uuid, p_fecha date, p_minuto integer)": "SIN REVISAR",
     "puede_eliminar_fichas()": "Ayuda de RLS: lee la identidad desde auth.uid() y solo informa sobre quien llama; anon recibe nulo/falso (definición en 0001).",
     "registrar_acceso_fallido(p_correo text, p_dispositivo text)": "ACEPTADA CON SEGUIMIENTO: anon debe poder registrar un intento fallido. PENDIENTE (WP0.3): limitar la tasa para evitar relleno de la tabla.",
     "registrar_eventos_uso(p_eventos jsonb)": "Definición revisada: actúa sobre auth.uid() / mi_empresa_id(); anon no tiene identidad. Sin prueba de comportamiento todavía.",
