@@ -106,12 +106,33 @@ Estimaciones en **días-persona** para una persona que conoce el código [S]. La
 
 | # | Hallazgo | Gravedad [S] | Estado |
 |---|---|---|---|
-| **H1** | `ot_detalle`: el `REVOKE` de columna de `0006` (costo, precio y total) **no tiene efecto**, porque `authenticated` conserva `SELECT` a nivel de tabla. Un técnico lee costos y precios por la API aunque la interfaz use la vista `ot_detalle_con_permiso`. Reproducido con el técnico de la demo. Es una fuga entre **roles** de la misma empresa, no entre empresas | Media–alta | **Abierto.** Requiere diseño: quitar el `SELECT` de tabla, conceder solo las columnas permitidas y rehacer la vista (con `security_invoker` hoy fallaría para todos). Hay que auditar el uso de `ot_detalle` en `src/` antes de tocar nada. Registrado como "hallazgo conocido" en la línea base |
+| **H1** | `ot_detalle`: el `REVOKE` de columna de `0006` (costo, precio y total) **no tiene efecto**, porque `authenticated` conserva `SELECT` a nivel de tabla. Un técnico lee costos y precios por la API aunque la interfaz use la vista `ot_detalle_con_permiso`. Reproducido con el técnico de la demo. Es una fuga entre **roles** de la misma empresa, no entre empresas | Media–alta | **Corrección lista, sin fusionar:** migración `0076` en la rama `h1-ot-detalle-columnas` (ver "Corrección de H1" más abajo). En `main` sigue abierto |
 | **H2** | `whatsapp_buscar_cliente_por_telefono` y `whatsapp_registrar_contacto` son `SECURITY DEFINER`, no verifican quién llama y eran ejecutables por `anon`: cualquiera podía obtener el id de un cliente de **otra empresa** por su teléfono y **escribir contactos en la bandeja de WhatsApp de otra empresa** | **Alta** | Corregido en la migración `0075` (quita `EXECUTE` a `public/anon/authenticated`; solo la Edge Function con service role las usa, verificado en `supabase/functions/whatsapp/index.ts` y por búsqueda en `src/`). Con `0075` aplicada la prueba pasa; sin ella reporta 5 fugas |
 | **H3** | `plataforma_empresa_ok` y `plataforma_exigir`: ayudantes internos del monitor, ejecutables por usuarios. Solo revelan si un uuid de empresa es demo | Baja | Incluido en `0075` |
 | **H4** | 6 funciones de agenda sin guarda visible, ejecutables por `anon`, que reciben ids y devuelven disponibilidad: `agenda_cupos_bloque`, `catalogo_horas_servicio`, `catalogo_isla_para_servicio`, `citas_buscar_horarios`, `citas_cupos_disponibles`, `personal_disponible_en` | Baja | Abierto: requieren revisión. Quedan como "SIN REVISAR" en la línea base |
 | **H5** | `registrar_acceso_fallido` es ejecutable por `anon` y no limita la tasa | Baja–media | Aceptada con seguimiento en WP0.3 |
 | **H6** | La dependencia `xlsx` se descarga desde `cdn.sheetjs.com`; con un host bloqueado `npm install` del proyecto falla | Media (cadena de suministro) | Ya previsto en T0.7.4. Por eso el arnés tiene su propio `package.json` |
+
+#### Corrección de H1 (rama `h1-ot-detalle-columnas`, migración `0076`, **sin fusionar**)
+
+La rama tiene un nombre que **no** activa el flujo automático (`claude/**` y `ccr-*`), así que nada llega a producción hasta que alguien abra el PR y lo fusione.
+
+**Diseño.** Un `REVOKE` de columna no sirve si queda el `SELECT` de tabla, así que la migración: (1) crea la vista `ot_detalle_montos_v`, única vía de lectura de costo, precio y total, que se acota sola a la empresa de quien consulta y redacta cada monto según su permiso (los permisos se evalúan **una vez por consulta**); (2) hace que `ot_detalle_con_permiso` lea los montos de esa vista, con las mismas columnas, nombres, tipos y orden y conservando `security_invoker`; (3) quita el `SELECT` de tabla a `authenticated` y le concede solo las columnas no protegidas, calculadas del catálogo. Las escrituras no cambian y el disparador que impide cargar precios sin permiso sigue activo.
+
+**Por qué esta forma y no otra.** Una función `SECURITY DEFINER` por fila (primer intento) dio el mismo resultado pero con 5.064 líneas la vista pasó de ~4 ms a ~890 ms; se descartó. La vista con permisos del dueño mide ~6 ms frente a ~6,7 ms del original en la misma prueba.
+
+**Qué se verificó** (sobre una base reconstruida desde las migraciones, no sobre producción):
+- **Equivalencia:** sobre la misma base, la salida de `ot_detalle_con_permiso` antes y después de `0076` es **idéntica byte a byte** para los 8 roles de la demo (64 líneas; valores y tipos incluidos).
+- **Protección:** 70 pruebas nuevas en el arnés. Un técnico y un admin ya no leen `costo_unitario`, `precio_unitario` ni `total_linea` directo ni con `select *`; por la vista cada rol ve exactamente lo que le corresponde (costos: socia, admin, encargado de presupuestos y jefe de taller; precios y totales: esos más el asesor; nada: técnico, detailer y recepcionista); otra empresa y `anon` no ven nada. Sin `0076`, esas pruebas dan **33 fallos**.
+- **Sin regresión de escritura:** marcar verificado, insertar líneas y cargar precios (con permiso) siguen funcionando; quien no tiene permiso sigue sin poder cargar precios.
+- **Uso en el código:** `src/` lee `ot_detalle` solo con columnas no protegidas o por la vista; las Edge Functions usan la clave de service role o columnas no protegidas; ningún disparador ni función `INVOKER` toca las columnas protegidas.
+- **Columna nueva olvidada:** una prueba falla si una columna agregada a `ot_detalle` queda sin `grant select (col)`.
+
+**Riesgos y lo que no se pudo verificar**
+1. **La base real puede diferir de la reconstruida.** Antes de fusionar, confirmar en producción que `has_column_privilege('authenticated','public.ot_detalle','costo_unitario','select')` da `true` (si da `false`, el problema no existe allí y `0076` es innecesaria).
+2. **Cualquier cliente que lea `ot_detalle` con una sesión de usuario pidiendo columnas protegidas dejará de funcionar** (un panel de BI, un script, otra app). En este repo no hay ninguno; fuera de él no lo sé.
+3. **No hay staging**: la migración se aplicaría directo a producción al fusionar. Es reversible (instrucciones en el encabezado de `0076`), pero conviene fusionar en un horario de poco uso y probar enseguida las pantallas de presupuesto, cobros, facturación, egreso y detalle de OT con un usuario de cada rol.
+4. Se cambia la definición de una vista en uso por todas esas pantallas; PostgREST recarga su caché al detectar el cambio de esquema.
 
 **Qué falta para cerrar WP0.2**
 1. **Verificar H1 y H2 en producción** con consultas de solo lectura (el arnés trabaja sobre una base reconstruida a partir de las migraciones, que puede diferir de producción):

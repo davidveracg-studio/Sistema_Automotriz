@@ -50,9 +50,6 @@
     "plataforma_usuarios(p_empresa uuid, p_demo boolean)": "Probada por explotación (WP0.2): un administrador común es rechazado (42501) por plataforma_exigir().",
     "turnos_resumen_diario(p_empresa_id uuid, p_desde date, p_hasta date)": "Probada por explotación (WP0.2): un admin de otra empresa recibe \"Sin acceso a los turnos de otra empresa\"."
   },
-  "columnas_sin_proteccion": {
-    "ot_detalle.costo_unitario@authenticated (declarada en 0006_valorizacion_cierre.sql)": "HALLAZGO CONOCIDO H1 (WP0.2): el REVOKE de columna de 0006 no tiene efecto porque authenticated/anon conservan SELECT a nivel de tabla; un rol sin acceso a montos (p. ej. técnico) puede leer costos y precios directo por la API. Corregir exige rediseñar la vista ot_detalle_con_permiso y revisar el uso en src/ (ver FASE0.md, resultados de WP0.2).",
-    "ot_detalle.precio_unitario@authenticated (declarada en 0006_valorizacion_cierre.sql)": "HALLAZGO CONOCIDO H1 (WP0.2): el REVOKE de columna de 0006 no tiene efecto porque authenticated/anon conservan SELECT a nivel de tabla; un rol sin acceso a montos (p. ej. técnico) puede leer costos y precios directo por la API. Corregir exige rediseñar la vista ot_detalle_con_permiso y revisar el uso en src/ (ver FASE0.md, resultados de WP0.2).",
-    "ot_detalle.total_linea@authenticated (declarada en 0006_valorizacion_cierre.sql)": "HALLAZGO CONOCIDO H1 (WP0.2): el REVOKE de columna de 0006 no tiene efecto porque authenticated/anon conservan SELECT a nivel de tabla; un rol sin acceso a montos (p. ej. técnico) puede leer costos y precios directo por la API. Corregir exige rediseñar la vista ot_detalle_con_permiso y revisar el uso en src/ (ver FASE0.md, resultados de WP0.2)."
-  }
+  "columnas_sin_proteccion": {},
+  "columnas_legibles_perdidas": {}
 }
