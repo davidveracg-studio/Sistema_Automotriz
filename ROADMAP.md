@@ -196,7 +196,9 @@ Continué el recorrido en tu cuenta de prueba (2026-11-06) hasta cerrar el ciclo
 - **Estados de la cotización:** Borrador → Enviada → **Vista** (cuando el cliente abre el link) → Aprobada.
 - **Envío:** la hoja "Enviar cotización" ofrece WhatsApp, Correo o "Crear el link". En este negocio de prueba **WhatsApp aparece "apagado en tu negocio"** y el correo "Sin correo"; no encontré cómo activarlo desde Ajustes ni desde Chat, así que **no se envió ningún mensaje**. Es coherente con "Pide activarlo" en boleta y pagos: los canales parecen activarse con el equipo de Automovity.
 
-**Sigue sin probar:** WhatsApp (apagado), correo, "Enviar para firmar", reserva pública completa, boleta, link de pago, tarjeta/TUU, anticipo, importación desde Excel, pago de comisiones calculado y "Invitar a la app" del cliente.
+- **Envío por correo (probado, con tu OK):** agregué `david.verapezo1@gmail.com` al cliente de prueba y envié COT-3 con "Enviar por correo". La hoja muestra el destinatario y una **vista previa del mensaje** (saludo, número, total y link para aprobar cada trabajo). La cotización pasó a "Enviada". **Consumió 1 crédito de correo** (1.000 → 999) y quedó en un **libro de movimientos** ("Correo: cotización COT-3 · −1" y "Incluido en el plan Starter · +1.000"). No pude verificar la llegada porque el Gmail conectado a esta sesión es de otra cuenta; confírmala tú en tu bandeja (revisa spam).
+
+**Sigue sin probar:** WhatsApp (apagado), "Enviar para firmar", reserva pública completa, boleta, link de pago, tarjeta/TUU, anticipo, importación desde Excel, pago de comisiones calculado y "Invitar a la app" del cliente.
 
 **Datos de prueba que quedan en tu cuenta de Automovity:** cliente "Cliente Prueba VPAI" (VPAI01, con tu teléfono +56 9 3462 5746), OT-1 entregada y cobrada ($37.000 en efectivo), caja cerrada, COT-1 aprobada, COT-2 enviada y vista (con ítems repetidos por mis pruebas), COT-3 en borrador, producto "Aceite 5W30 (prueba)" con 9 unidades y 5 fotos de prueba.
 
@@ -345,7 +347,8 @@ Esfuerzo: S (≤1 semana), M (1–4 semanas), L (>1 mes) — estimación mía pa
 | 71 | Textos de firma con versión y código de integridad [A] | **Falta** | Firma PNG sin versión (`0003`, `0020`, `FirmaCanvas.jsx`); ver #34 | S | Medio | — |
 | 72 | Estados de cotización con seguimiento de lectura: Enviada → Vista → Aprobada [A] | **Falta** | Estados `borrador/enviado/aceptado/parcial/rechazado/anulado` (`0006`), sin "visto" | S | Medio | #5 |
 | 73 | Ficha de cliente con métricas (gasto, visitas, ticket, última visita) y pendientes (cotización sin respuesta) [A] | **Parcial** | `ClienteDetalle.jsx` con historial; sin métricas ni pendientes (no verificado en detalle) | S–M | Medio | #44 |
-| 74 | Envío por canal elegible (WhatsApp / correo / link) con canales activables por negocio [A] | **Falta** | WhatsApp solo bandeja/bot por número de taller (`whatsapp/index.ts`); correo solo encuestas (`brevo.ts`) | M | Alto | #31, #32 |
+| 75 | Libro de movimientos de créditos por canal (cada envío descuenta 1; saldo y movimientos visibles) [A] | **Falta** | Sin planes ni créditos (#20, #35) | S–M | Medio–Alto | #20 |
+| 74 | Envío por canal elegible (WhatsApp / correo / link) con canales activables por negocio; correo funciona con vista previa [A] | **Falta** | WhatsApp solo bandeja/bot por número de taller (`whatsapp/index.ts`); correo solo encuestas (`brevo.ts`) | M | Alto | #31, #32 |
 
 Fila extra, para no olvidar lo no listado: **notificaciones de repuestos, bloqueo de OT cerrada, descuentos con tope, turnos/RRHH, cumplimiento de datos** existen y no tienen equivalente en la lista [U].
 
