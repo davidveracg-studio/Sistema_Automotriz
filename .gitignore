@@ -14,3 +14,8 @@ supabase/.temp
 supabase/.branches
 
 .vercel
+
+# Salidas locales de las pruebas de aislamiento (WP0.2)
+supabase/tests/aislamiento/salida/
+supabase/tests/aislamiento/salida-*.txt
+supabase/tests/aislamiento/.ultimo-error.txt

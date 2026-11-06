@@ -1,0 +1,13 @@
+{
+  "name": "vpai-pruebas-aislamiento",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pruebas de aislamiento entre empresas (WP0.2). Paquete aparte para no depender de las dependencias de la app.",
+  "type": "module",
+  "scripts": {
+    "probar": "node probar-aislamiento.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}
