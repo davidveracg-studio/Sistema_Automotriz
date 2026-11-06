@@ -4,14 +4,15 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 
 **Convención de evidencia**
 - **[H]** Hecho: verificado en código del repo (archivo/ruta citados).
-- **[U]** Dato aportado por ti (la lista de Automovity del encargo). **No verificado** por mí.
+- **[W]** Lo que la web de Automovity afirma (leída vía Apify el 2026-11-06). No probado funcionalmente.
+- **[U]** Dato aportado por ti (lista del encargo); donde [W] lo confirma, se indica.
 - **[S]** Suposición/inferencia mía, a confirmar.
 
 ---
 
 ## 0. Advertencias antes de leer (importante)
 
-1. **No pude revisar la web de Automovity.** `automovity.com` no resuelve desde este entorno (el proxy devuelve 403 en el túnel y un subagente obtuvo `ENOTFOUND`), y una búsqueda web no devolvió ninguna página de Automovity. Por eso **no confirmé ni amplié** su lista de funciones, precios, FAQ ni integraciones. Toda la columna "Automovity" de este documento es **[U]**. Los precios de Starter/Premium, los límites de plan y los 7 rubros quedan sin verificar. Para cerrar esto necesito que permitas ese dominio en la red de la sesión (ver "Preguntas abiertas").
+1. **Fuente de la web de Automovity [W].** Desde mi red directa `automovity.com` estaba bloqueado, así que la leí vía Apify (`apify/web-fetch`, 2026-11-06). **Páginas leídas:** home (incluye precios, FAQ y datos estructurados), `/para-talleres`, `/para-desabolladura` y `sitemap.xml`. **No leí:** las páginas de los otros 5 rubros (`/para-electricidad-automotriz`, `-lubricentros`, `-servitecas`, `-car-wash`, `-instalaciones`), la app (`app.automovity.com`), las páginas públicas de negocios clientes del sitemap ni tiendas de apps. Lo que dice la web es lo que **Automovity afirma**; no probé que funcione. Perplexity no estaba disponible para búsqueda (solo ofrece importar dashboards).
 2. **El repo es una versión demo/portafolio**, no el producto de producción (`README.md`: "versión de demostración, adaptada de un proyecto en producción real"). El código de producción de Didial podría tener cosas que aquí no están (p. ej. el esquema dice que el tenant real "se siembra aparte", `0001_esquema_roles.sql`). Mi auditoría cubre **solo lo que hay en este repo**.
 3. Revisé arquitectura, migraciones (74), Edge Functions (11), rutas, CI y componentes clave. **No ejecuté la app ni la base de datos**, así que nada aquí está probado en ejecución.
 
@@ -32,6 +33,36 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 **Dónde VPAI ya gana [H]:** CRM de retorno/oportunidades, encuestas de postventa con alerta de nota negativa, IA de inspección, informes de calidad (retrabajos por técnico), agenda por habilidades, cumplimiento de datos personales, y RLS fino por rol con protección de precios por columna.
 
 **Recomendación:** no perseguir paridad de vistosidad. Orden: (0) cerrar deuda que bloquea vender (tests, ClickUp, onboarding de tenants, auth real) → (1) lo que un taller usa a diario y hoy no puede hacer en VPAI (aprobación de cotización por link, cobro real, aviso "listo" por WhatsApp, firma/foto de ingreso en móvil, DTE real) → (2) diferenciarse con CRM/IA/finanzas → (3) planes, cobro de suscripción y escala.
+
+---
+
+## 1b. Referencia verificada: qué afirma Automovity [W]
+
+**Confirmado de tu lista [U→W]:** OT por patente con historial y aviso si el auto ya vino hoy; recepción con fotos, daños, firma; cotización por link aprobada ítem por ítem + PDF; caja con tarjeta/transferencia/efectivo; boleta/factura SII al cobrar; Mercado Pago y máquina TUU; comisiones; inventario; gastos; reportes día/semana/mes; agenda por persona/equipo; avisos WhatsApp; espera en vivo pública; 7 rubros; planes Starter/Premium y 14 días gratis.
+
+**Ampliaciones que tu lista no traía (nuevas):**
+- **Recepción**: kilometraje, combustible, objetos de valor, **video corto al recibir y al entregar**, y **firma del cliente en persona o por link**.
+- **Cobro**: caja como punto de venta (carrito de productos y servicios), **anticipos en % o en pesos**, **arqueo** y movimientos, **link de pago** de la OT; en desabolladura, abono al aprobar y saldo al retirar.
+- **Seguimientos automáticos**: aviso de recepción y de "listo" (con botón de pago), **recordatorios de visita y de mantención**, y **seguimiento de cotizaciones por vencer**.
+- **Equipamiento**: bahías, elevadores, rampas, escáner con ocupación en vivo; un equipo ocupado no ofrece horas.
+- **Página pública por negocio** con reservas y espera en vivo (el sitemap lista varias, p. ej. `/pacifico-automotriz`, `/alfa-detailing`: son URLs de clientes).
+- **Aseguradoras/liquidadores**: estado "esperando liquidador" y respaldo de cada aprobación (quién y cuándo).
+- **App Staff "Mi día"** (técnico/lavador ve sus trabajos, sube fotos, marca avances; no ve precios ni caja) y **apps en App Store y Google Play** (enlaces en la home).
+- **Importación desde Excel**; **configuración y capacitación incluidas** en ambos planes; **estados por rubro** (mecánico: por recibir → diagnóstico → esperando aprobación → reparación → listo → entregado; DyP: peritaje, desabolladura, pintura, armado).
+- Se presentan como **Meta Business Partner**, distribuidor TUU y con Mercado Pago. La política de seguridad del sitio permite formularios hacia `haulmer.com` [S: probable proveedor de boleta electrónica; no lo dice explícitamente].
+
+**Precios [W]** (CLP + IVA/mes; fuera de Chile en USD):
+
+| | Starter | Premium |
+|---|---|---|
+| Precio | $49.900 | $99.900 |
+| Personas | 5 incluidas, +$10.000 c/u | Ilimitadas |
+| WhatsApp | 200 avisos/mes | 500 avisos/mes |
+| Correos | 1.000/mes | 3.000/mes |
+| Resto de funciones | Idénticas (OT, caja, cotizaciones, agenda, página pública, inventario, comisiones, App Staff, SII) | Idénticas |
+| Prueba | 14 días | 14 días |
+
+**Lectura estratégica [S]:** la diferencia de plan es solo cantidad (personas y mensajes), no funciones. Un taller de 5 personas paga $49.900; con 10 serían $99.900 (= Premium). Referencia de precio para tu plan, no para copiarlo sin validar con clientes.
 
 ---
 
@@ -122,10 +153,19 @@ Esfuerzo: S (≤1 semana), M (1–4 semanas), L (>1 mes) — estimación mía pa
 | 15 | Agenda por persona/bahía conectada a la fila | **Existe (distinto)** | Agenda por habilidades/isla (`0048`, `0017`), ingreso desde cita (`0014`) | S | Medio | — |
 | 16 | Avisos automáticos WhatsApp (recepción, listo, recordatorio) | **Parcial** | Bandeja y bot ✔; sin plantillas ni disparadores; Meta sin aprobar | M | **Alto** | Aprobación Meta/plantillas; cola de envío |
 | 17 | Espera en vivo pública | **Falta** | No hay ruta pública de estado | S–M | Medio | Token por OT; #2 |
-| 18 | Multirrubro (7) | **Falta** | Catálogo y roles acoplados a mecánica/DyP (`catalogo_servicios`, bot) | L | Bajo (corto plazo) | Configuración por tenant |
-| 19 | Apps móviles | **Parcial** | PWA instalable | S–M | Medio | Responsive; evaluar nativo después |
+| 18 | Multirrubro (7 rubros confirmados [W]) | **Parcial** | Cubre mecánica y DyP (`catalogo_servicios`: Taller Mecánico, Servicio Rápido, DyP); faltan etapas/checklists por rubro (car wash, lubricentro, serviteca, instalaciones, electricidad) | L | Medio (según mercado objetivo) | Configuración por tenant |
+| 19 | Apps móviles (iOS/Android en tiendas [W]) | **Parcial** | PWA instalable, sin app en tiendas | S–M (PWA pulida) / L (nativa) | Medio | Responsive; decidir envoltorio (Capacitor) o nativo |
 | 20 | Planes + prueba gratis 14 d | **Falta** | Sin concepto de plan | M | **Alto** (para vender) | Onboarding, cobro suscripción |
 | 21 | Alta self-service de taller | **Falta** | Trigger asigna "primera empresa activa" | M | **Alto** (para vender) | Auth real, plantillas de datos |
+| 22 | Recepción: video corto al recibir/entregar y firma por link [W] | **Parcial** | Firma presencial en canvas (`FirmaCanvas.jsx`); el video del escáner se procesa en el dispositivo y **no se guarda** (`0068`); no hay firma remota | M | Medio | Almacenamiento de video, ruta pública con token |
+| 23 | Anticipos/abonos, arqueo de caja, link de pago [W] | **Falta** | Ver #7 | M | Alto | #7, #9 |
+| 24 | Seguimiento automático de cotizaciones por vencer y recordatorio de mantención [W] | **Falta** | Hay `oportunidades` manuales y encuestas; sin recordatorios programados | M | Alto | #16, #5 |
+| 25 | Equipamiento: bahías/elevadores con ocupación; equipo ocupado no ofrece horas [W] | **Parcial** | Plano con puestos/ocupación (`0038`, `0045`, `plano_ocupacion`) y agenda por habilidades (`0048`); no hay recursos físicos que bloqueen horas | M | Medio | #2 |
+| 26 | Página pública del negocio con reservas [W] | **Falta** | Sin ruta pública de reservas (hay bot por WhatsApp, `0034`) | M | Medio | Fase 0 (rutas públicas), #15 |
+| 27 | Aseguradoras/liquidadores: estado y respaldo de aprobación [W] | **Falta** | No hay entidad aseguradora/liquidador | S–M | Medio (alto si apuntas a DyP) | #5 |
+| 28 | App Staff sin precios ni caja [W] | **Existe** (vía rol) | Rol `tecnico` ve OT/RADAR; precios protegidos con RLS + REVOKE de columna (`README.md`) | S | Medio | Pulir móvil |
+| 29 | Importación desde Excel de clientes/vehículos [W] | **Falta** | Hay lectura de xlsx solo para reloj control (`Turnos.jsx`) | S–M | Alto (onboarding) | #21 |
+| 30 | Configuración y capacitación incluidas [W] | **Falta** (proceso, no código) | Puesta en marcha manual | — | Medio | Definir servicio de implantación |
 
 Fila extra, para no olvidar lo no listado: **notificaciones de repuestos, bloqueo de OT cerrada, descuentos con tope, turnos/RRHH, cumplimiento de datos** existen y no tienen equivalente en la lista [U].
 
@@ -178,6 +218,8 @@ Entregables (en orden):
 5. **Fila propia + espera en vivo pública** (usa Fase 0.4): ruta pública por token con estado de la OT.
 6. **Informes financieros base**: ingresos por día/semana/mes, ticket promedio, cobrado vs pendiente, por técnico.
 7. **Gastos simples** y alerta de stock mínimo.
+8. **Anticipos/abonos y arqueo** (parte de la caja) y **seguimiento automático** de cotizaciones por vencer (usa la cola de avisos del punto 4).
+9. **Importación desde Excel** de clientes y vehículos (necesaria para onboarding en Fase 3; puede adelantarse si hay un segundo taller).
 
 Criterios de aceptación:
 - Un cliente aprueba una cotización desde el celular sin cuenta y el asesor ve el cambio en <1 min.
@@ -196,6 +238,9 @@ Entregables:
 4. **Análisis financiero**: margen por servicio/OT, costo de repuestos vs precio (aprovecha columnas protegidas), retrabajo con costo.
 5. **IA**: cotización sugerida a partir de hallazgos RADAR + fotos; resumen de OT para el cliente; mensajes de WhatsApp asistidos.
 6. Configuración multirrubro básica (catálogos y checklists por tipo de negocio) solo si hay demanda real.
+7. **Aseguradoras/liquidadores** (estado "esperando liquidador", PDF con fotos, respaldo de aprobación): refuerza DyP, donde ya tienes diagrama de daños y fotos.
+8. **Página pública del negocio con reservas** y recursos físicos (bahías/elevadores) que bloquean horas.
+9. Video corto de recepción/entrega y firma por link (evaluar costo de almacenamiento).
 
 Criterios de aceptación:
 - Un administrador ve margen real por OT y por técnico del mes.
@@ -206,7 +251,7 @@ Criterios de aceptación:
 **Objetivo:** vender sin intervención manual.
 
 Entregables:
-1. **Planes y límites** (Starter/Premium propios) + **prueba de 14 días** + cobro de suscripción.
+1. **Planes y límites** (Starter/Premium propios) + **prueba de 14 días** + cobro de suscripción. Referencia [W]: Automovity limita por personas y por cantidad de WhatsApp/correos, no por funciones; el consumo de WhatsApp tiene costo real para ti, así que medirlo por tenant es obligatorio. Definir además si la configuración/capacitación será servicio incluido o de pago.
 2. **Autoservicio de alta** con asistente (datos del taller, importar clientes/catálogo desde Excel, invitar equipo).
 3. Marca por tenant (logo ya existe: `0024`), dominio/subdominio, portal público con marca del taller.
 4. Mercado Pago / TUU para cobro en caja y links de pago.
@@ -222,7 +267,7 @@ Criterios de aceptación:
 
 ## 6. Dónde VPAI ya supera a Automovity [H vs U]
 
-*(Comparo contra la lista [U]; si Automovity tiene estos módulos, no los conozco.)*
+*(Comparo contra lo que Automovity afirma en las páginas que leí [W]. En ellas no vi encuestas de postventa, IA de inspección, informes de calidad/retrabajos ni cumplimiento de datos personales; no leí los otros 5 rubros ni la app, así que "no lo vi" no prueba que no exista. Ojo: sí ofrecen recordatorios de mantención y seguimiento de cotizaciones, que acercan su "retención" a la tuya.)*
 
 | Ventaja | Evidencia | Cómo convertirla en ventaja competitiva |
 |---|---|---|
@@ -238,7 +283,7 @@ Criterios de aceptación:
 
 ## 7. Los 5 primeros pasos concretos
 
-1. **Desbloquear la investigación de Automovity** (1 día): permitir `automovity.com` en la red, o pegarme precios/FAQ/capturas; con eso reviso la matriz #5–#9, #16–#21 y ajusto prioridades. Sin eso, la Fase 1 descansa en tu lista.
+1. **Completar la investigación de Automovity** (1 día): leer los 5 rubros restantes y probar su prueba gratis de 14 días (`app.automovity.com/panel/alta`) para validar cotización por link, caja y WhatsApp en la práctica. Hoy [W] es solo lo que dicen; mira los términos de uso antes de registrarte y no copies textos ni diseño.
 2. **Definir con Didial cuál es el repo/producto real** (1 día): confirmar qué de lo demo falta o difiere en producción (ver preguntas). Evita planificar sobre código distinto.
 3. **Escribir los tests de aislamiento RLS entre dos empresas y meterlos en CI** (3–5 días). Es lo que protege al negocio de todo lo demás.
 4. **Desacoplar el estado de la OT de ClickUp** (2–3 semanas): nueva tabla de estados/tablero propio; ClickUp pasa a sincronización opcional. Habilita fila, espera en vivo y venta a talleres sin ClickUp.
@@ -248,10 +293,10 @@ Criterios de aceptación:
 
 ## 8. Preguntas abiertas (necesito tu respuesta antes de asumir)
 
-1. ¿Puedes permitir `automovity.com` en la red del entorno, o prefieres pegarme su contenido? Hoy no está verificado.
+1. Mencionaste "otra web" para analizar, pero tu mensaje no traía la URL. ¿Cuál es? La reviso con Apify de la misma forma.
 2. ¿El **repo de producción de Didial** es otro? ¿Tiene cobro/caja, DTE real (el código menciona "Dimasoft" como facturador externo, `0013`) o WhatsApp aprobado que no están aquí?
 3. ¿VPAI es solo para Didial, o el objetivo es **vender a otros talleres** desde ya? Cambia el peso de la Fase 0.5 y la Fase 3.
-4. ¿Qué rubros además de mecánica/DyP interesan (Automovity [U] cita 7)? Si ninguno, descarto multirrubro por ahora.
+4. ¿Qué rubros además de mecánica/DyP interesan (Automovity [W] confirma 7: mecánico, electricidad, lubricentro, serviteca, DyP, car wash, instalaciones)? Si ninguno, descarto multirrubro por ahora.
 5. ¿Hay presupuesto/preferencia de **proveedor DTE** y de pasarela (Mercado Pago/TUU/Transbank)? Afecta F1.3 y F3.4.
 6. ¿Aprobó Meta la cuenta WhatsApp ("Tech Provider")? Condiciona F1.4.
 7. ¿Cuántos usuarios simultáneos y cuántos talleres esperas el primer año? Para decidir plan de Supabase, backups y rendimiento.
