@@ -389,7 +389,9 @@ async function inventarioFunciones() {
     ejecutable_por_anon: sd.filter((f) => f.anon_ejec).map((f) => `${f.n}(${f.a})`),
     parametro_empresa: sd.filter((f) => f.auth_ejec && /empresa/i.test(f.a)).map((f) => `${f.n}(${f.a})`),
   }
-  hallazgos.columnas_sin_proteccion = await columnasDeclaradasSinEfecto()
+  const columnas = await columnasDeclaradasSinEfecto()
+  hallazgos.columnas_sin_proteccion = columnas.sinEfecto
+  hallazgos.columnas_legibles_perdidas = columnas.perdidas
   return { total: fn.length, securityDefiner: sd.length, hallazgos }
 }
 
@@ -400,10 +402,13 @@ async function inventarioFunciones() {
 async function columnasDeclaradasSinEfecto() {
   const dir = path.join(AQUI, '..', '..', 'migrations')
   const hallados = []
+  const declaradas = {} // tabla -> columnas con protección declarada
   for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.sql')).sort()) {
     const sql = fs.readFileSync(path.join(dir, f), 'utf8').replace(/--[^\n]*/g, '')
     for (const m of sql.matchAll(/revoke\s+select\s*\(([^)]+)\)\s+on\s+(?:table\s+)?public\.(\w+)\s+from\s+([^;]+);/gi)) {
       const columnas = m[1].split(',').map((c) => c.trim())
+      const protegidas = (declaradas[m[2]] ||= new Set())
+      for (const c of columnas) protegidas.add(c)
       const roles = m[3].split(',').map((r) => r.trim().toLowerCase()).filter((r) => ['anon', 'authenticated'].includes(r))
       for (const rol of roles) for (const col of columnas) {
         const r = await q(`select has_column_privilege($1, $2, $3, 'select') as puede`, [rol, `public.${m[2]}`, col]).catch(() => null)
@@ -411,7 +416,17 @@ async function columnasDeclaradasSinEfecto() {
       }
     }
   }
-  return hallados
+  // Si una tabla tiene columnas protegidas por privilegio, TODAS las demás deben seguir legibles por
+  // `authenticated`: una columna agregada después y sin `grant select (col)` rompería la interfaz.
+  const perdidas = []
+  for (const [tabla, protegidas] of Object.entries(declaradas)) {
+    const parcial = (await q(`select a.attname col from pg_attribute a join pg_class c on c.oid = a.attrelid
+      where c.oid = $1::regclass and a.attnum > 0 and not a.attisdropped
+        and not has_table_privilege('authenticated', c.oid, 'select')
+        and not has_column_privilege('authenticated', c.oid, a.attnum, 'select')`, [`public.${tabla}`])).rows
+    for (const { col } of parcial) if (!protegidas.has(col)) perdidas.push(`${tabla}.${col}`)
+  }
+  return { sinEfecto: hallados, perdidas }
 }
 
 // Pruebas de EXPLOTACIÓN de funciones SECURITY DEFINER expuestas por RPC: se intenta usarlas
@@ -489,6 +504,73 @@ async function probarFuncionesExpuestas() {
   reg('encuesta_obtener_por_token: token inventado no devuelve datos', enc.ok && enc.rows.length && Object.values(enc.rows[0]).some((v) => v != null) ? 'FUGA' : 'ok', enc.ok ? `${enc.rows.length} filas` : enc.codigo)
 }
 
+// H1 (0076): costo, precio y total de ot_detalle solo se leen por la vista, redactados por rol.
+// Se comprueba lo que cada rol DEBE y NO DEBE poder hacer. Un acceso de más es FUGA; uno de menos
+// (algo que la interfaz necesita y se rompió) es REGRESION. Ambos hacen fallar la prueba.
+const h1Res = []
+async function probarOtDetalle() {
+  const reg = (nombre, estado, detalle = '') => h1Res.push({ nombre, estado, detalle })
+  const trabajo = (await q(`select id from public.trabajos_taller where empresa_id = $1 limit 1`, [EMP_A])).rows[0]
+  const area = (await q(`select area from public.ot_detalle where area is not null limit 1`)).rows[0]?.area
+  if (!trabajo || !area) { reg('preparación de datos de ot_detalle', 'REGRESION', 'no hay una OT de la empresa A ni un área válida para sembrar la línea de prueba'); return }
+  await q('begin')
+  await q(`set local session_replication_role = replica`)
+  const linea = (await q(`insert into public.ot_detalle (trabajo_id, area, detalle, cantidad, costo_unitario, precio_unitario)
+    values ($1, $2, 'h1-prueba', 2, 100, 200) returning id, total_linea`, [trabajo.id, area])).rows[0]
+  await q('commit')
+  const conMontos = ['socia', 'admin', 'encargado_presupuestos', 'jefe_taller']
+  const conPrecio = [...conMontos, 'asesor']
+  const num = (v) => (v === null || v === undefined ? null : Number(v))
+
+  for (const rol of ROLES) {
+    const uid = uidRol(EMP_A, rol)
+    // 1) La lectura directa de las columnas protegidas debe estar denegada para TODOS (también admin).
+    for (const col of ['costo_unitario', 'precio_unitario', 'total_linea']) {
+      const r = await intentar(rol, uid, `select ${col} from public.ot_detalle where id = $1`, [linea.id])
+      reg(`${rol}: lectura directa de ot_detalle.${col} denegada`, !r.ok && r.codigo === '42501' ? 'ok' : 'FUGA', r.ok ? 'la lee' : r.codigo)
+    }
+    const star = await intentar(rol, uid, `select * from public.ot_detalle where id = $1`, [linea.id])
+    reg(`${rol}: select * directo de ot_detalle denegado`, !star.ok ? 'ok' : 'FUGA', star.ok ? 'devuelve todas las columnas' : star.codigo)
+    // 2) Las columnas no protegidas siguen legibles (lo que usa DetalleOt.jsx).
+    const libre = await intentar(rol, uid, `select id, area, detalle, cantidad, verificado from public.ot_detalle where id = $1`, [linea.id])
+    reg(`${rol}: lectura directa de columnas no protegidas`, libre.ok && libre.rows.length === 1 ? 'ok' : 'REGRESION', libre.ok ? `${libre.rows.length} filas` : libre.codigo)
+    // 3) La vista entrega cada monto solo a quien corresponde.
+    const v = await intentar(rol, uid, `select costo_unitario c, precio_unitario p, total_linea t from public.ot_detalle_con_permiso where id = $1`, [linea.id])
+    if (!v.ok || v.rows.length !== 1) { reg(`${rol}: vista ot_detalle_con_permiso`, 'REGRESION', v.ok ? `${v.rows.length} filas` : v.codigo) } else {
+      const { c, p, t } = v.rows[0]
+      const espC = conMontos.includes(rol) ? 100 : null
+      const espP = conPrecio.includes(rol) ? 200 : null
+      const espT = conPrecio.includes(rol) ? num(linea.total_linea) : null
+      const exceso = (num(c) !== null && espC === null) || (num(p) !== null && espP === null) || (num(t) !== null && espT === null)
+      const falta = (num(c) === null && espC !== null) || (num(p) === null && espP !== null) || (num(t) === null && espT !== null)
+      reg(`${rol}: la vista redacta los montos según el rol`, exceso ? 'FUGA' : falta ? 'REGRESION' : 'ok', `costo=${c} precio=${p} total=${t}`)
+    }
+    // 4) Las escrituras de la interfaz siguen funcionando, y la protección de escritura se mantiene.
+    const ver = await intentar(rol, uid, `update public.ot_detalle set verificado = true where id = $1`, [linea.id])
+    reg(`${rol}: marcar una línea como verificada`, ver.ok && ver.filas === 1 ? 'ok' : 'REGRESION', ver.ok ? `filas=${ver.filas}` : ver.codigo)
+    const pre = await intentar(rol, uid, `update public.ot_detalle set precio_unitario = 250 where id = $1`, [linea.id])
+    if (conMontos.includes(rol)) reg(`${rol}: cargar un precio`, pre.ok && pre.filas === 1 ? 'ok' : 'REGRESION', pre.ok ? `filas=${pre.filas}` : pre.codigo)
+    else reg(`${rol}: no puede cargar un precio`, pre.ok ? 'FUGA' : 'ok', pre.ok ? 'lo cargó' : pre.codigo)
+  }
+  // 5) Otra empresa no ve ni obtiene los montos de esta línea.
+  const adminB = uidRol(EMP_B, 'admin')
+  const vB = await intentar('admin', adminB, `select count(*)::int n from public.ot_detalle_con_permiso where id = $1`, [linea.id])
+  reg('admin de otra empresa no ve la línea en la vista', vB.ok && vB.rows[0].n === 0 ? 'ok' : 'FUGA', vB.ok ? `n=${vB.rows[0].n}` : vB.codigo)
+  const fB = await intentar('admin', adminB, `select count(*)::int n from public.ot_detalle_montos_v where id = $1`, [linea.id])
+  reg('admin de otra empresa no ve la línea en ot_detalle_montos_v', fB.ok && fB.rows[0].n === 0 ? 'ok' : 'FUGA', fB.ok ? `n=${fB.rows[0].n}` : fB.codigo)
+  // La vista de montos, consultada directo, también redacta por rol (no es una puerta trasera).
+  for (const rol of ['tecnico', 'recepcionista']) {
+    const d = await intentar(rol, uidRol(EMP_A, rol), `select costo_unitario c, precio_unitario p, total_linea t from public.ot_detalle_montos_v where id = $1`, [linea.id])
+    const filtra = d.ok && d.rows.some((f) => f.c !== null || f.p !== null || f.t !== null)
+    reg(`${rol}: ot_detalle_montos_v consultada directo no entrega montos`, filtra ? 'FUGA' : 'ok', d.ok ? JSON.stringify(d.rows[0] ?? {}) : d.codigo)
+  }
+  // 6) Sin sesión no se puede leer la vista de montos ni la vista de lectura.
+  const fA = await intentar('anon', null, `select count(*)::int n from public.ot_detalle_montos_v where id = $1`, [linea.id])
+  reg('anon no lee ot_detalle_montos_v', !fA.ok || fA.rows[0].n === 0 ? 'ok' : 'FUGA', fA.ok ? `n=${fA.rows[0].n}` : fA.codigo)
+  const vA = await intentar('anon', null, `select count(*)::int n from public.ot_detalle_con_permiso where id = $1`, [linea.id])
+  reg('anon no lee la vista', !vA.ok || vA.rows[0].n === 0 ? 'ok' : 'FUGA', vA.ok ? `n=${vA.rows[0].n}` : vA.codigo)
+}
+
 async function columnasProtegidas() {
   const filas = (await q(`select c.relname t, a.attname col
     from pg_class c
@@ -520,6 +602,7 @@ for (const t of lista) await probarTabla(t)
 await probarEscalada()
 await probarStorage()
 await probarFuncionesExpuestas()
+await probarOtDetalle()
 const funciones = await inventarioFunciones()
 const columnas = await columnasProtegidas()
 
@@ -539,7 +622,7 @@ const fugasColumnas = columnas.filter((c) => c.estado === 'FUGA')
 // La línea base es { categoría: { "función(args)": "motivo por el que se acepta" } }.
 // Un hallazgo que no esté en la línea base hace fallar la prueba; para aceptarlo hay que
 // revisarlo y escribir el motivo (no basta con regenerar el archivo).
-let base = { sin_search_path: {}, ejecutable_por_anon: {}, parametro_empresa: {}, columnas_sin_proteccion: {} }
+let base = { sin_search_path: {}, ejecutable_por_anon: {}, parametro_empresa: {}, columnas_sin_proteccion: {}, columnas_legibles_perdidas: {} }
 if (fs.existsSync(ARCHIVO_BASE)) base = JSON.parse(fs.readFileSync(ARCHIVO_BASE, 'utf8'))
 const nuevosHigiene = {}
 for (const k of Object.keys(funciones.hallazgos)) nuevosHigiene[k] = funciones.hallazgos[k].filter((x) => !(x in (base[k] || {})))
@@ -558,9 +641,10 @@ if (ACTUALIZAR_BASE) {
 }
 const fugasFunciones = funcionesRes.filter((f) => f.estado === 'FUGA')
 const inconclusosFunciones = funcionesRes.filter((f) => f.estado === 'inconcluso')
+const fallosH1 = h1Res.filter((f) => f.estado !== 'ok')
 
 fs.mkdirSync(SALIDA, { recursive: true })
-fs.writeFileSync(path.join(SALIDA, 'informe.json'), JSON.stringify({ cobertura, fugas, inconclusos, escalada, storage: storageRes, funcionesExpuestas: funcionesRes, funciones, columnas, fallosSiembra }, null, 2))
+fs.writeFileSync(path.join(SALIDA, 'informe.json'), JSON.stringify({ cobertura, fugas, inconclusos, escalada, storage: storageRes, funcionesExpuestas: funcionesRes, montosOtDetalle: h1Res, funciones, columnas, fallosSiembra }, null, 2))
 
 const resumenFugas = {}
 for (const f of fugas) (resumenFugas[f.tabla] ||= new Set()).add(`${f.op}[${f.rol}]`)
@@ -573,6 +657,7 @@ console.log(`Escalada de privilegios ........... ${escalada.length} pruebas, FUG
 console.log(`Storage ........................... ${storageRes.length} pruebas, FUGA: ${fugasStorage.length}`)
 console.log(`Columnas con privilegio revocado .. ${columnas.length}, FUGA: ${fugasColumnas.length}`)
 console.log(`Explotación de funciones expuestas . ${funcionesRes.length} pruebas, FUGA: ${fugasFunciones.length}, inconclusas: ${inconclusosFunciones.length}`)
+console.log(`Montos de ot_detalle (H1) ......... ${h1Res.length} pruebas, fallos: ${fallosH1.length}`)
 console.log(`Funciones SECURITY DEFINER (no disparadores) ${funciones.securityDefiner} de ${funciones.total}; línea base sin revisar: ${sinRevisar}`)
 for (const [k, v] of Object.entries(funciones.hallazgos)) console.log(`  higiene · ${k}: ${v.length} (nuevos: ${nuevosHigiene[k].length})`)
 if (fugas.length) {
@@ -582,6 +667,7 @@ if (fugas.length) {
 }
 if (fugasEscalada.length) { console.log('\n--- FUGAS de escalada ---'); fugasEscalada.forEach((e) => console.log(`  ${e.nombre}: ${e.detalle}`)) }
 if (fugasStorage.length) { console.log('\n--- FUGAS de storage ---'); fugasStorage.forEach((e) => console.log(`  ${e.bucket} ${e.op} [${e.rol}]`)) }
+if (fallosH1.length) { console.log('\n--- FALLOS en la protección de montos de ot_detalle (H1) ---'); fallosH1.forEach((e) => console.log(`  [${e.estado}] ${e.nombre}: ${e.detalle}`)) }
 if (fugasFunciones.length) { console.log('\n--- FUGAS por funciones expuestas ---'); fugasFunciones.forEach((e) => console.log(`  ${e.nombre}: ${e.detalle}`)) }
 if (DETALLE && inconclusosFunciones.length) { console.log('\n--- Funciones inconclusas ---'); inconclusosFunciones.forEach((e) => console.log(`  ${e.nombre}: ${e.detalle}`)) }
 if (fugasColumnas.length) { console.log('\n--- FUGAS de columnas protegidas ---'); fugasColumnas.forEach((e) => console.log(`  ${e.tabla}.${e.columna}`)) }
@@ -591,6 +677,6 @@ if (hayNuevosHigiene) { console.log('\n--- Higiene: hallazgos NUEVOS respecto de
 if (DETALLE && inconclusos.length) { console.log('\n--- Inconclusos (revisar) ---'); inconclusos.slice(0, 40).forEach((f) => console.log(`   · ${f.tabla} ${f.op} [${f.rol}] ${f.detalle}`)) }
 console.log(`\nInforme completo: ${path.join(SALIDA, 'informe.json')}`)
 
-const hayFuga = fugas.length || fugasEscalada.length || fugasStorage.length || fugasColumnas.length || fugasFunciones.length
+const hayFuga = fugas.length || fugasEscalada.length || fugasStorage.length || fugasColumnas.length || fugasFunciones.length || fallosH1.length
 if (hayFuga || hayNuevosHigiene) { console.log('\nRESULTADO: FALLA'); process.exit(1) }
 console.log('\nRESULTADO: OK — ningún acceso entre empresas detectado.')

@@ -30,7 +30,8 @@ Opciones: `--detalle` (lista cada hallazgo), `--tabla=clientes` (una sola tabla)
 | **Storage** | Leer, cambiar, borrar o subir objetos de otra empresa en cada bucket | lo logra (los buckets públicos se leen por diseño; las escrituras no) |
 | **Funciones expuestas** | Usar por RPC, como visitante y como admin de A, las funciones `SECURITY DEFINER` contra datos de otra empresa; llamar a todas las `plataforma_*` como admin común | la función hace algo sobre datos ajenos |
 | **Columnas protegidas** | Un técnico lee columnas con privilegio revocado (costos y precios) | las lee |
-| **Higiene de funciones** | Inventario de funciones `SECURITY DEFINER` sin `search_path`, ejecutables por `anon` o con parámetro de empresa | aparece una **nueva** que no esté en la línea base |
+| **Montos de `ot_detalle` (H1, `0076`)** | Cada rol lee costo, precio y total directo de la tabla y por la vista; escribe líneas y precios; otra empresa y `anon` consultan | un rol ve un monto que no le corresponde (FUGA) o algo que la interfaz necesita deja de funcionar (REGRESION) |
+| **Higiene** | Inventario de funciones `SECURITY DEFINER` sin `search_path`, ejecutables por `anon` o con parámetro de empresa; `REVOKE` de columna declarados en migraciones que no tienen efecto; columnas de una tabla con protección parcial que quedaron sin permiso de lectura | aparece un hallazgo **nuevo** que no esté en la línea base |
 
 Las filas "ajenas" salen de la empresa demo (que trae datos reales de las migraciones) y de una empresa B que se siembra con un generador de filas. El dueño de una fila de una tabla hija se determina por **todas** sus claves foráneas hacia una empresa; si no se puede determinar, la fila no se usa.
 
