@@ -13,7 +13,7 @@ Fecha: 2026-11-06 · Rama: `claude/vpai-automovity-gap-analysis-pl7inh` · Solo 
 
 ## 0. Advertencias antes de leer (importante)
 
-1. **Fuente de la web de Automovity [W].** Desde mi red directa `automovity.com` estaba bloqueado, así que la leí vía Apify (`apify/web-fetch`, 2026-11-06). **Páginas leídas:** home (incluye precios, FAQ y datos estructurados), las 7 páginas de rubro (`/para-talleres`, `-electricidad-automotriz`, `-lubricentros`, `-servitecas`, `-desabolladura`, `-car-wash`, `-instalaciones`) y `sitemap.xml`. También leí `app.automovity.com/terminos` y `/privacidad` (vigentes desde 2026-10-20). El enlace de tu mensaje (`app.automovity.com/panel`) redirige a un acceso por correo (`/entrar`). Con tu autorización entré con tu correo a una cuenta de prueba que ya existía y recorrí el panel en modo lectura (sección 1d, etiqueta [A]); no creé cuentas ni cambié datos. **No leí:** las páginas públicas de negocios clientes del sitemap ni las fichas de las tiendas de apps. **No vi con datos:** la cuenta de prueba está vacía, así que la cotización por link, los cobros, los avisos de WhatsApp y las comisiones se conocen por lo que Automovity afirma, no por haberlos usado. Lo que dice la web es lo que **Automovity afirma**; no probé que funcione. Perplexity no estaba disponible para búsqueda (solo ofrece importar dashboards).
+1. **Fuente de la web de Automovity [W].** Desde mi red directa `automovity.com` estaba bloqueado, así que la leí vía Apify (`apify/web-fetch`, 2026-11-06). **Páginas leídas:** home (incluye precios, FAQ y datos estructurados), las 7 páginas de rubro (`/para-talleres`, `-electricidad-automotriz`, `-lubricentros`, `-servitecas`, `-desabolladura`, `-car-wash`, `-instalaciones`) y `sitemap.xml`. También leí `app.automovity.com/terminos` y `/privacidad` (vigentes desde 2026-10-20). El enlace de tu mensaje (`app.automovity.com/panel`) redirige a un acceso por correo (`/entrar`). Con tu autorización entré con tu correo a una cuenta de prueba que ya existía y recorrí el panel en modo lectura (sección 1d, etiqueta [A]); no creé cuentas ni cambié datos. **No leí:** las páginas públicas de negocios clientes del sitemap ni las fichas de las tiendas de apps. **Prueba con datos (sección 1f):** con tu OK cargué un cliente, una OT, una cotización con link y un cobro en efectivo de prueba. **Sigue sin verse en uso:** avisos de WhatsApp, boleta electrónica, link de pago, tarjeta/TUU, comisiones, cotización con varios ítems u opcionales, y reportes con una OT finalizada. Lo que dice la web es lo que **Automovity afirma**; no probé que funcione. Perplexity no estaba disponible para búsqueda (solo ofrece importar dashboards).
 2. **El repo es una versión demo/portafolio**, no el producto de producción (`README.md`: "versión de demostración, adaptada de un proyecto en producción real"). El código de producción de Didial podría tener cosas que aquí no están (p. ej. el esquema dice que el tenant real "se siembra aparte", `0001_esquema_roles.sql`). Mi auditoría cubre **solo lo que hay en este repo**.
 3. Revisé arquitectura, migraciones (74), Edge Functions (11), rutas, CI y componentes clave. **No ejecuté la app ni la base de datos**, así que nada aquí está probado en ejecución.
 
@@ -94,7 +94,7 @@ Estos documentos muestran **cómo opera** Automovity, no solo qué funciones ven
 
 ## 1d. Lo observado dentro de la app de Automovity [A]
 
-**Alcance.** Entré con tu correo (código de un solo uso) a una cuenta que ya existía: negocio "PA", rubro taller mecánico, prueba gratis que **termina el 20 nov 2026**. Recorrí 35 pantallas en modo lectura, en formato móvil (390 px), sin pulsar acciones ni cambiar datos. **La cuenta está vacía** (0 OT, 0 clientes, 0 cotizaciones, 0 inventario), así que **no vi** el detalle de una OT, la cotización que recibe el cliente, un cobro real, un aviso de WhatsApp ni comisiones con datos. Lo que sigue es estructura y configuración, no comportamiento probado.
+**Alcance.** Entré con tu correo (código de un solo uso) a una cuenta que ya existía: negocio "PA", rubro taller mecánico, prueba gratis que **termina el 20 nov 2026**. Recorrí 35 pantallas en modo lectura, en formato móvil (390 px), sin pulsar acciones ni cambiar datos. **La cuenta estaba vacía** (0 OT, 0 clientes, 0 cotizaciones, 0 inventario) cuando recorrí estas pantallas, así que lo que sigue es estructura y configuración. El comportamiento con datos (OT, cotización por link, aprobación, caja) está en la sección 1f.
 
 | Área | Qué vi [A] | Implicancia para VPAI |
 |---|---|---|
@@ -138,6 +138,27 @@ Leí las 7 páginas de rubro. Hallazgo central: **no son 7 productos; es un solo
 - La inversión correcta es un **"perfil de rubro"** (etapas, checklist de recepción, tipos de vehículo, catálogo semilla y recordatorios), no 7 desarrollos. Es además lo que hace posible el onboarding con catálogo precargado de la sección 1d.
 - Orden sugerido de rubros, por cercanía a lo que ya tienes: **mecánico y DyP** (hoy) → **electricidad** (casi solo un checklist y stock de baterías) → **lubricentro y serviteca** (fila rápida, recordatorio de mantención, precio por aro) → **instalaciones** (garantía con vencimiento) → **car wash** (el más distinto: volumen alto, ticket bajo, fila y comisión por lavador).
 - Decidir con datos: confirma con talleres reales qué rubro quieres vender primero antes de construir los siguientes.
+
+---
+
+## 1f. Recorrido con datos de prueba en Automovity [A]
+
+**Qué hice (con tu autorización, 2026-11-06, en tu cuenta de prueba):** creé un cliente ficticio sin teléfono ("Cliente Prueba VPAI", patente VPAI01) para que ningún aviso pudiera llegar a una persona real; una OT (OT-1, "Diagnóstico con scanner", $25.000); una cotización suelta (COT-1); la aprobé desde el link público como lo haría un cliente; abrí la caja y cobré $25.000 en efectivo. **No usé** "Enviar por WhatsApp", boleta ni link de pago.
+
+| Paso | Qué vi [A] | Lección para VPAI |
+|---|---|---|
+| **Cliente** | Formulario mínimo: nombre, teléfono y patente (el resto bajo "Más datos": correo, RUT, dirección, comuna, cumpleaños, notas). Crea cliente y vehículo a la vez. La ficha ofrece "Nueva OT", "Cotizar" e "Invitar a la app" (app del cliente) | Tu alta de cliente/vehículo/ingreso es mucho más larga (`NuevoIngreso.jsx`, 1.244 líneas). Meta medible: cliente + vehículo + OT en menos de un minuto |
+| **OT** | "Nueva recepción" en una sola pantalla: patente (reconoce al cliente y al vehículo), tipo de vehículo, servicio del catálogo con precio y duración por tipo, mecánico y fecha de entrega. Al crear, entra directo al checklist | Un solo formulario corto, con el catálogo como botones. Ver tu flujo de dos ingresos (diagnóstico/agendado) como candidato a simplificar |
+| **Checklist de entrada** | 6 pasos: fotos (4 mínimas de 7 ángulos), estado visual (sin daños/con daños), revisión de 7 ítems Bien/Mal con "Todo bien", combustible y km, objetos de valor, resumen. Se puede saltar cualquier paso; el resumen avisa qué falta y ofrece un **checklist liviano**; la firma queda en la OT | Tu RADAR de 48 puntos es más profundo; el valor para vender es una versión corta por defecto y la profunda opcional |
+| **OT (detalle)** | Barra de etapas (Por recibir → Esperando aprobación → Aprobado → En reparación → Listo → Entregado), servicios con avance "0 de 1 hecho", fotos, historial con autor y hora, notas, "por cobrar" | Etapas visibles y propias; hoy las tuyas vienen de ClickUp |
+| **Cotización** | Se crea "suelta con la patente" (borrador, válida 30 días desde que se envía). Agrega trabajos del catálogo, mensaje al cliente y nota interna; neto e IVA calculados con IVA incluido en los precios ($21.008 + $3.992 = $25.000). Acciones: copiar link, PDF, vista previa, **enviar por WhatsApp**, **PDF con QR para impresora de 80 mm**, **"Respondió en el local"** (registra una aprobación presencial) y **cobrar anticipo**. Copiar el link la marca "Enviada" sin mandar ningún mensaje | La aprobación presencial y el anticipo son casos reales que tu `PresupuestoDetalle.jsx` hoy resuelve solo con "Marcar aceptado" |
+| **Link público** (`/cotizacion/<token largo>`) | Página móvil con el nombre del taller, los servicios, total con neto e IVA, un campo "Tu nombre" y el botón "Aprobar · $25.000". Sin login. No tiene casillas por ítem porque la cotización tenía un solo ítem; **no probé opcionales ni aprobación parcial** | Es el patrón de la ruta pública (token) del paso 5 de este roadmap. El token tiene 43 caracteres; no probé caducidad ni límites de intentos |
+| **Aprobación** | Pantalla de confirmación con número y hora; en el taller, la cotización pasa a "Aprobada" con "Respondió *nombre* por el link" y se muestra Propuesto vs Aprobado; llega un aviso en la campana | Registrar quién y cuándo aprobó da respaldo; tu esquema tiene estados pero no esa traza |
+| **Efecto en la OT** | Aprobar la cotización suelta **no movió** la OT-1 (siguió "Por recibir") ni la vinculó. En Caja, OT-1 y COT-1 aparecieron como dos "por cobrar" separados de $25.000 | Riesgo de doble conteo si cotización y OT no se enlazan. Diseña desde el inicio el vínculo cotización ↔ OT ↔ cobro. No probé crear la cotización desde la ficha de la OT, que es el camino pensado |
+| **Caja** | Abrir caja con efectivo inicial; lista "Por cobrar" (OT y cotizaciones aprobadas) y catálogo como botones; cobro por efectivo, transferencia o tarjeta, descuento, **cobro parcial** ("otro monto") y, en efectivo, **monto recibido y vuelto**; al terminar: comprobante de 80 mm o carta. **Cierre con arqueo**: "debería haber" frente a "efectivo contado". Sin boleta porque no está activada | Es el módulo que tú no tienes (`0013`: "sin manejo de pago real"). Estos son los casos mínimos: apertura, métodos, parcial, vuelto, comprobante, arqueo |
+| **Reportes y resumen** | Con el cobro hecho, "Vendido hoy" siguió en $0 y Reportes dijo "nada en este período": la OT seguía en "Por recibir". El texto del reporte habla de "lo que quedó listo y lo que se vendió en la caja" [S: las ventas parecen reconocerse al terminar la OT, no al cobrar]. El resumen del mecánico muestra "Mi cola" con sus OT | Decide pronto qué es una "venta" en VPAI (cobro vs OT entregada); afecta reportes, comisiones y caja |
+
+**Límites de esta prueba:** un solo ítem y un solo cobro en efectivo; sin WhatsApp, boleta, link de pago, tarjeta/TUU ni comisiones; no cerré la caja ni finalicé la OT. Dejé la caja abierta y los datos de prueba en tu cuenta (cliente, OT-1, COT-1 aprobada y un cobro de $25.000), por si quieres revisarlos o borrarlos.
 
 ---
 
@@ -266,6 +287,12 @@ Esfuerzo: S (≤1 semana), M (1–4 semanas), L (>1 mes) — estimación mía pa
 | 53 | Importar lista de precios e historial desde Excel [W] | **Falta** | Excel solo para reloj control (`Turnos.jsx`) | S–M | Alto (onboarding) | #29 |
 | 54 | Flotas y empresas: varios vehículos por cliente con factura [W] | **Existe** | `clientes_vehiculos` para "flota de una empresa" (`0002`), razón social y RUT | S (pulir) | Medio | — |
 | 55 | Estado documental del vehículo (revisión técnica, permiso de circulación) [W] | **Falta** | Sin campos en `vehiculos` (grep sin resultados) | S | Bajo–medio (lubricentro) | — |
+| 56 | Aprobación presencial de cotización ("respondió en el local") y registro de quién/cuándo aprobó [A] | **Parcial** | Solo "Marcar aceptado" por el personal (`PresupuestoDetalle.jsx:244`), sin autor de la respuesta | S | Medio | #5 |
+| 57 | Caja con apertura, arqueo (debería haber vs contado), cobro parcial, vuelto y comprobante 80 mm/carta [A] | **Falta** | Ver #7; `0013` | M | **Alto** | #7 |
+| 58 | Vínculo cotización ↔ OT ↔ cobro sin doble conteo [A] | **Parcial** | Presupuestos ligados a OT (`presupuestos_taller`, `trabajos_taller`); sin cobro (#7) | M | Alto | #5, #7 |
+| 59 | Ingreso rápido: cliente + vehículo + OT en una pantalla corta [A] | **Parcial** | `NuevoIngreso.jsx` (1.244 líneas) con dos flujos y muchos campos | M | **Alto** | #1, #47 |
+| 60 | Checklist de entrada corto por defecto, con versión profunda opcional [A] | **Parcial** | RADAR 48 puntos (`0029`) y escáner (`0068`); sin versión liviana | S–M | Medio | #47 |
+| 61 | Anticipo/abono al aprobar la cotización [A] | **Falta** | Sin pagos (#7) | S–M | Medio | #57 |
 
 Fila extra, para no olvidar lo no listado: **notificaciones de repuestos, bloqueo de OT cerrada, descuentos con tope, turnos/RRHH, cumplimiento de datos** existen y no tienen equivalente en la lista [U].
 
@@ -351,6 +378,8 @@ Criterios de aceptación:
 - Una boleta emitida en el ambiente de certificación del SII del proveedor queda aceptada.
 - Al pasar la OT a "listo", se envía un solo aviso (idempotente) y queda registrado.
 - Ningún enlace público permite ver datos de otra OT (prueba automatizada).
+- Metas de uso inspiradas en el recorrido de la sección 1f [S, a validar con talleres]: crear cliente + vehículo + OT en menos de 1 minuto desde el celular; enviar una cotización con link en 3 toques o menos desde la OT; cobrar y comprobar en menos de 30 segundos.
+- Cotización, OT y cobro quedan enlazados: aprobar una cotización actualiza la OT y el cobro no se cuenta dos veces (prueba automatizada).
 
 ### Fase 2 — Diferenciación (≈6–8 semanas)
 **Objetivo:** que VPAI sea elegido por lo que Automovity no muestra en su web ni en su panel [W/A]: retención accionable, calidad, inspección con IA y cumplimiento de datos.
@@ -408,7 +437,7 @@ Criterios de aceptación:
 
 ## 7. Los 5 primeros pasos concretos
 
-1. **Validar en la práctica lo que Automovity afirma** (1 día, antes de que termine tu prueba el 20 nov 2026): con tu OK, cargar un cliente, una OT y una cotización de prueba en tu cuenta para ver cómo es la cotización por link y la caja. Hoy [W]/[A] es estructura y lo que dicen, no comportamiento probado. Es solo para entender el nivel funcional: no copies textos ni diseño.
+1. **Definir el modelo cotización ↔ OT ↔ cobro de VPAI** (2–3 días, con la sección 1f como referencia funcional): qué es una "venta" (cobro u OT entregada), cómo se enlazan y qué estados tiene cada una. Es la decisión que más condiciona caja, reportes y comisiones. Aún no vi en Automovity los varios ítems, los opcionales, WhatsApp, boleta ni tarjeta; si quieres, los pruebo antes de que termine tu prueba el 20 nov 2026. Es solo para entender el nivel funcional: no copies textos ni diseño.
 2. **Definir con Didial cuál es el repo/producto real** (1 día): confirmar qué de lo demo falta o difiere en producción (ver preguntas). Evita planificar sobre código distinto.
 3. **Escribir los tests de aislamiento RLS entre dos empresas y meterlos en CI** (3–5 días). Es lo que protege al negocio de todo lo demás.
 4. **Desacoplar el estado de la OT de ClickUp** (2–3 semanas): nueva tabla de estados/tablero propio; ClickUp pasa a sincronización opcional. Habilita fila, espera en vivo y venta a talleres sin ClickUp.
@@ -418,7 +447,7 @@ Criterios de aceptación:
 
 ## 8. Preguntas abiertas (necesito tu respuesta antes de asumir)
 
-1. ¿Me autorizas a cargar datos de prueba en tu cuenta de Automovity (un cliente, una OT, una cotización) para ver cotización por link y caja? Modifica tu cuenta; sin tu OK no lo hago.
+1. En tu cuenta de Automovity quedaron datos de prueba (cliente, OT-1, COT-1 aprobada, un cobro de $25.000 y la caja abierta). ¿Los dejo o prefieres que cierre la caja? ¿Quieres que pruebe también varios ítems, opcionales o el aviso por WhatsApp? Este último envía un mensaje, así que necesito un número de prueba tuyo.
 2. ¿El **repo de producción de Didial** es otro? ¿Tiene cobro/caja, DTE real (el código menciona "Dimasoft" como facturador externo, `0013`) o WhatsApp aprobado que no están aquí?
 3. ¿VPAI es solo para Didial, o el objetivo es **vender a otros talleres** desde ya? Cambia el peso de la Fase 0.5 y la Fase 3.
 4. ¿Qué rubros además de mecánica/DyP quieres vender primero (sección 1e)? Sugiero electricidad y lubricentro/serviteca como siguientes. Si ninguno, dejo multirrubro fuera de las Fases 1 y 2.
