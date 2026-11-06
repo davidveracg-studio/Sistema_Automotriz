@@ -48,3 +48,51 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+  # WP0.2 (FASE0.md): comprueba que un usuario de una empresa no puede leer,
+  # cambiar, borrar ni crear datos de otra. Corre sobre un Postgres desechable
+  # (nunca sobre Supabase) con TODAS las migraciones aplicadas. Si encuentra una
+  # fuga, este job falla y el cambio no debe fusionarse.
+  aislamiento:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PRUEBAS_DB_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: supabase/tests/aislamiento/package-lock.json
+
+      - name: Instalar dependencias de la prueba
+        working-directory: supabase/tests/aislamiento
+        run: npm ci
+
+      - name: Construir la base de pruebas (emulación de Supabase + migraciones)
+        run: bash supabase/tests/aislamiento/construir-base.sh
+
+      - name: Probar aislamiento entre empresas
+        working-directory: supabase/tests/aislamiento
+        run: node probar-aislamiento.mjs --detalle
+
+      - name: Guardar el informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-aislamiento
+          path: supabase/tests/aislamiento/salida/informe.json
+          if-no-files-found: ignore

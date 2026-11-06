@@ -86,6 +86,46 @@ Estimaciones en **días-persona** para una persona que conoce el código [S]. La
 
 **Aceptación:** CI falla si alguna tabla, bucket o función permite acceso cruzado; informe con la matriz completa y los hallazgos corregidos.
 
+#### Estado y resultados de WP0.2 (2026-11-06)
+
+**Hecho:** el arnés está en `supabase/tests/aislamiento/` (ver su `README.md`). Aplica las 73 migraciones sobre un Postgres desechable con una emulación mínima de Supabase y ataca desde 8 roles de una empresa y desde `anon`. Hay un job nuevo `aislamiento` en `.github/workflows/ci.yml`.
+
+| Tarea | Estado |
+|---|---|
+| T0.2.1 Dos empresas con un usuario por rol | Hecho |
+| T0.2.2 Matriz tabla × operación × rol | Hecho: 67 tablas, 62 con filas ajenas probadas (2.232 pruebas) y 5 sin cubrir (`documento_tributario_lineas`, `documentos_tributarios`, `personal_horarios`, `plataforma_admins`, `politicas_retencion`); 25 `INSERT` quedan inconclusos por reglas de negocio que los rechazan antes de RLS |
+| T0.2.3 Columnas protegidas | Hecho: **hallazgo H1** |
+| T0.2.4 Storage | Hecho: 3 buckets, 36 pruebas, 0 fugas (`logos-empresa` es público por diseño) |
+| T0.2.5 Funciones y RPC | Hecho: 24 pruebas de explotación e inventario de 61 funciones `SECURITY DEFINER`; **hallazgos H2 y H3** |
+| T0.2.6 Edge Functions con ids de otra empresa | **Pendiente**: requiere ejecutar las funciones (Deno) contra un entorno; el arnés no las cubre |
+| T0.2.7 Ejecutar en CI y bloquear el merge | Job escrito y YAML válido; **aún no se ha ejecutado en GitHub Actions**. Falta activarlo como check obligatorio de `main` |
+
+**Resultado sobre las empresas:** **0 fugas entre empresas** en las 2.232 pruebas de tablas, 9 de escalada de privilegios y 36 de storage. Eso es lo que prueba este arnés; no prueba la capa HTTP de PostgREST ni las Edge Functions.
+
+**La prueba sabe detectar fugas:** se introdujeron a propósito políticas rotas (un `SELECT` abierto en una tabla con `empresa_id`, otro en una tabla hija, un `INSERT` sin `with check`, y `SELECT` + `UPDATE` abiertos) y en cada caso falló. Un `UPDATE` abierto sin `SELECT` abierto no se marca porque en Postgres no es explotable.
+
+| # | Hallazgo | Gravedad [S] | Estado |
+|---|---|---|---|
+| **H1** | `ot_detalle`: el `REVOKE` de columna de `0006` (costo, precio y total) **no tiene efecto**, porque `authenticated` conserva `SELECT` a nivel de tabla. Un técnico lee costos y precios por la API aunque la interfaz use la vista `ot_detalle_con_permiso`. Reproducido con el técnico de la demo. Es una fuga entre **roles** de la misma empresa, no entre empresas | Media–alta | **Abierto.** Requiere diseño: quitar el `SELECT` de tabla, conceder solo las columnas permitidas y rehacer la vista (con `security_invoker` hoy fallaría para todos). Hay que auditar el uso de `ot_detalle` en `src/` antes de tocar nada. Registrado como "hallazgo conocido" en la línea base |
+| **H2** | `whatsapp_buscar_cliente_por_telefono` y `whatsapp_registrar_contacto` son `SECURITY DEFINER`, no verifican quién llama y eran ejecutables por `anon`: cualquiera podía obtener el id de un cliente de **otra empresa** por su teléfono y **escribir contactos en la bandeja de WhatsApp de otra empresa** | **Alta** | Corregido en la migración `0075` (quita `EXECUTE` a `public/anon/authenticated`; solo la Edge Function con service role las usa, verificado en `supabase/functions/whatsapp/index.ts` y por búsqueda en `src/`). Con `0075` aplicada la prueba pasa; sin ella reporta 5 fugas |
+| **H3** | `plataforma_empresa_ok` y `plataforma_exigir`: ayudantes internos del monitor, ejecutables por usuarios. Solo revelan si un uuid de empresa es demo | Baja | Incluido en `0075` |
+| **H4** | 6 funciones de agenda sin guarda visible, ejecutables por `anon`, que reciben ids y devuelven disponibilidad: `agenda_cupos_bloque`, `catalogo_horas_servicio`, `catalogo_isla_para_servicio`, `citas_buscar_horarios`, `citas_cupos_disponibles`, `personal_disponible_en` | Baja | Abierto: requieren revisión. Quedan como "SIN REVISAR" en la línea base |
+| **H5** | `registrar_acceso_fallido` es ejecutable por `anon` y no limita la tasa | Baja–media | Aceptada con seguimiento en WP0.3 |
+| **H6** | La dependencia `xlsx` se descarga desde `cdn.sheetjs.com`; con un host bloqueado `npm install` del proyecto falla | Media (cadena de suministro) | Ya previsto en T0.7.4. Por eso el arnés tiene su propio `package.json` |
+
+**Qué falta para cerrar WP0.2**
+1. **Verificar H1 y H2 en producción** con consultas de solo lectura (el arnés trabaja sobre una base reconstruida a partir de las migraciones, que puede diferir de producción):
+   ```sql
+   select has_function_privilege('anon', 'public.whatsapp_registrar_contacto(uuid,text,text,text)', 'execute');
+   select has_function_privilege('anon', 'public.whatsapp_buscar_cliente_por_telefono(text,uuid)', 'execute');
+   select has_column_privilege('authenticated', 'public.ot_detalle', 'costo_unitario', 'select');
+   ```
+   Si devuelven `true`, el hallazgo existe en producción.
+2. **Aplicar `0075`**: como `deploy-vercel.yml` aplica las migraciones al fusionar con `main`, la corrección **se aplicará a producción en ese momento**. Es una revocación reversible (se deshace con `grant execute … to public`) y no cambia el código de ninguna función. Después del despliegue conviene enviar un mensaje de WhatsApp de prueba para confirmar que la Edge Function sigue registrando contactos.
+3. Ejecutar el job en GitHub Actions y marcarlo como check obligatorio.
+4. Decidir el diseño de H1 y revisar las 6 funciones de H4.
+5. T0.2.6: pruebas de las Edge Functions.
+
 ### WP0.3 — Autenticación real y alta de tenants (8–10 días) · depende de WP0.2 y D4
 **Por qué:** hoy no se puede entrar con cuenta propia ni crear un negocio sin SQL [H: `LoginDemo.jsx`, `demo.js`, trigger de `0001`].
 - [ ] T0.3.1 **Quitar el fallback** "primera empresa activa" del trigger: sin `empresa_id` explícito, el alta no crea perfil activo.
