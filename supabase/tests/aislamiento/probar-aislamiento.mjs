@@ -243,8 +243,11 @@ async function sembrarTodo() {
 async function como(rol, uid, fn) {
   await prueba.query('begin')
   try {
-    await prueba.query(`set local role ${rol === 'anon' ? 'anon' : 'authenticated'}`)
-    await prueba.query(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify(uid ? { sub: uid, role: 'authenticated' } : { role: 'anon' })])
+    const rolBd = rol === 'anon' ? 'anon' : rol === 'service_role' ? 'service_role' : 'authenticated'
+    await prueba.query(`set local role ${rolBd}`)
+    // service_role = las Edge Functions con la clave de servicio (p. ej. el bot de WhatsApp).
+    const claims = rol === 'service_role' ? { role: 'service_role' } : uid ? { sub: uid, role: 'authenticated' } : { role: 'anon' }
+    await prueba.query(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify(claims)])
     return await fn(prueba)
   } finally {
     await prueba.query('rollback')
@@ -489,6 +492,53 @@ async function probarFuncionesExpuestas() {
   reg('encuesta_obtener_por_token: token inventado no devuelve datos', enc.ok && enc.rows.length && Object.values(enc.rows[0]).some((v) => v != null) ? 'FUGA' : 'ok', enc.ok ? `${enc.rows.length} filas` : enc.codigo)
 }
 
+// H4 (0077): funciones de agenda y catálogo que reciben el id de una isla, servicio o persona.
+// Con un id de OTRA empresa deben responder como con un id inexistente (null / false / sin filas), y sin
+// sesión no deben ejecutarse. Los controles positivos comprueban que la ruta legítima sigue funcionando:
+// un usuario de la propia empresa y service_role (el bot de WhatsApp) siguen obteniendo datos.
+const agendaRes = []
+async function probarFuncionesAgenda() {
+  const reg = (nombre, estado, detalle = '') => agendaRes.push({ nombre, estado, detalle })
+  const EMP_DEMO = 'b0000000-0000-4000-8000-000000000001'
+  const adminDemo = { rol: 'admin', uid: 'a0000000-0000-4000-8000-000000000001' }
+  const ids = async (sql) => (await q(sql, [EMP_DEMO])).rows.map((r) => r.id)
+  const [isla] = await ids(`select id from public.tipos_isla where empresa_id = $1 order by id`)
+  const [persona] = await ids(`select id from public.personal_taller where empresa_id = $1 and activo order by id`)
+  const servicios = await ids(`select id from public.catalogo_servicios where empresa_id = $1 order by id`)
+  if (!isla || !persona || !servicios.length) { reg('datos de agenda de la empresa demo', 'REGRESION', 'faltan islas, personal o servicios para probar'); return }
+  const fecha = '2026-11-09' // lunes: fija, para que el resultado no dependa del día en que corra
+  // Un servicio con isla y uno con horas, buscados como service_role (el bot).
+  let servicioIsla = null
+  let servicioHoras = null
+  for (const s of servicios) {
+    if (!servicioIsla) { const r = await intentar('service_role', null, `select public.catalogo_isla_para_servicio($1) v`, [s]); if (r.ok && r.rows[0].v) servicioIsla = s }
+    if (!servicioHoras) { const r = await intentar('service_role', null, `select public.catalogo_horas_servicio($1, null, null) v`, [s]); if (r.ok && r.rows[0].v !== null) servicioHoras = s }
+  }
+  const llamadas = [
+    { f: 'agenda_cupos_bloque', sql: `select public.agenda_cupos_bloque($1, $2, 600) v`, p: [isla, fecha], vale: (v) => v !== null },
+    { f: 'citas_cupos_disponibles', sql: `select public.citas_cupos_disponibles($1, $2, '10:00', 60) v`, p: [isla, fecha], vale: (v) => v !== null },
+    { f: 'citas_buscar_horarios', sql: `select count(*)::int v from public.citas_buscar_horarios($1, 60, $2, 14, 6)`, p: [isla, fecha], vale: (v) => v > 0 },
+    { f: 'personal_disponible_en', sql: `select bool_or(public.personal_disponible_en($1, d::date, m)) v from generate_series($2::date, $2::date + 6, '1 day') d, (values (540), (600), (780)) x(m)`, p: [persona, fecha], vale: (v) => v === true },
+  ]
+  if (servicioIsla) llamadas.push({ f: 'catalogo_isla_para_servicio', sql: `select public.catalogo_isla_para_servicio($1) v`, p: [servicioIsla], vale: (v) => v !== null })
+  if (servicioHoras) llamadas.push({ f: 'catalogo_horas_servicio', sql: `select public.catalogo_horas_servicio($1, null, null) v`, p: [servicioHoras], vale: (v) => v !== null })
+  if (llamadas.length < 6) reg('cobertura de agenda', 'REGRESION', `solo ${llamadas.length} de 6 funciones tienen datos de prueba en la demo`)
+  const vacio = (v) => v === null || v === false || v === 0
+
+  for (const l of llamadas) {
+    // Controles positivos: la ruta legítima sigue entregando datos.
+    const propio = await intentar(adminDemo.rol, adminDemo.uid, l.sql, l.p)
+    reg(`${l.f}: un usuario de la propia empresa obtiene datos`, propio.ok && l.vale(propio.rows[0].v) ? 'ok' : 'REGRESION', propio.ok ? `v=${propio.rows[0].v}` : propio.codigo)
+    const bot = await intentar('service_role', null, l.sql, l.p)
+    reg(`${l.f}: service_role (bot de WhatsApp) obtiene datos`, bot.ok && l.vale(bot.rows[0].v) ? 'ok' : 'REGRESION', bot.ok ? `v=${bot.rows[0].v}` : bot.codigo)
+    // Ataques: un admin de otra empresa y un visitante sin sesión.
+    const ajeno = await intentar('admin', uidRol(EMP_A, 'admin'), l.sql, l.p)
+    reg(`${l.f}: un admin de otra empresa no obtiene datos`, ajeno.ok && !vacio(ajeno.rows[0].v) ? 'FUGA' : 'ok', ajeno.ok ? `v=${ajeno.rows[0].v}` : ajeno.codigo)
+    const anon = await intentar('anon', null, l.sql, l.p)
+    reg(`${l.f}: sin sesión no se puede ejecutar`, anon.ok ? 'FUGA' : 'ok', anon.ok ? `v=${anon.rows[0].v}` : anon.codigo)
+  }
+}
+
 async function columnasProtegidas() {
   const filas = (await q(`select c.relname t, a.attname col
     from pg_class c
@@ -520,6 +570,7 @@ for (const t of lista) await probarTabla(t)
 await probarEscalada()
 await probarStorage()
 await probarFuncionesExpuestas()
+await probarFuncionesAgenda()
 const funciones = await inventarioFunciones()
 const columnas = await columnasProtegidas()
 
@@ -558,9 +609,10 @@ if (ACTUALIZAR_BASE) {
 }
 const fugasFunciones = funcionesRes.filter((f) => f.estado === 'FUGA')
 const inconclusosFunciones = funcionesRes.filter((f) => f.estado === 'inconcluso')
+const fallosAgenda = agendaRes.filter((f) => f.estado !== 'ok')
 
 fs.mkdirSync(SALIDA, { recursive: true })
-fs.writeFileSync(path.join(SALIDA, 'informe.json'), JSON.stringify({ cobertura, fugas, inconclusos, escalada, storage: storageRes, funcionesExpuestas: funcionesRes, funciones, columnas, fallosSiembra }, null, 2))
+fs.writeFileSync(path.join(SALIDA, 'informe.json'), JSON.stringify({ cobertura, fugas, inconclusos, escalada, storage: storageRes, funcionesExpuestas: funcionesRes, funcionesAgenda: agendaRes, funciones, columnas, fallosSiembra }, null, 2))
 
 const resumenFugas = {}
 for (const f of fugas) (resumenFugas[f.tabla] ||= new Set()).add(`${f.op}[${f.rol}]`)
@@ -573,6 +625,7 @@ console.log(`Escalada de privilegios ........... ${escalada.length} pruebas, FUG
 console.log(`Storage ........................... ${storageRes.length} pruebas, FUGA: ${fugasStorage.length}`)
 console.log(`Columnas con privilegio revocado .. ${columnas.length}, FUGA: ${fugasColumnas.length}`)
 console.log(`Explotación de funciones expuestas . ${funcionesRes.length} pruebas, FUGA: ${fugasFunciones.length}, inconclusas: ${inconclusosFunciones.length}`)
+console.log(`Funciones de agenda (H4) ......... ${agendaRes.length} pruebas, fallos: ${fallosAgenda.length}`)
 console.log(`Funciones SECURITY DEFINER (no disparadores) ${funciones.securityDefiner} de ${funciones.total}; línea base sin revisar: ${sinRevisar}`)
 for (const [k, v] of Object.entries(funciones.hallazgos)) console.log(`  higiene · ${k}: ${v.length} (nuevos: ${nuevosHigiene[k].length})`)
 if (fugas.length) {
@@ -582,6 +635,7 @@ if (fugas.length) {
 }
 if (fugasEscalada.length) { console.log('\n--- FUGAS de escalada ---'); fugasEscalada.forEach((e) => console.log(`  ${e.nombre}: ${e.detalle}`)) }
 if (fugasStorage.length) { console.log('\n--- FUGAS de storage ---'); fugasStorage.forEach((e) => console.log(`  ${e.bucket} ${e.op} [${e.rol}]`)) }
+if (fallosAgenda.length) { console.log('\n--- FALLOS en las funciones de agenda (H4) ---'); fallosAgenda.forEach((e) => console.log(`  [${e.estado}] ${e.nombre}: ${e.detalle}`)) }
 if (fugasFunciones.length) { console.log('\n--- FUGAS por funciones expuestas ---'); fugasFunciones.forEach((e) => console.log(`  ${e.nombre}: ${e.detalle}`)) }
 if (DETALLE && inconclusosFunciones.length) { console.log('\n--- Funciones inconclusas ---'); inconclusosFunciones.forEach((e) => console.log(`  ${e.nombre}: ${e.detalle}`)) }
 if (fugasColumnas.length) { console.log('\n--- FUGAS de columnas protegidas ---'); fugasColumnas.forEach((e) => console.log(`  ${e.tabla}.${e.columna}`)) }
@@ -591,6 +645,6 @@ if (hayNuevosHigiene) { console.log('\n--- Higiene: hallazgos NUEVOS respecto de
 if (DETALLE && inconclusos.length) { console.log('\n--- Inconclusos (revisar) ---'); inconclusos.slice(0, 40).forEach((f) => console.log(`   · ${f.tabla} ${f.op} [${f.rol}] ${f.detalle}`)) }
 console.log(`\nInforme completo: ${path.join(SALIDA, 'informe.json')}`)
 
-const hayFuga = fugas.length || fugasEscalada.length || fugasStorage.length || fugasColumnas.length || fugasFunciones.length
+const hayFuga = fugas.length || fugasEscalada.length || fugasStorage.length || fugasColumnas.length || fugasFunciones.length || fallosAgenda.length
 if (hayFuga || hayNuevosHigiene) { console.log('\nRESULTADO: FALLA'); process.exit(1) }
 console.log('\nRESULTADO: OK — ningún acceso entre empresas detectado.')
