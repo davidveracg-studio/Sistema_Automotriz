@@ -98,7 +98,7 @@ Estimaciones en **días-persona** para una persona que conoce el código [S]. La
 | T0.2.4 Storage | Hecho: 3 buckets, 36 pruebas, 0 fugas (`logos-empresa` es público por diseño) |
 | T0.2.5 Funciones y RPC | Hecho: 24 pruebas de explotación e inventario de 61 funciones `SECURITY DEFINER`; **hallazgos H2 y H3** |
 | T0.2.6 Edge Functions con ids de otra empresa | **Pendiente**: requiere ejecutar las funciones (Deno) contra un entorno; el arnés no las cubre |
-| T0.2.7 Ejecutar en CI y bloquear el merge | Job escrito y YAML válido; **aún no se ha ejecutado en GitHub Actions**. Falta activarlo como check obligatorio de `main` |
+| T0.2.7 Ejecutar en CI y bloquear el merge | **Ejecutado en GitHub Actions** (CI #52, 2026-11-06): el job `aislamiento` corrió las pruebas reales y pasó. **Falta** hacerlo check obligatorio de `main`: hoy el flujo `pr-automatico.yml` fusiona cuando el CI de la rama pasa, pero el CI del evento `pull_request` falló sin jobs en #51 y #53 (ya fallaba antes de este job) y no se investigó |
 
 **Resultado sobre las empresas:** **0 fugas entre empresas** en las 2.232 pruebas de tablas, 9 de escalada de privilegios y 36 de storage. Eso es lo que prueba este arnés; no prueba la capa HTTP de PostgREST ni las Edge Functions.
 
@@ -121,8 +121,8 @@ Estimaciones en **días-persona** para una persona que conoce el código [S]. La
    select has_column_privilege('authenticated', 'public.ot_detalle', 'costo_unitario', 'select');
    ```
    Si devuelven `true`, el hallazgo existe en producción.
-2. **Aplicar `0075`**: como `deploy-vercel.yml` aplica las migraciones al fusionar con `main`, la corrección **se aplicará a producción en ese momento**. Es una revocación reversible (se deshace con `grant execute … to public`) y no cambia el código de ninguna función. Después del despliegue conviene enviar un mensaje de WhatsApp de prueba para confirmar que la Edge Function sigue registrando contactos.
-3. Ejecutar el job en GitHub Actions y marcarlo como check obligatorio.
+2. **`0075` ya está aplicada en producción.** El flujo `pr-automatico.yml` abre y fusiona a `main` cada push a una rama `claude/**` cuando el CI pasa, y `deploy-vercel.yml` aplicó entonces las migraciones (PR #31, despliegue #28, 2026-11-06 21:09 UTC, job `migrar` en verde). Es una revocación reversible (se deshace con `grant execute … to public`) y no cambia el código de ninguna función. **Falta la comprobación que se había previsto antes de fusionar:** enviar un mensaje de WhatsApp de prueba y confirmar que la Edge Function sigue registrando contactos. Si falla, revertir con las sentencias de `0075`.
+3. Hacer del job `aislamiento` un check obligatorio de `main` e investigar por qué el CI del evento `pull_request` falla sin jobs.
 4. Decidir el diseño de H1 y revisar las 6 funciones de H4.
 5. T0.2.6: pruebas de las Edge Functions.
 
